@@ -1,20 +1,24 @@
 import React, { useState } from "react";
+import axios from "axios";
 import { FaEye, FaEyeSlash, FaGoogle, FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
-const SignUpPage = () => {
+const Register = () => {
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const validateEmail = (email) => {
-    return email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
   const validatePassword = (password) => {
@@ -24,14 +28,14 @@ const SignUpPage = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    
-    // Clear errors when user starts typing
+
+    // Xóa lỗi nếu người dùng bắt đầu chỉnh sửa
     if (errors[name]) {
       setErrors({ ...errors, [name]: "" });
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
 
@@ -56,7 +60,32 @@ const SignUpPage = () => {
     }
 
     if (Object.keys(newErrors).length === 0) {
-      console.log("Form submitted:", formData);
+      setLoading(true);
+      setErrors({});
+      setSuccessMessage("");
+
+      try {
+        const response = await axios.post("http://localhost:5000/api/auth/register", {
+          name: formData.fullName,
+          email: formData.email,
+          password: formData.password,
+          role: "customer", // Mặc định role là 'customer'
+        });
+        
+
+        setSuccessMessage("Registration successful! Please log in.");
+        setFormData({
+          fullName: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+        });
+      } catch (error) {
+        const serverError = error.response?.data?.message || "An error occurred. Please try again.";
+        setErrors({ server: serverError });
+      } finally {
+        setLoading(false);
+      }
     } else {
       setErrors(newErrors);
     }
@@ -76,7 +105,7 @@ const SignUpPage = () => {
               type="text"
               name="fullName"
               placeholder="Enter your full name"
-              className={`w-full px-4 py-3 rounded-lg border ${errors.fullName ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              className={`w-full px-4 py-3 rounded-lg border ${errors.fullName ? "border-red-500" : "border-gray-300"} focus:outline-none focus:ring-2 focus:ring-blue-500`}
               value={formData.fullName}
               onChange={handleChange}
             />
@@ -88,7 +117,7 @@ const SignUpPage = () => {
               type="email"
               name="email"
               placeholder="Enter your email"
-              className={`w-full px-4 py-3 rounded-lg border ${errors.email ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              className={`w-full px-4 py-3 rounded-lg border ${errors.email ? "border-red-500" : "border-gray-300"} focus:outline-none focus:ring-2 focus:ring-blue-500`}
               value={formData.email}
               onChange={handleChange}
             />
@@ -100,7 +129,7 @@ const SignUpPage = () => {
               type={showPassword ? "text" : "password"}
               name="password"
               placeholder="Enter your password"
-              className={`w-full px-4 py-3 rounded-lg border ${errors.password ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              className={`w-full px-4 py-3 rounded-lg border ${errors.password ? "border-red-500" : "border-gray-300"} focus:outline-none focus:ring-2 focus:ring-blue-500`}
               value={formData.password}
               onChange={handleChange}
             />
@@ -119,7 +148,7 @@ const SignUpPage = () => {
               type={showConfirmPassword ? "text" : "password"}
               name="confirmPassword"
               placeholder="Confirm your password"
-              className={`w-full px-4 py-3 rounded-lg border ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              className={`w-full px-4 py-3 rounded-lg border ${errors.confirmPassword ? "border-red-500" : "border-gray-300"} focus:outline-none focus:ring-2 focus:ring-blue-500`}
               value={formData.confirmPassword}
               onChange={handleChange}
             />
@@ -133,12 +162,17 @@ const SignUpPage = () => {
             {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
           </div>
 
+          {errors.server && <p className="text-red-500 text-sm mt-1">{errors.server}</p>}
+
           <button
             type="submit"
             className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold"
+            disabled={loading}
           >
-            Sign Up
+            {loading ? "Registering..." : "Sign Up"}
           </button>
+
+          {successMessage && <p className="text-green-500 text-sm mt-4">{successMessage}</p>}
 
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
@@ -169,10 +203,11 @@ const SignUpPage = () => {
 
         <p className="mt-6 text-center text-gray-600">
           Already have an account?{" "}
-          <button className="text-blue-600 hover:text-blue-700 font-semibold">
-            Sign in now
-          </button>
+        <Link to="/login" className="text-blue-600 hover:text-blue-700 font-semibold">
+          Sign in now
+        </Link>
         </p>
+
       </div>
 
       <footer className="max-w-5xl mx-auto mt-12 px-4">
@@ -183,21 +218,12 @@ const SignUpPage = () => {
               <a href="#" className="text-gray-600 hover:text-gray-900">Terms of Use</a>
               <a href="#" className="text-gray-600 hover:text-gray-900">Contact</a>
             </div>
-            <div className="flex space-x-6">
-              <FaFacebook className="text-gray-600 hover:text-gray-900 w-5 h-5 cursor-pointer" />
-              <FaTwitter className="text-gray-600 hover:text-gray-900 w-5 h-5 cursor-pointer" />
-              <FaInstagram className="text-gray-600 hover:text-gray-900 w-5 h-5 cursor-pointer" />
-              <FaLinkedin className="text-gray-600 hover:text-gray-900 w-5 h-5 cursor-pointer" />
-            </div>
+            <div className="text-gray-500">&copy; 2024 Your Company. All rights reserved.</div>
           </div>
-          <p className="text-center text-gray-500 mt-8">
-            123 Business Street, Tech City, TC 12345<br />
-            support@company.com
-          </p>
         </div>
       </footer>
     </div>
   );
 };
 
-export default SignUpPage;
+export default Register;
