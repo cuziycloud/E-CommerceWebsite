@@ -108,7 +108,9 @@ const Login = () => {
             {errors.general && <p className="mt-1 text-sm text-red-500">{errors.general}</p>}
 
             <div className="text-center">
-              <a href="#" className="text-sm text-blue-600 hover:underline">Forgot your password?</a>
+              <Link to="/forgot-password" className="text-sm text-blue-600 hover:underline">
+                 Forgot your password?
+              </Link>
             </div>
 
             <div className="relative">
