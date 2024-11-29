@@ -1,9 +1,27 @@
 import React, { useState, useEffect } from "react";
-import { FaSearch, FaShoppingCart, FaStar, FaUser, FaBars, FaTimes } from "react-icons/fa";
+import { useNavigate, useLocation } from "react-router-dom";
+import { FaBars, FaTimes, FaSearch, FaShoppingCart, FaUser, FaSignOutAlt, FaStar } from "react-icons/fa";
 
 const HomePage = () => {
   const [mobileMenu, setMobileMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Trạng thái đăng nhập
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false); // Trạng thái hộp thoại xác nhận đăng xuất
+  const navigate = useNavigate();
+  const location = useLocation(); // Lấy đường dẫn hiện tại
+
+  useEffect(() => {
+    // Kiểm tra trạng thái đăng nhập khi ứng dụng vừa khởi động
+    const token = localStorage.getItem("authToken");
+    setIsLoggedIn(!!token); // Cập nhật trạng thái đăng nhập
+  }, []);
+
+  useEffect(() => {
+    // Kiểm tra trạng thái đăng nhập và điều hướng nếu đang ở /login
+    if (isLoggedIn && location.pathname === "/login") {
+      navigate("/"); // Điều hướng về trang home nếu đã đăng nhập
+    }
+  }, [isLoggedIn, location.pathname, navigate]);
 
   const categories = [
     { id: 1, name: "Phones", icon: "📱" },
@@ -48,9 +66,7 @@ const HomePage = () => {
   ];
 
   const ProductCard = ({ product }) => (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105"
-         role="article"
-         aria-label={`${product.name} product card`}>
+    <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105">
       <img
         src={`https://${product.image}`}
         alt={product.name}
@@ -66,13 +82,30 @@ const HomePage = () => {
         </div>
         <button
           className="mt-4 w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          aria-label={`Add ${product.name} to cart`}
         >
           Add to Cart
         </button>
       </div>
     </div>
   );
+
+  const handleLogout = () => {
+    setShowLogoutConfirm(true); // Hiển thị hộp thoại xác nhận đăng xuất
+  };
+
+  const confirmLogout = () => {
+    localStorage.removeItem("authToken");
+    setIsLoggedIn(false); // Cập nhật lại trạng thái đăng nhập
+    setShowLogoutConfirm(false); // Đóng hộp thoại xác nhận
+  };
+
+  const cancelLogout = () => {
+    setShowLogoutConfirm(false); // Đóng hộp thoại xác nhận nếu người dùng hủy
+  };
+
+  const handleLogin = () => {
+    navigate("/login"); // Chuyển đến trang login khi nhấn nút đăng nhập
+  };
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -83,7 +116,6 @@ const HomePage = () => {
               <button
                 className="md:hidden"
                 onClick={() => setMobileMenu(!mobileMenu)}
-                aria-label="Toggle menu"
               >
                 {mobileMenu ? <FaTimes /> : <FaBars />}
               </button>
@@ -92,11 +124,7 @@ const HomePage = () => {
 
             <div className="hidden md:flex items-center space-x-8">
               {categories.map(category => (
-                <button
-                  key={category.id}
-                  className="text-gray-600 hover:text-blue-600 focus:outline-none focus:text-blue-600"
-                  aria-label={`${category.name} category`}
-                >
+                <button key={category.id} className="text-gray-600 hover:text-blue-600">
                   <span className="mr-2">{category.icon}</span>
                   {category.name}
                 </button>
@@ -108,25 +136,35 @@ const HomePage = () => {
                 <input
                   type="text"
                   placeholder="Search products..."
-                  className="w-full md:w-64 px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full md:w-64 px-4 py-2 rounded-md border border-gray-300"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  aria-label="Search products"
                 />
                 <FaSearch className="absolute right-3 top-3 text-gray-400" />
               </div>
-              <button
-                className="p-2 text-gray-600 hover:text-blue-600 focus:outline-none focus:text-blue-600"
-                aria-label="Shopping cart"
-              >
+              <button className="p-2 text-gray-600">
                 <FaShoppingCart size={20} />
               </button>
-              <button
-                className="p-2 text-gray-600 hover:text-blue-600 focus:outline-none focus:text-blue-600"
-                aria-label="User account"
-              >
+              <button className="p-2 text-gray-600">
                 <FaUser size={20} />
               </button>
+
+              {/* Nút Đăng Nhập/Đăng Xuất */}
+              {isLoggedIn ? (
+                <button
+                  onClick={handleLogout}
+                  className="p-2 text-red-600 hover:text-red-800"
+                >
+                  <FaSignOutAlt size={20} />
+                </button>
+              ) : (
+                <button
+                  onClick={handleLogin}
+                  className="p-2 text-blue-600 hover:text-blue-800"
+                >
+                  Đăng Nhập
+                </button>
+              )}
             </div>
           </div>
 
@@ -135,8 +173,7 @@ const HomePage = () => {
               {categories.map(category => (
                 <button
                   key={category.id}
-                  className="block w-full text-left px-4 py-2 text-gray-600 hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
-                  aria-label={`${category.name} category`}
+                  className="block w-full text-left px-4 py-2 text-gray-600 hover:bg-gray-100"
                 >
                   <span className="mr-2">{category.icon}</span>
                   {category.name}
@@ -148,7 +185,8 @@ const HomePage = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <section className="mb-12" aria-label="Featured products">
+        {/* Các phần hiển thị sản phẩm */}
+        <section aria-label="Featured products">
           <h2 className="text-2xl font-bold mb-6">Featured Products</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {products.map(product => (
@@ -157,60 +195,47 @@ const HomePage = () => {
           </div>
         </section>
 
-        <section className="mb-12" aria-label="Best selling products">
-          <h2 className="text-2xl font-bold mb-6">Best Selling</h2>
+        <section aria-label="New Arrivals" className="mt-12">
+          <h2 className="text-2xl font-bold mb-6">New Arrivals</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {products.slice(0, 3).map(product => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </section>
+
+        <section aria-label="Top Sellers" className="mt-12">
+          <h2 className="text-2xl font-bold mb-6">Top Sellers</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {products.slice(0, 4).map(product => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
         </section>
-
-        <section aria-label="New arrivals">
-          <h2 className="text-2xl font-bold mb-6">New Arrivals</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {products.slice(0, 4).reverse().map(product => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        </section>
       </main>
 
-      <footer className="bg-gray-800 text-white py-8 mt-12">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
-              <h3 className="text-lg font-semibold mb-4">About Us</h3>
-              <p className="text-gray-400">Your one-stop shop for all things tech.</p>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
-              <ul className="space-y-2">
-                <li><button className="text-gray-400 hover:text-white">Privacy Policy</button></li>
-                <li><button className="text-gray-400 hover:text-white">Terms of Service</button></li>
-                <li><button className="text-gray-400 hover:text-white">Contact Us</button></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Newsletter</h3>
-              <div className="flex">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="flex-1 px-4 py-2 rounded-l-md focus:outline-none text-gray-900"
-                  aria-label="Email for newsletter"
-                />
-                <button
-                  className="bg-blue-600 px-4 py-2 rounded-r-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                  aria-label="Subscribe to newsletter"
-                >
-                  Subscribe
-                </button>
-              </div>
+      {/* Hộp thoại xác nhận đăng xuất */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-md shadow-md">
+            <h3 className="text-lg font-semibold mb-4">Are you sure you want to log out?</h3>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={cancelLogout}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmLogout}
+                className="px-4 py-2 bg-red-600 text-white rounded-md"
+              >
+                Log Out
+              </button>
             </div>
           </div>
         </div>
-      </footer>
+      )}
     </div>
   );
 };

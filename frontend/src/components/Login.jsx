@@ -1,20 +1,25 @@
+// frontend/src/pages/Login.jsx
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash, FaGoogle, FaFacebook, FaTwitter, FaLinkedin, FaInstagram } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
 import { BiLock } from "react-icons/bi";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";  // Import axios
 
-const LoginPage = () => {
+const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate();  // Sử dụng useNavigate để điều hướng
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     const validationErrors = {};
 
+    // Kiểm tra email và password có nhập hay không
     if (!email) validationErrors.email = "Email is required";
     if (!password) validationErrors.password = "Password is required";
 
@@ -25,11 +30,20 @@ const LoginPage = () => {
     }
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      console.log("Login successful");
+      // Gửi yêu cầu đăng nhập đến API của backend
+      const response = await axios.post("http://localhost:5000/api/auth/login", {
+        email,
+        password
+      });
+
+      // Lưu JWT token vào localStorage
+      localStorage.setItem("authToken", response.data.token);
+
+      // Điều hướng tới trang HomePage nếu đăng nhập thành công
+      navigate("/home"); // Đảm bảo có route "/home" trong React Router
     } catch (error) {
       console.error("Login failed:", error);
+      setErrors({ general: "Đăng nhập thất bại, vui lòng thử lại!" });
     } finally {
       setLoading(false);
     }
@@ -91,6 +105,8 @@ const LoginPage = () => {
               )}
             </button>
 
+            {errors.general && <p className="mt-1 text-sm text-red-500">{errors.general}</p>}
+
             <div className="text-center">
               <a href="#" className="text-sm text-blue-600 hover:underline">Forgot your password?</a>
             </div>
@@ -116,9 +132,12 @@ const LoginPage = () => {
             </div>
 
             <p className="text-center text-sm text-gray-600">
-              Don't have an account?{" "}
-              <a href="#" className="text-blue-600 hover:underline">Sign up</a>
-            </p>
+               Don't have an account?{" "}
+             <Link to="/register" className="text-blue-600 hover:underline">
+                Sign up
+            </Link>
+          </p>
+
           </form>
         </div>
 
@@ -142,4 +161,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default Login;

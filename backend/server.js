@@ -1,18 +1,22 @@
-// backend/server.js
+require('dotenv').config(); // Đảm bảo dotenv được gọi để sử dụng các biến môi trường
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const authRoutes = require('./src/routes/auth');  // Import routes
+const authRoutes = require('./src/routes/auth'); // Đảm bảo import routes
 
 const app = express();
 
-// Cấu hình middleware
-app.use(cors());
+// Middleware
+app.use(cors({
+  origin: 'http://localhost:3000', // Đảm bảo rằng URL của frontend được phép truy cập backend
+  credentials: true
+}));
 app.use(bodyParser.json());
 
 // Kết nối MongoDB
-mongoose.connect('mongodb://localhost:27017/ecommerce', {
+mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 }).then(() => {
@@ -25,6 +29,6 @@ mongoose.connect('mongodb://localhost:27017/ecommerce', {
 app.use('/api/auth', authRoutes);
 
 // Chạy server
-app.listen(5000, () => {
-  console.log('Server running on port 5000');
+app.listen(process.env.PORT, () => {
+  console.log(`Server running on port ${process.env.PORT}`);
 });
