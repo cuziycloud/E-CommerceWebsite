@@ -241,14 +241,7 @@ const TechStore = () => {
                 <FiUser className="text-2xl" />
                 <span>{isLoggedIn ? "John Doe" : "Login"}</span>
               </button>
-              <button
-                onClick={() => setIsAdmin(!isAdmin)}
-                className={`p-2 rounded ${isAdmin ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-900"}`}
-              >
-                {isAdmin ? "Admin" : "Customer"}
-              </button>
             </div>
-            
           </div>
         </div>
       </nav> 
