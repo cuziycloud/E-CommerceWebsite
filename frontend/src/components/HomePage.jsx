@@ -18,7 +18,7 @@ const TechStore = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showBestSeller, setShowBestSeller] = useState(false);
   const [showNewArrivals, setShowNewArrivals] = useState(false);
-
+  
 
   const bannerSlides = [
     {
@@ -182,6 +182,7 @@ const TechStore = () => {
     </div>
   );
   
+  //Chuyển banner
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev === bannerSlides.length - 1 ? 0 : prev + 1));
@@ -189,6 +190,12 @@ const TechStore = () => {
 
     return () => clearInterval(interval);
   }, []);
+
+  // Hàm đăng xuất
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    alert("You have been logged out.");
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -220,32 +227,6 @@ const TechStore = () => {
                   </div>
                 ))}
               </div>
-              {/* <div className="hidden md:flex space-x-6 relative">
-              {categories.map(category => (
-                <div
-                  key={category.id}
-                  className="relative group"
-                  onMouseEnter={() => setShowCategoryDropdown(true)}
-                  onMouseLeave={() => setShowCategoryDropdown(false)}
-                >
-                  <button
-                    className="flex items-center space-x-1 hover:text-blue-400 transition-colors"
-                    onClick={() => {
-                      if (category.name === "Best Sellers") {
-                        setShowBestSeller(true);
-                        setShowNewArrivals(false);
-                      } else if (category.name === "New Arrivals") {
-                        setShowBestSeller(false);
-                        setShowNewArrivals(true);
-                      }
-                    }}
-                  >
-                    <span>{category.name}</span>
-                    <FiChevronDown />
-                  </button>
-                </div>
-              ))}
-            </div> */}
             </div>
             <div className="flex items-center space-x-6">
               <div className="relative">
@@ -267,6 +248,7 @@ const TechStore = () => {
                 {isAdmin ? "Admin" : "Customer"}
               </button>
             </div>
+            
           </div>
         </div>
       </nav> 

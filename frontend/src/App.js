@@ -9,6 +9,7 @@ import ForgotPassword from './components/ForgotPassword';
 import UserProfileManagement from './components/UserProfileManagement';
 import NotFound from './components/NotFound';
 import AddProductForm from './components/AddProductForm';
+import ProductDetail from './components/ProductDetail';
 import './styles/tailwind.css';
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/user-profile" element={<UserProfileManagement />} />
           <Route path="/add-product" element={<AddProductForm/>}/>
+          <Route path="/product-detail" element={<ProductDetail/>}/>
           {/* Route dành cho các đường dẫn không tồn tại */}
           <Route path="*" element={<NotFound />} />
         </Routes>
