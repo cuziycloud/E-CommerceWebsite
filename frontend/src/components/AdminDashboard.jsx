@@ -3,6 +3,7 @@ import { BsGrid, BsClipboardData, BsBox, BsPeople, BsGraphUp, BsGear } from "rea
 import { FiMenu, FiBell } from "react-icons/fi";
 import { Line, Pie, Bar } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement, BarElement } from "chart.js";
+import { Link } from 'react-router-dom'; 
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement, BarElement);
 
@@ -197,25 +198,29 @@ const AdminDashboard = () => {
           </div>
         );
 
-      case "products":
-        return (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="p-4">
-              <button  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                Add New Product
-              </button>
-            </div>
-            <table className="w-full">
-              <thead>
-                <tr className="bg-gray-50">
-                  <th className="p-4 text-left">ID</th>
-                  <th className="p-4 text-left">Name</th>
-                  <th className="p-4 text-left">Price</th>
-                  <th className="p-4 text-left">Stock</th>
-                  <th className="p-4 text-left">Status</th>
-                  <th className="p-4 text-left">Actions</th>
-                </tr>
-              </thead>
+        case "products":
+          return (
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              <div className="p-4">
+                {/* Sử dụng Link để điều hướng */}
+                <Link 
+                  to="/admin/add-product" // Đường dẫn đến trang thêm sản phẩm
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Add New Product
+                </Link>
+              </div>
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gray-50">
+                    <th className="p-4 text-left">ID</th>
+                    <th className="p-4 text-left">Name</th>
+                    <th className="p-4 text-left">Price</th>
+                    <th className="p-4 text-left">Stock</th>
+                    <th className="p-4 text-left">Status</th>
+                    <th className="p-4 text-left">Actions</th>
+                  </tr>
+                </thead>
               <tbody>
                 {paginate(dummyProducts, currentProductPage).map((product) => (
                   <tr key={product.id} className="border-t">
