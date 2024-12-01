@@ -16,6 +16,15 @@ const productSchema = new mongoose.Schema({
   price: { type: Number, required: true, min: 0 },
   stock: { type: Number, required: true, min: 0 },
   category: { type: String, required: true, enum: ['Laptop', 'Phone', 'Tablet', 'Console', 'Accessory'] },
+  tags: {  // Thêm trường tags vào schema
+    type: [String],
+    validate: {
+      validator: function (v) {
+        return Array.isArray(v) && v.length > 0;  // Đảm bảo rằng tags là một mảng và không rỗng
+      },
+      message: 'A list of tags is required'
+    }
+  },
   variants: { type: [variantSchema], required: true },
   images: {
     type: [String],

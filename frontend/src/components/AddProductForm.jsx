@@ -1,18 +1,29 @@
 import React, { useState } from "react";
 import { FiTrash2, FiUpload } from "react-icons/fi";
 import { MdPreview } from "react-icons/md";
+import axios from 'axios'; import { Link } from 'react-router-dom';
 
 const AddProductForm = () => {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     price: "",
-    tag: "",
-    category: "Laptop",
-    isAvailable: false,
-    variants: [{ size: "", color: "", material: "", stock: "" }],
-    images: []
+    category: "",
+    tags: "",
+    images: [],
+    isAvailable: true,
+    variants: [
+      {
+        color: "",
+        size: "",
+        stock: "",
+        material: ""
+      },
+    ],
+    createdAt: new Date().toISOString(),
   });
+  
+  
 
   const [errors, setErrors] = useState({});
   const [isPreview, setIsPreview] = useState(false);
@@ -137,6 +148,10 @@ const AddProductForm = () => {
     setFormData({ ...formData, images: newImages });
   };
 
+  const handleTagsChange = (e) => {
+    setFormData({ ...formData, tags: e.target.value });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
@@ -210,6 +225,9 @@ const AddProductForm = () => {
   
       const productData = { ...formData, images: uploadedImageUrls };
   
+      // Chuyển đổi tags thành mảng trước khi gửi
+      productData.tags = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== "");
+  
       try {
         console.log('Sending data:', productData);
         const response = await fetch('http://localhost:5000/api/products/add-product', {
@@ -234,7 +252,6 @@ const AddProductForm = () => {
       setErrors(newErrors);
     }
   };
-  
   
   
 
@@ -277,21 +294,23 @@ const AddProductForm = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="tag" className="block text-sm font-medium text-gray-700">
-                    Tags * (comma-separated)
-                  </label>
-                  <input
-                    type="text"
-                    id="tag"
-                    name="tag"
-                    value={formData.tag}
-                    onChange={handleInputChange}
-                    placeholder="tag1, tag2, tag3"
-                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${errors.tag ? "border-red-500" : ""}`}
-                  />
-                  {errors.tag && <p className="mt-1 text-sm text-red-500">{errors.tag}</p>}
-                  <p className="mt-1 text-xs text-gray-500">Enter multiple tags separated by commas</p>
-                </div>
+                    <label htmlFor="tags" className="block text-sm font-medium text-gray-700">
+                      Tags * (comma-separated)
+                    </label>
+                    <input
+                      type="text"
+                      id="tags"
+                      name="tags"
+                      value={formData.tags}
+                      onChange={handleTagsChange}
+                      placeholder="tag1, tag2, tag3"
+                      className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${errors.tags ? "border-red-500" : ""}`}
+                    />
+                    {errors.tags && <p className="mt-1 text-sm text-red-500">{errors.tags}</p>}
+                    <p className="mt-1 text-xs text-gray-500">Enter multiple tags separated by commas</p>
+                  </div>
+
+
 
                 <div>
                   <label htmlFor="category" className="block text-sm font-medium text-gray-700">

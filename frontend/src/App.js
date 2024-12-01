@@ -27,7 +27,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/user-profile" element={<UserProfileManagement />} />
           <Route path="/admin/add-product" element={<AddProductForm/>}/>
-          <Route path="/admin/edit-product" element={<ProductEditPage/>}/>
+          <Route path="/admin/edit-product/:id" element={<ProductEditPage/>}/> {/* Định nghĩa route với tham số id */}
           {/* Route dành cho các đường dẫn không tồn tại */}
           <Route path="*" element={<NotFound />} />
         </Routes>
