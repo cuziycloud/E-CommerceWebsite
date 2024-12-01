@@ -1,24 +1,30 @@
 const express = require('express');
-const Product = require('../models/Product');  // Đảm bảo đường dẫn đúng tới file Product.js
+const multer = require('multer');
+const path = require('path');
+const { addProduct, getProducts } = require('../controllers/productController');
+
 const router = express.Router();
 
-// Endpoint để lấy tất cả sản phẩm
-router.get('/showProducts', async (req, res) => {
-  try {
-    // Lấy danh sách sản phẩm từ MongoDB
-    const products = await Product.find();
-
-    // Kiểm tra nếu không có sản phẩm nào
-    if (!products) {
-      return res.status(404).json({ message: 'No products found' });
-    }
-
-    // Trả về danh sách sản phẩm
-    res.status(200).json(products);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
-  }
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadPath = path.join(__dirname, '../../uploads/');
+    console.log('Upload destination path:', uploadPath); // Debug thông tin đường dẫn
+    cb(null, uploadPath);
+  },
+  filename: (req, file, cb) => {
+    const filename = `${Date.now()}-${file.originalname}`;
+    console.log('File name:', filename); // Debug thông tin tên file
+    cb(null, filename);
+  },
 });
+
+const upload = multer({ storage });
+
+// Kiểm tra lại các hàm callback để đảm bảo import đúng
+console.log('addProduct:', addProduct);
+console.log('getProducts:', getProducts);
+
+router.post('/add-product', upload.array('images', 5), addProduct); // Định nghĩa route thêm sản phẩm
+router.get('/list', getProducts); // Định nghĩa route lấy danh sách sản phẩm
 
 module.exports = router;
