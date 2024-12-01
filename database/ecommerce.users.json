@@ -1,0 +1,25 @@
+[{
+  "_id": {
+    "$oid": "67473f76c9b8b5b66412af45"
+  },
+  "name": "Nguyen Thi Lan",
+  "email": "lan.nguyen@example.com",
+  "password": "securePassword123",
+  "role": "customer",
+  "createdAt": {
+    "$date": "2024-11-27T00:00:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "67475799e32f8edc602f1e2f"
+  },
+  "name": "Truong",
+  "email": "xuantruong3204.vietnam@gmail.com",
+  "password": "$2a$10$MSCd.15jHPC21V0xluEWfe2Haci5O53UvsXw6g3vQ7uduQb32F7Yi",
+  "role": "customer",
+  "createdAt": {
+    "$date": "2024-11-27T17:32:09.883Z"
+  },
+  "__v": 0
+}]

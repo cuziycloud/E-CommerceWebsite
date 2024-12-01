@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FaBars, FaTimes, FaSearch, FaShoppingCart, FaUser, FaSignOutAlt, FaStar } from "react-icons/fa";
+import axios from 'axios'
 
 const HomePage = () => {
   const [mobileMenu, setMobileMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Trạng thái đăng nhập
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false); // Trạng thái hộp thoại xác nhận đăng xuất
+  const [products, setProducts] = useState([]);
   const navigate = useNavigate();
   const location = useLocation(); // Lấy đường dẫn hiện tại
 
@@ -22,6 +24,12 @@ const HomePage = () => {
       navigate("/"); // Điều hướng về trang home nếu đã đăng nhập
     }
   }, [isLoggedIn, location.pathname, navigate]);
+  
+  useEffect(() => {
+    axios.get("http://localhost:8080/api/getProducts/showProducts")
+    .then(products => setProducts(products.data))
+    .catch(err => console.log(err))
+  }, [])
 
   const categories = [
     { id: 1, name: "Phones", icon: "📱" },
@@ -30,64 +38,45 @@ const HomePage = () => {
     { id: 4, name: "Accessories", icon: "🎧" }
   ];
 
-  const products = [
-    {
-      id: 1,
-      name: "iPhone 13 Pro",
-      category: "Phones",
-      price: 999,
-      rating: 4.8,
-      image: "images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      id: 2,
-      name: "MacBook Pro",
-      category: "Laptops",
-      price: 1299,
-      rating: 4.9,
-      image: "images.unsplash.com/photo-1517336714731-489689fd1ca8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      id: 3,
-      name: "iPad Air",
-      category: "Tablets",
-      price: 599,
-      rating: 4.7,
-      image: "images.unsplash.com/photo-1544244015-0df4b3ffc6b0?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      id: 4,
-      name: "AirPods Pro",
-      category: "Accessories",
-      price: 249,
-      rating: 4.6,
-      image: "images.unsplash.com/photo-1572569511254-d8f925fe2cbb?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    }
-  ];
+  
 
-  const ProductCard = ({ product }) => (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105">
-      <img
-        src={`https://${product.image}`}
-        alt={product.name}
-        className="w-full h-48 object-cover"
-        loading="lazy"
-      />
-      <div className="p-4">
-        <h3 className="text-lg font-semibold mb-2">{product.name}</h3>
-        <p className="text-gray-600 mb-2">${product.price}</p>
-        <div className="flex items-center">
-          <FaStar className="text-yellow-400" />
-          <span className="ml-1">{product.rating}</span>
+  const ProductCard = ({ product }) => {
+    const { name, description, price, stock, category, images, isAvailable } = product;
+    const productImage = images && images.length > 0 ? images[0] : ''; // Lấy hình ảnh đầu tiên từ mảng
+    const availabilityText = isAvailable ? "In Stock" : "Out of Stock";
+  
+    return (
+      <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105">
+        {/* Hiển thị ảnh sản phẩm */}
+        <img
+          src={productImage}
+          alt={name}
+          className="w-full h-48 object-cover"
+          loading="lazy"
+        />
+        <div className="p-4">
+          {/* Tên sản phẩm */}
+          <h3 className="text-lg font-semibold mb-2">{name}</h3>
+          {/* Mô tả sản phẩm */}
+          <p className="text-gray-600 mb-2">{description}</p>
+          {/* Giá và trạng thái có sẵn */}
+          <p className="text-gray-800 mb-2">${price}</p>
+          <p className={`text-sm ${isAvailable ? 'text-green-600' : 'text-red-600'}`}>{availabilityText}</p>
+          <p className="text-sm text-gray-500 mb-2">Category: {category}</p>
+          <p className="text-sm text-gray-500 mb-2">Stock: {stock}</p>
+  
+          {/* Nút thêm vào giỏ hàng */}
+          <button
+            className={`mt-4 w-full ${isAvailable ? 'bg-blue-600' : 'bg-gray-400'} text-white py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
+            disabled={!isAvailable} // Disable nếu sản phẩm không có sẵn
+          >
+            {isAvailable ? "Add to Cart" : "Out of Stock"}
+          </button>
         </div>
-        <button
-          className="mt-4 w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-        >
-          Add to Cart
-        </button>
       </div>
-    </div>
-  );
+    );
+  };
+  
 
   const handleLogout = () => {
     setShowLogoutConfirm(true); // Hiển thị hộp thoại xác nhận đăng xuất
