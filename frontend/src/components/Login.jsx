@@ -31,7 +31,7 @@ const Login = () => {
 
     try {
       // Gửi yêu cầu đăng nhập đến API của backend
-      const response = await axios.post("http://localhost:8080/api/auth/login", {
+      const response = await axios.post("http://localhost:5000/api/auth/login", {
         email,
         password
       });
