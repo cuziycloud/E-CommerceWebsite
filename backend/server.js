@@ -11,7 +11,10 @@ const uploadRoutes = require('./src/routes/uploadRoutes'); // Import route uploa
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true
+}));
 
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
@@ -27,7 +30,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Sử dụng các route
 app.use('/api/auth', authRoutes);
-app.use('/api/getProducts', productRoutes); // Sử dụng route product
+app.use('/api/products', productRoutes); // Sử dụng route product
 app.use('/api/uploads', uploadRoutes); // Sử dụng route upload
 
 // Đặt thư mục 'uploads' là static để phục vụ file ảnh

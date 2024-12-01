@@ -1,7 +1,6 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const { addProduct, getProducts } = require('../controllers/productController');
 
 const router = express.Router();
 
@@ -20,11 +19,13 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Kiểm tra lại các hàm callback để đảm bảo import đúng
-console.log('addProduct:', addProduct);
-console.log('getProducts:', getProducts);
-
-router.post('/add-product', upload.array('images', 5), addProduct); // Định nghĩa route thêm sản phẩm
-router.get('/list', getProducts); // Định nghĩa route lấy danh sách sản phẩm
+router.post('/upload', upload.single('image'), (req, res) => {
+  console.log('File received:', req.file); // Debug thông tin file nhận được
+  if (!req.file) {
+    console.log('No file uploaded'); // Debug khi không có file tải lên
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+  res.status(200).json({ url: `/uploads/${req.file.filename}` });
+});
 
 module.exports = router;
