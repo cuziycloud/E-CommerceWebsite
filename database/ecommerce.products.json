@@ -1,73 +1,137 @@
 [
-    {
-      "name": "iPhone 13 Pro",
-      "category": "Phones",
-      "price": 999,
-      "rating": 4.8,
-      "image": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "name": "Samsung Galaxy S23 Ultra",
-      "category": "Phones",
-      "price": 1199,
-      "rating": 4.7,
-      "image": "https://images.unsplash.com/photo-1603791440384-56cd371ee9a7?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "name": "MacBook Air M2",
-      "category": "Laptops",
-      "price": 1299,
-      "rating": 4.9,
-      "image": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "name": "Sony WH-1000XM5",
-      "category": "Headphones",
-      "price": 399,
-      "rating": 4.6,
-      "image": "https://images.unsplash.com/photo-1594007659810-3ec23513a3c7?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "name": "Apple Watch Series 8",
-      "category": "Watches",
-      "price": 429,
-      "rating": 4.8,
-      "image": "https://images.unsplash.com/photo-1552820728-8b83bab1f1a5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "name": "Google Pixel 8 Pro",
-      "category": "Phones",
-      "price": 899,
-      "rating": 4.5,
-      "image": "https://images.unsplash.com/photo-1593032457863-b0adfc57d72f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "name": "Dell XPS 15",
-      "category": "Laptops",
-      "price": 1499,
-      "rating": 4.7,
-      "image": "https://images.unsplash.com/photo-1517336717455-6e24ef69e00b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "name": "Logitech MX Master 3",
-      "category": "Accessories",
-      "price": 99,
-      "rating": 4.9,
-      "image": "https://images.unsplash.com/photo-1603993097397-89ba7e8d8656?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "name": "DJI Mini 3 Pro",
-      "category": "Drones",
-      "price": 799,
-      "rating": 4.8,
-      "image": "https://images.unsplash.com/photo-1523978591478-c753949ff840?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "name": "Anker Soundcore Liberty 3 Pro",
-      "category": "Earbuds",
-      "price": 169,
-      "rating": 4.6,
-      "image": "https://images.unsplash.com/photo-1511381939415-c3ccd821b6c3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-    }
+  {
+    "name": "Laptop A",
+    "description": "A high-performance laptop with 16GB RAM and 512GB SSD.",
+    "price": 1200,
+    "stock": 50,
+    "category": "Laptop",
+    "variants": [
+      {
+        "color": "Black",
+        "stock": 20,
+        "size": "15 inch",
+        "material": "Aluminum"
+      },
+      {
+        "color": "Silver",
+        "stock": 30,
+        "size": "15 inch",
+        "material": "Aluminum"
+      }
+    ],
+    "images": [
+      "https://example.com/images/laptop_a_black.jpg",
+      "https://example.com/images/laptop_a_silver.jpg"
+    ],
+    "isAvailable": true,
+    "createdAt": { "$date": "2024-11-01T10:00:00Z" }
+  },
+  {
+    "name": "Phone B",
+    "description": "A flagship phone with 8GB RAM, 128GB storage, and a 48MP camera.",
+    "price": 800,
+    "stock": 100,
+    "category": "Phone",
+    "variants": [
+      {
+        "color": "Blue",
+        "stock": 50,
+        "size": "6.5 inch",
+        "material": "Glass"
+      },
+      {
+        "color": "Black",
+        "stock": 50,
+        "size": "6.5 inch",
+        "material": "Glass"
+      }
+    ],
+    "images": [
+      "https://example.com/images/phone_b_blue.jpg",
+      "https://example.com/images/phone_b_black.jpg"
+    ],
+    "isAvailable": true,
+    "createdAt": { "$date": "2024-11-02T10:00:00Z" }
+  },
+  {
+    "name": "Tablet C",
+    "description": "A 10-inch tablet with 4GB RAM and 64GB storage.",
+    "price": 350,
+    "stock": 30,
+    "category": "Tablet",
+    "variants": [
+      {
+        "color": "Gold",
+        "stock": 15,
+        "size": "10 inch",
+        "material": "Metal"
+      },
+      {
+        "color": "Gray",
+        "stock": 15,
+        "size": "10 inch",
+        "material": "Metal"
+      }
+    ],
+    "images": [
+      "https://example.com/images/tablet_c_gold.jpg",
+      "https://example.com/images/tablet_c_gray.jpg"
+    ],
+    "isAvailable": true,
+    "createdAt": { "$date": "2024-11-03T10:00:00Z" }
+  },
+  {
+    "name": "Console D",
+    "description": "A gaming console with 1TB storage and 4K support.",
+    "price": 500,
+    "stock": 200,
+    "category": "Console",
+    "variants": [
+      {
+        "color": "White",
+        "stock": 100,
+        "size": "Standard",
+        "material": "Plastic"
+      },
+      {
+        "color": "Black",
+        "stock": 100,
+        "size": "Standard",
+        "material": "Plastic"
+      }
+    ],
+    "images": [
+      "https://example.com/images/console_d_white.jpg",
+      "https://example.com/images/console_d_black.jpg"
+    ],
+    "isAvailable": true,
+    "createdAt": { "$date": "2024-11-04T10:00:00Z" }
+  },
+  {
+    "name": "Accessory E",
+    "description": "A wireless mouse with ergonomic design and Bluetooth connectivity.",
+    "price": 25,
+    "stock": 500,
+    "category": "Accessory",
+    "variants": [
+      {
+        "color": "Black",
+        "stock": 250,
+        "size": "Medium",
+        "material": "Plastic"
+      },
+      {
+        "color": "White",
+        "stock": 250,
+        "size": "Medium",
+        "material": "Plastic"
+      }
+    ],
+    "images": [
+      "https://example.com/images/accessory_e_black.jpg",
+      "https://example.com/images/accessory_e_white.jpg"
+    ],
+    "isAvailable": true,
+    "createdAt": { "$date": "2024-11-05T10:00:00Z" }
+  }
 ]
-  

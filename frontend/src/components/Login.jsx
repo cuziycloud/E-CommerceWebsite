@@ -1,4 +1,4 @@
-// frontend/src/pages/Login.jsx
+// frontend/src/components/Login.jsx
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash, FaGoogle, FaFacebook, FaTwitter, FaLinkedin, FaInstagram } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
@@ -31,7 +31,7 @@ const Login = () => {
 
     try {
       // Gửi yêu cầu đăng nhập đến API của backend
-      const response = await axios.post("http://localhost:5000/api/auth/login", {
+      const response = await axios.post("http://localhost:8080/api/auth/login", {
         email,
         password
       });

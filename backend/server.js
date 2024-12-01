@@ -5,14 +5,13 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const authRoutes = require('./src/routes/auth'); // Đảm bảo import routes
+const getProductsRoutes = require('./src/routes/getProducts')
 
 const app = express();
+app.use(express.json())
 
 // Middleware
-app.use(cors({
-  origin: 'http://localhost:3000', // Đảm bảo rằng URL của frontend được phép truy cập backend
-  credentials: true
-}));
+app.use(cors());
 app.use(bodyParser.json());
 
 // Kết nối MongoDB
@@ -27,9 +26,10 @@ mongoose.connect(process.env.MONGO_URI, {
 
 // Sử dụng các route
 app.use('/api/auth', authRoutes);
+app.use('/api/getProducts', getProductsRoutes);
+
 
 // Chạy server
 app.listen(process.env.PORT, () => {
   console.log(`Server running on port ${process.env.PORT}`);
 });
- 
