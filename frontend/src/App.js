@@ -36,6 +36,7 @@ function App() {
           <Route path="/checkout" element={<Checkout/>}/>
           <Route path="/privacy-policy" element={<PrivacyPolicy/>}/>
           <Route path="/contact-us" element={<ContactUs/>}/>
+          <Route path="/term-of-service" element={<TermOfService/>}/>
           {/* Route dành cho các đường dẫn không tồn tại */}
           <Route path="*" element={<NotFound />} />
         </Routes>
