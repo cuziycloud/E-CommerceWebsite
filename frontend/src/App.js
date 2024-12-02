@@ -12,6 +12,9 @@ import AddProductForm from './components/AddProductForm';
 import ProductDetail from './components/ProductDetail';
 import CartPage from './components/CartPage';
 import Checkout from './components/Checkout';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import TermOfService from './components/TermOfService';
+import ContactUs from './components/ContactUs';
 import './styles/tailwind.css';
 
 function App() {
@@ -31,6 +34,8 @@ function App() {
           <Route path="/product-detail" element={<ProductDetail/>}/>
           <Route path="/cart-page" element={<CartPage/>}/>
           <Route path="/checkout" element={<Checkout/>}/>
+          <Route path="/privacy-policy" element={<PrivacyPolicy/>}/>
+          <Route path="/contact-us" element={<ContactUs/>}/>
           {/* Route dành cho các đường dẫn không tồn tại */}
           <Route path="*" element={<NotFound />} />
         </Routes>
