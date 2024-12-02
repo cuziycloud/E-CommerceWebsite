@@ -2,8 +2,11 @@ import React, { useState, useEffect } from "react";
 import { FiShoppingCart, FiUser, FiSearch, FiEdit, FiMapPin, FiChevronDown } from "react-icons/fi";
 import { FaGoogle, FaFacebook } from "react-icons/fa";
 import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
-
-
+import { FiMessageCircle, FiX, FiPhone } from "react-icons/fi";
+import { FaTelegramPlane, FaFacebookMessenger } from "react-icons/fa";
+import { SiZalo } from "react-icons/si";
+import { Link } from "react-router-dom"; // Thêm import Link
+import axios from "axios"
 
 const HomePage = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -18,7 +21,24 @@ const HomePage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showBestSeller, setShowBestSeller] = useState(false);
   const [showNewArrivals, setShowNewArrivals] = useState(false);
-
+  const [laptops, setLaptops] = useState([]);
+  
+  useEffect(() => {
+    console.log("Fetching laptops");
+    axios.get("http://localhost:5000/api/products/category?category=Laptop") // Thay đổi URL thành URL đầy đủ với http://localhost:5000
+      .then(response => {
+        console.log("Laptops fetched:", response.data.products);
+        setLaptops(response.data.products);
+      })
+      .catch(error => {
+        console.error("There was an error fetching the laptops!", error);
+      });
+  }, []);
+  
+  
+  
+  
+  
 
   const bannerSlides = [
     {
@@ -182,6 +202,7 @@ const HomePage = () => {
     </div>
   );
   
+  //Chuyển banner
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev === bannerSlides.length - 1 ? 0 : prev + 1));
@@ -189,6 +210,54 @@ const HomePage = () => {
 
     return () => clearInterval(interval);
   }, []);
+
+  // Hàm đăng xuất
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    alert("You have been logged out.");
+  };
+
+  //Chat
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  const handleSubButtonClick = (url) => {
+    window.open(url, "_blank");
+  };
+
+  const subButtons = [
+    {
+      icon: <FiPhone className="w-6 h-6" />,
+      color: "bg-green-500",
+      hoverColor: "hover:bg-green-600",
+      label: "Call us",
+      action: "tel:+1234567890"
+    },
+    {
+      icon: <FaFacebookMessenger className="w-6 h-6" />,
+      color: "bg-blue-600",
+      hoverColor: "hover:bg-blue-700",
+      label: "Messenger",
+      action: "https://m.me/your-page-id"
+    },
+    {
+      icon: <SiZalo className="w-6 h-6" />,
+      color: "bg-gray-500",
+      hoverColor: "hover:bg-gray-600",
+      label: "Zalo",
+      action: "https://zalo.me/your-zalo-id"
+    },
+    {
+      icon: <FaTelegramPlane className="w-6 h-6" />,
+      color: "bg-blue-400",
+      hoverColor: "hover:bg-blue-500",
+      label: "Telegram",
+      action: "https://t.me/your-telegram-id"
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -220,32 +289,6 @@ const HomePage = () => {
                   </div>
                 ))}
               </div>
-              {/* <div className="hidden md:flex space-x-6 relative">
-              {categories.map(category => (
-                <div
-                  key={category.id}
-                  className="relative group"
-                  onMouseEnter={() => setShowCategoryDropdown(true)}
-                  onMouseLeave={() => setShowCategoryDropdown(false)}
-                >
-                  <button
-                    className="flex items-center space-x-1 hover:text-blue-400 transition-colors"
-                    onClick={() => {
-                      if (category.name === "Best Sellers") {
-                        setShowBestSeller(true);
-                        setShowNewArrivals(false);
-                      } else if (category.name === "New Arrivals") {
-                        setShowBestSeller(false);
-                        setShowNewArrivals(true);
-                      }
-                    }}
-                  >
-                    <span>{category.name}</span>
-                    <FiChevronDown />
-                  </button>
-                </div>
-              ))}
-            </div> */}
             </div>
             <div className="flex items-center space-x-6">
               <div className="relative">
@@ -259,12 +302,6 @@ const HomePage = () => {
               <button onClick={() => setShowLogin(true)} className="flex items-center space-x-2">
                 <FiUser className="text-2xl" />
                 <span>{isLoggedIn ? "John Doe" : "Login"}</span>
-              </button>
-              <button
-                onClick={() => setIsAdmin(!isAdmin)}
-                className={`p-2 rounded ${isAdmin ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-900"}`}
-              >
-                {isAdmin ? "Admin" : "Customer"}
               </button>
             </div>
           </div>
@@ -396,6 +433,26 @@ const HomePage = () => {
           ))}
         </div>
       </div>
+      
+      {/* Laptops */}
+        <div className="container mx-auto px-4 py-12 bg-blue-50 rounded-lg">
+          <h2 className="text-3xl font-bold mb-8 text-left">Laptops</h2> {/* Thêm lớp text-left để căn lề trái */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {laptops.map(product => (
+              <Link to={`/product-detail/${product._id}`} key={product._id} className="bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 relative cursor-pointer">
+                <img
+                  src={`http://localhost:5000${product.images && product.images[0]}`}
+                  alt={product.name}
+                  className="w-full h-48 object-cover"
+                />
+                <div className="p-4">
+                  <h3 className="font-bold text-lg mb-2">{product.name}</h3>
+                  <p className="text-gray-600 mb-4">${product.price}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
 
       {/* Hiển thị sản phẩm theo danh mục */}
       <div className="container mx-auto px-4 py-24">
@@ -429,6 +486,48 @@ const HomePage = () => {
           </div>
         )}
       </div>
+
+      {/* Chat */}
+      <div className="fixed bottom-20 right-4 z-50">
+      <div className="relative">
+        {/* Sub Buttons */}
+        <div
+          className={`absolute bottom-0 right-0 transition-all duration-300 ${
+            isExpanded ? "opacity-100 visible" : "opacity-0 invisible"
+          }`}
+        >
+          {subButtons.map((button, index) => (
+            <button
+              key={index}
+              onClick={() => handleSubButtonClick(button.action)}
+              className={`absolute bottom-0 right-0 w-10 h-10 rounded-full ${button.color} ${button.hoverColor} text-white shadow-lg transform transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-${button.color}`}
+              style={{
+                transform: isExpanded
+                  ? `translate(-${index * 20}px, -${(index + 1) * 60}px)`
+                  : "translate(0, 0)",
+                transitionDelay: `${index * 50}ms`
+              }}
+              aria-label={button.label}
+            >
+              {button.icon}
+            </button>
+          ))}
+        </div>
+
+        {/* Main Button */}
+        <button
+          onClick={toggleExpand}
+          className="w-14 h-14 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg transform transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
+          aria-label="Toggle chat options"
+        >
+          {isExpanded ? (
+            <FiX className="w-8 h-8" />
+          ) : (
+            <FiMessageCircle className="w-8 h-8" />
+          )}
+        </button>
+      </div>
+    </div>
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">

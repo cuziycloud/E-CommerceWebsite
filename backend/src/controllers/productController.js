@@ -42,13 +42,24 @@ exports.addProduct = async (req, res) => {
 
 // Lấy danh sách sản phẩm
 exports.getProducts = async (req, res) => {
-  console.log('Fetching products'); // Debug khi bắt đầu lấy danh sách sản phẩm
+  console.log('Fetching products');
   try {
     const products = await Product.find();
-    console.log('Products:', products); // Debug thông tin danh sách sản phẩm
-    res.status(200).json({ success: true, products });
+    const updatedProducts = products.map(product => {
+      let status;
+      if (!product.isAvailable) {
+        status = 'Unavailable';
+      } else if (product.stock < 10) {
+        status = 'Low Stock';
+      } else {
+        status = 'Available';
+      }
+      return { ...product._doc, status };
+    });
+    console.log('Products:', updatedProducts);
+    res.status(200).json({ success: true, products: updatedProducts });
   } catch (error) {
-    console.log('Error fetching products:', error); // Debug khi có lỗi
+    console.log('Error fetching products:', error);
     res.status(500).json({ success: false, message: 'Không thể lấy danh sách sản phẩm', error: error.message });
   }
 };
@@ -56,16 +67,37 @@ exports.getProducts = async (req, res) => {
 // Lấy thông tin sản phẩm theo ID
 exports.getProductById = async (req, res) => {
   const { id } = req.params;
+  console.log('Fetching product by ID:', id); // Debug ID sản phẩm cần lấy
   try {
     const product = await Product.findById(id);
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found' });
     }
+    console.log('Product found:', product); // Debug thông tin sản phẩm tìm thấy
     res.status(200).json({ success: true, product });
   } catch (error) {
+    console.log('Error fetching product by ID:', error); // Debug khi có lỗi
     res.status(500).json({ success: false, message: 'Error fetching product', error: error.message });
   }
 };
+
+// Lấy sản phẩm theo category
+exports.getProductsByCategory = async (req, res) => {
+  const { category } = req.query;
+  console.log('Category query:', category); // Debug category query
+  try {
+    const products = await Product.find({ category: category }, 'name price images'); // Chỉ lấy các trường cần thiết
+    console.log('Products found:', products); // Debug sản phẩm tìm thấy
+    res.status(200).json({ success: true, products });
+  } catch (error) {
+    console.log('Error fetching products by category:', error); // Debug khi có lỗi
+    res.status(500).json({ success: false, message: 'Failed to fetch products', error: error.message });
+  }
+};
+
+
+
+
 
 // Xóa sản phẩm
 exports.deleteProduct = async (req, res) => {

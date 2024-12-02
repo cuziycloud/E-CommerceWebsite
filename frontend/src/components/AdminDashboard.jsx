@@ -16,20 +16,28 @@ const AdminDashboard = () => {
   const [currentOrderPage, setCurrentOrderPage] = useState(1);
   const [currentProductPage, setCurrentProductPage] = useState(1);
   const [currentUserPage, setCurrentUserPage] = useState(1);
-  const [products, setProducts] = useState([]);
+  const [users, setUsers] = useState([]); // Khai báo state cho users
+  const [products, setProducts] = useState([]); // Khai báo state cho products
+
   const itemsPerPage = 20;
 
   useEffect(() => {
-    if (activeTab === "products") {
-      axios.get("http://localhost:5000/api/products")
-        .then(response => {
-          setProducts(response.data.products);
-        })
-        .catch(error => {
-          console.error("There was an error fetching the products!", error);
-        });
-    }
-  }, [activeTab]);
+    const fetchData = async () => {
+      try {
+        const userResponse = await axios.get("http://localhost:5000/api/users");
+        setUsers(userResponse.data.users);
+  
+        const productResponse = await axios.get("http://localhost:5000/api/products");
+        setProducts(productResponse.data.products);
+      } catch (error) {
+        console.error("There was an error fetching the data!", error);
+      }
+    };
+  
+    fetchData();
+  }, []);
+  
+  
 
   const deleteProduct = (id) => {
     axios.delete(`http://localhost:5000/api/products/${id}`)
@@ -44,7 +52,7 @@ const AdminDashboard = () => {
   
   
   const dummyMetrics = {
-    users: 1250,
+    users: users.length,
     orders: 856,
     revenue: 125000,
     products: products.length // Cập nhật số lượng sản phẩm từ dữ liệu thực
@@ -66,14 +74,6 @@ const AdminDashboard = () => {
     price: Math.floor(Math.random() * 1000),
     stock: Math.floor(Math.random() * 100),
     status: Math.random() > 0.2 ? "Available" : "Low Stock"
-  }));
-
-  const dummyUsers = Array.from({ length: 100 }, (_, index) => ({
-    id: index + 1,
-    name: `User ${index + 1}`,
-    email: `user${index + 1}@example.com`,
-    role: Math.random() > 0.8 ? "Admin" : "User",
-    status: Math.random() > 0.1 ? "Active" : "Banned"
   }));
 
   const chartData = {
@@ -232,7 +232,7 @@ const AdminDashboard = () => {
             <div className="bg-white rounded-lg shadow overflow-hidden">
               <div className="p-4">
                 <Link 
-                  to="/admin/add-product" // Đường dẫn đến trang thêm sản phẩm
+                  to="/admin/add-product"
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   Add New Product
@@ -240,19 +240,19 @@ const AdminDashboard = () => {
               </div>
               <table className="w-full">
                 <thead>
-                  <tr className="bg-gray-50">
-                    <th className="p-4 text-left">STT</th>
-                    <th className="p-4 text-left">Name</th>
-                    <th className="p-4 text-left">Price</th>
-                    <th className="p-4 text-left">Total Stock</th>
-                    <th className="p-4 text-left">Variants</th>
-                    <th className="p-4 text-left">Status</th>
-                    <th className="p-4 text-left">Actions</th>
+                  <tr className="bg-gray-50 text-left">
+                    <th className="p-4">STT</th>
+                    <th className="p-4">Name</th>
+                    <th className="p-4">Price</th>
+                    <th className="p-4">Total Stock</th>
+                    <th className="p-4">Variants</th>
+                    <th className="p-4">Status</th>
+                    <th className="p-4">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {paginate(products, currentProductPage).map((product, index) => (
-                    <tr key={product._id} className="border-t">
+                    <tr key={product._id} className="border-t text-left">
                       <td className="p-4">{(currentProductPage - 1) * itemsPerPage + index + 1}</td>
                       <td className="p-4">{product.name}</td>
                       <td className="p-4">${product.price}</td>
@@ -260,9 +260,9 @@ const AdminDashboard = () => {
                       <td className="p-4">{product.variants.length}</td>
                       <td className="p-4">
                         <span
-                          className={`px-2 py-1 rounded-full text-sm ${product.stock > 0 ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
+                          className={`px-2 py-1 rounded-full text-sm ${product.status === "Available" ? "bg-green-100 text-green-800" : product.status === "Low Stock" ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800"}`}
                         >
-                          {product.stock > 0 ? "Available" : "Out of Stock"}
+                          {product.status}
                         </span>
                       </td>
                       <td className="p-4">
@@ -291,58 +291,60 @@ const AdminDashboard = () => {
             </div>
           );
 
-      case "users":
-        return (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="p-4">
-              <input
-                type="text"
-                placeholder="Search users..."
-                className="p-2 border rounded-lg"
-              />
-            </div>
-            <table className="w-full">
-              <thead>
-                <tr className="bg-gray-50">
-                  <th className="p-4 text-left">ID</th>
-                  <th className="p-4 text-left">Name</th>
-                  <th className="p-4 text-left">Email</th>
-                  <th className="p-4 text-left">Role</th>
-                  <th className="p-4 text-left">Status</th>
-                  <th className="p-4 text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginate(dummyUsers, currentUserPage).map((user) => (
-                  <tr key={user.id} className="border-t">
-                    <td className="p-4">{user.id}</td>
-                    <td className="p-4">{user.name}</td>
-                    <td className="p-4">{user.email}</td>
-                    <td className="p-4">{user.role}</td>
-                    <td className="p-4">
-                      <span
-                        className={`px-2 py-1 rounded-full text-sm ${user.status === "Active" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
-                      >
-                        {user.status}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      <button className="text-blue-600 hover:text-blue-800 mr-2">Edit</button>
-                      <button className="text-red-600 hover:text-red-800">
-                        {user.status === "Active" ? "Ban" : "Unban"}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <PaginationControls
-              totalItems={dummyUsers.length}
-              currentPage={currentUserPage}
-              setCurrentPage={setCurrentUserPage}
-            />
-          </div>
-        );
+          
+
+                      case "users":
+            return (
+              <div className="bg-white rounded-lg shadow overflow-hidden">
+                <div className="p-4">
+                  <input
+                    type="text"
+                    placeholder="Search users..."
+                    className="p-2 border rounded-lg"
+                  />
+                </div>
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-gray-50 text-left">
+                      <th className="p-4">STT</th>
+                      <th className="p-4">Name</th>
+                      <th className="p-4">Email</th>
+                      <th className="p-4">Role</th>
+                      <th className="p-4">Status</th>
+                      <th className="p-4">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginate(users, currentUserPage).map((user, index) => (
+                      <tr key={user._id} className="border-t text-left">
+                        <td className="p-4">{(currentUserPage - 1) * itemsPerPage + index + 1}</td>
+                        <td className="p-4">{user.name}</td>
+                        <td className="p-4">{user.email}</td>
+                        <td className="p-4">{user.role}</td>
+                        <td className="p-4">
+                          <span className={`px-2 py-1 rounded-full text-sm ${user.isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+                            {user.isActive ? "Active" : "Inactive"}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <button className="text-blue-600 hover:text-blue-800 mr-2">Edit</button>
+                          <button className="text-red-600 hover:text-red-800">
+                            {user.isActive ? "Ban" : "Unban"}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <PaginationControls
+                  totalItems={users.length}
+                  currentPage={currentUserPage}
+                  setCurrentPage={setCurrentUserPage}
+                />
+              </div>
+            );
+
+            
 
       default:
         return null;

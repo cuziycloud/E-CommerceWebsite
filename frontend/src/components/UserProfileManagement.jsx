@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { FiUser, FiLock, FiMap, FiClock, FiEye, FiEyeOff, FiHome, FiHelpCircle, FiShield } from "react-icons/fi";
-import { FaFacebook, FaTwitter, FaInstagram } from "react-icons/fa";
+import { FiUser, FiLock, FiMap, FiClock, FiEye, FiEyeOff, FiHome, FiHelpCircle, FiShield, FiChevronDown, FiShoppingCart } from "react-icons/fi";
+import { FaFacebook, FaTwitter, FaInstagram, FaGoogle } from "react-icons/fa";
 
 const UserProfileManagement = () => {
   const [activeTab, setActiveTab] = useState("personal");
@@ -12,6 +12,18 @@ const UserProfileManagement = () => {
     dob: "1990-01-01",
     gender: "male"
   });
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [cartItems, setCartItems] = useState(0);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [showBestSeller, setShowBestSeller] = useState(false);
+  const [showNewArrivals, setShowNewArrivals] = useState(false);
 
   const [addresses, setAddresses] = useState([
     {
@@ -23,6 +35,13 @@ const UserProfileManagement = () => {
       isDefault: true
     }
   ]);
+
+  const categories = [
+    { id: 1, name: "Phones", image: "images.unsplash.com/photo-1511707171634-5f897ff02aa9" },
+    { id: 2, name: "Laptops", image: "images.unsplash.com/photo-1496181133206-80ce9b88a853" },
+    { id: 3, name: "Best Sellers", image: "images.unsplash.com/photo-1531297484001-80022131f5a1" },
+    { id: 4, name: "New Arrivals", image: "images.unsplash.com/photo-1498049794561-7780e7231661" }
+  ];
 
   const [transactions] = useState([
     {
@@ -169,8 +188,54 @@ const UserProfileManagement = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
+      {/* Navigation */}
+      <nav className="fixed top-0 w-full bg-gray-900 text-white shadow-md z-40">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-8">
+              <h1 className="text-2xl font-bold text-blue-400">TechStore</h1>
+              <div className="hidden md:flex space-x-6 relative">
+                {categories.map(category => (
+                  <div
+                    key={category.id}
+                    className="relative group"
+                    onMouseEnter={() => setShowCategoryDropdown(true)}
+                    onMouseLeave={() => setShowCategoryDropdown(false)}
+                  >
+                    <button className="flex items-center space-x-1 hover:text-blue-400 transition-colors">
+                      <span>{category.name}</span>
+                      <FiChevronDown />
+                    </button>
+                    {showCategoryDropdown && (
+                      <div className="absolute top-full left-0 w-48 bg-white text-gray-900 shadow-lg rounded-lg py-2 mt-2 transform opacity-0 group-hover:opacity-100 transition-all duration-200">
+                        <a href="#" className="block px-4 py-2 hover:bg-gray-100">Sub Category 1</a>
+                        <a href="#" className="block px-4 py-2 hover:bg-gray-100">Sub Category 2</a>
+                        <a href="#" className="block px-4 py-2 hover:bg-gray-100">Sub Category 3</a>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center space-x-6">
+              <div className="relative">
+                <FiShoppingCart className="text-2xl" />
+                {cartItems > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                    {cartItems}
+                  </span>
+                )}
+              </div>
+              <button onClick={() => setShowLogin(true)} className="flex items-center space-x-2">
+                <FiUser className="text-2xl" />
+                <span>{isLoggedIn ? "John Doe" : "Login"}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav> 
+      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 mt-10">
+        <div className="px-4 py-6 sm:px-0 text-left">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">My Profile</h1>
           <p className="text-gray-600 mb-8">Manage your personal information, password, and shipping address</p>
           
@@ -216,23 +281,41 @@ const UserProfileManagement = () => {
             </div>
           </div>
         </div>
-
-        <footer className="mt-8 border-t pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex space-x-6 mb-4 md:mb-0">
-              <a href="#" className="text-gray-600 hover:text-gray-900"><FiHome className="h-5 w-5" /></a>
-              <a href="#" className="text-gray-600 hover:text-gray-900"><FiHelpCircle className="h-5 w-5" /></a>
-              <a href="#" className="text-gray-600 hover:text-gray-900"><FiShield className="h-5 w-5" /></a>
+      </div>
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+              <h3 className="text-xl font-bold mb-4">TechStore</h3>
+              <p className="text-gray-400">Your one-stop shop for all things tech</p>
             </div>
-            <p className="text-gray-600 text-sm">© 2024 Company ABC. All rights reserved.</p>
-            <div className="flex space-x-6 mt-4 md:mt-0">
-              <a href="#" className="text-gray-600 hover:text-gray-900"><FaFacebook className="h-5 w-5" /></a>
-              <a href="#" className="text-gray-600 hover:text-gray-900"><FaTwitter className="h-5 w-5" /></a>
-              <a href="#" className="text-gray-600 hover:text-gray-900"><FaInstagram className="h-5 w-5" /></a>
+            <div>
+              <h4 className="font-bold mb-4">Quick Links</h4>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-gray-400 hover:text-white">Privacy Policy</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white">Terms of Use</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white">Return Policy</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold mb-4">Contact</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li>123 Tech Street</li>
+                <li>Phone: (123) 456-7890</li>
+                <li>Email: support@techstore.com</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold mb-4">Follow Us</h4>
+              <div className="flex space-x-4">
+                <FaFacebook className="text-2xl hover:text-blue-500 cursor-pointer" />
+                <FaGoogle className="text-2xl hover:text-red-500 cursor-pointer" />
+              </div>
             </div>
           </div>
-        </footer>
-      </div>
+        </div>
+      </footer>
     </div>
   );
 };
