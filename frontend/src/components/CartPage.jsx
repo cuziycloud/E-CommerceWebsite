@@ -38,6 +38,15 @@ const CartPage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showBestSeller, setShowBestSeller] = useState(false);
   const [showNewArrivals, setShowNewArrivals] = useState(false);
+  // Updated: Selected voucher state
+  const [selectedVoucher, setSelectedVoucher] = useState("");
+
+  // Updated: Available vouchers list
+  const availableVouchers = [
+    { code: "SAVE20", discount: 0.20, description: "20% off on all items" },
+    { code: "SAVE30", discount: 0.30, description: "30% off on all items" },
+    { code: "SAVE50", discount: 0.50, description: "50% off on all items" }
+  ];
 
   const updateQuantity = (id, newQuantity) => {
     if (newQuantity < 1) return;
@@ -53,19 +62,24 @@ const CartPage = () => {
     toast.success("Product removed from cart");
   };
 
+  // Updated: Apply discount function
   const applyDiscount = () => {
-    if (discountCode === "SAVE20") {
+    if (selectedVoucher) {
       setIsDiscountApplied(true);
-      toast.success("Discount code applied successfully");
+      toast.success("Voucher applied successfully");
     } else {
-      toast.error("Invalid discount code");
+      toast.error("Please select a voucher");
     }
   };
+
+  
 
   const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
   const tax = subtotal * 0.10;
   const shipping = subtotal > 500 ? 0 : 29.99;
-  const discount = isDiscountApplied ? subtotal * 0.20 : 0;
+  // Updated: Calculate discount based on selected voucher
+  const discount = isDiscountApplied && selectedVoucher ? 
+    subtotal * availableVouchers.find(v => v.code === selectedVoucher)?.discount || 0 : 0;
   const total = subtotal + tax + shipping - discount;
 
   const suggestedProducts = [
@@ -218,64 +232,69 @@ const CartPage = () => {
           </div>
 
           {/* Right Column - Order Summary */}
-          <div className="lg:col-span-1">
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h2 className="text-xl font-bold mb-4">ORDER SUMMARY</h2>
-              <div className="space-y-4">
-                <div className="flex justify-between">
-                  <span>Subtotal</span>
-                  <span>${subtotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Tax (10%)</span>
-                  <span>${tax.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Shipping</span>
-                  <span>
-                    {shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}
-                  </span>
-                </div>
-                {isDiscountApplied && (
-                  <div className="flex justify-between text-green-600">
-                    <span>Discount (20%)</span>
-                    <span>-${discount.toFixed(2)}</span>
-                  </div>
-                )}
-                <div className="pt-4 border-t">
-                  <div className="flex justify-between items-center">
-                    <input
-                      type="text"
-                      value={discountCode}
-                      onChange={(e) => setDiscountCode(e.target.value)}
-                      placeholder="Enter discount code"
-                      className="flex-1 mr-2 px-4 py-2 border rounded"
-                    />
-                    <button
-                      onClick={applyDiscount}
-                      className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
-                    >
-                      Apply
+            <div className="lg:col-span-1">
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                <h2 className="text-xl font-bold mb-4">ORDER SUMMARY</h2>
+                <div className="space-y-4">
+                    <div className="flex justify-between">
+                    <span>Subtotal</span>
+                    <span>${subtotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                    <span>Tax (10%)</span>
+                    <span>${tax.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                    <span>Shipping</span>
+                    <span>
+                        {shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}
+                    </span>
+                    </div>
+                    {isDiscountApplied && selectedVoucher && (
+                    <div className="flex justify-between text-green-600">
+                        <span>Discount ({availableVouchers.find(v => v.code === selectedVoucher)?.discount * 100}%)</span>
+                        <span>-${discount.toFixed(2)}</span>
+                    </div>
+                    )}
+                    <div className="pt-4 border-t">
+                    <div className="flex flex-col space-y-2">
+                        <select
+                        value={selectedVoucher}
+                        onChange={(e) => setSelectedVoucher(e.target.value)}
+                        className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                        <option value="">Select a voucher</option>
+                        {availableVouchers.map((voucher) => (
+                            <option key={voucher.code} value={voucher.code}>
+                            {voucher.code} - {voucher.description}
+                            </option>
+                        ))}
+                        </select>
+                        <button
+                        onClick={applyDiscount}
+                        className="w-full bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+                        >
+                        Apply Voucher
+                        </button>
+                    </div>
+                    </div>
+                    <div className="pt-4 border-t">
+                    <div className="flex justify-between items-center font-bold text-xl">
+                        <span>Total</span>
+                        <span className="text-green-600">${total.toFixed(2)}</span>
+                    </div>
+                    </div>
+                    <div className="pt-6 space-y-3">
+                    <button className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
+                        Continue Shopping
                     </button>
-                  </div>
+                    <button className="w-full bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700">
+                        Proceed to Checkout
+                    </button>
+                    </div>
                 </div>
-                <div className="pt-4 border-t">
-                  <div className="flex justify-between items-center font-bold text-xl">
-                    <span>Total</span>
-                    <span className="text-green-600">${total.toFixed(2)}</span>
-                  </div>
                 </div>
-                <div className="pt-6 space-y-3">
-                  <button className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
-                    Continue Shopping
-                  </button>
-                  <button className="w-full bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700">
-                    Proceed to Checkout
-                  </button>
-                </div>
-              </div>
             </div>
-          </div>
         </div>
 
         {/* Suggested Products */}
