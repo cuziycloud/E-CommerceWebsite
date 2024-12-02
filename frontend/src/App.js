@@ -9,8 +9,12 @@ import ForgotPassword from './components/ForgotPassword';
 import UserProfileManagement from './components/UserProfileManagement';
 import NotFound from './components/NotFound';
 import AddProductForm from './components/AddProductForm';
-import ProductEditPage from './components/ProductEditPage';
-
+import ProductDetail from './components/ProductDetail';
+import CartPage from './components/CartPage';
+import Checkout from './components/Checkout';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import TermOfService from './components/TermOfService';
+import ContactUs from './components/ContactUs';
 import './styles/tailwind.css';
 
 function App() {
@@ -26,8 +30,13 @@ function App() {
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/user-profile" element={<UserProfileManagement />} />
-          <Route path="/admin/add-product" element={<AddProductForm/>}/>
-          <Route path="/admin/edit-product" element={<ProductEditPage/>}/>
+          <Route path="/add-product" element={<AddProductForm/>}/>
+          <Route path="/product-detail" element={<ProductDetail/>}/>
+          <Route path="/cart-page" element={<CartPage/>}/>
+          <Route path="/checkout" element={<Checkout/>}/>
+          <Route path="/privacy-policy" element={<PrivacyPolicy/>}/>
+          <Route path="/contact-us" element={<ContactUs/>}/>
+          <Route path="/term-of-service" element={<TermOfService/>}/>
           {/* Route dành cho các đường dẫn không tồn tại */}
           <Route path="*" element={<NotFound />} />
         </Routes>
