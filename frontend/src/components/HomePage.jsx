@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import { FiShoppingCart, FiUser, FiSearch, FiEdit, FiMapPin, FiChevronDown } from "react-icons/fi";
 import { FaGoogle, FaFacebook } from "react-icons/fa";
 import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
-
+import { FiMessageCircle, FiX, FiPhone } from "react-icons/fi";
+import { FaTelegramPlane, FaFacebookMessenger } from "react-icons/fa";
+import { SiZalo } from "react-icons/si";
 
 
 const TechStore = () => {
@@ -196,6 +198,48 @@ const TechStore = () => {
     setIsLoggedIn(false);
     alert("You have been logged out.");
   };
+
+  //Chat
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  const handleSubButtonClick = (url) => {
+    window.open(url, "_blank");
+  };
+
+  const subButtons = [
+    {
+      icon: <FiPhone className="w-6 h-6" />,
+      color: "bg-green-500",
+      hoverColor: "hover:bg-green-600",
+      label: "Call us",
+      action: "tel:+1234567890"
+    },
+    {
+      icon: <FaFacebookMessenger className="w-6 h-6" />,
+      color: "bg-blue-600",
+      hoverColor: "hover:bg-blue-700",
+      label: "Messenger",
+      action: "https://m.me/your-page-id"
+    },
+    {
+      icon: <SiZalo className="w-6 h-6" />,
+      color: "bg-gray-500",
+      hoverColor: "hover:bg-gray-600",
+      label: "Zalo",
+      action: "https://zalo.me/your-zalo-id"
+    },
+    {
+      icon: <FaTelegramPlane className="w-6 h-6" />,
+      color: "bg-blue-400",
+      hoverColor: "hover:bg-blue-500",
+      label: "Telegram",
+      action: "https://t.me/your-telegram-id"
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -404,6 +448,48 @@ const TechStore = () => {
           </div>
         )}
       </div>
+
+      {/* Chat */}
+      <div className="fixed bottom-20 right-4 z-50">
+      <div className="relative">
+        {/* Sub Buttons */}
+        <div
+          className={`absolute bottom-0 right-0 transition-all duration-300 ${
+            isExpanded ? "opacity-100 visible" : "opacity-0 invisible"
+          }`}
+        >
+          {subButtons.map((button, index) => (
+            <button
+              key={index}
+              onClick={() => handleSubButtonClick(button.action)}
+              className={`absolute bottom-0 right-0 w-10 h-10 rounded-full ${button.color} ${button.hoverColor} text-white shadow-lg transform transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-${button.color}`}
+              style={{
+                transform: isExpanded
+                  ? `translate(-${index * 20}px, -${(index + 1) * 60}px)`
+                  : "translate(0, 0)",
+                transitionDelay: `${index * 50}ms`
+              }}
+              aria-label={button.label}
+            >
+              {button.icon}
+            </button>
+          ))}
+        </div>
+
+        {/* Main Button */}
+        <button
+          onClick={toggleExpand}
+          className="w-14 h-14 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg transform transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
+          aria-label="Toggle chat options"
+        >
+          {isExpanded ? (
+            <FiX className="w-8 h-8" />
+          ) : (
+            <FiMessageCircle className="w-8 h-8" />
+          )}
+        </button>
+      </div>
+    </div>
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
