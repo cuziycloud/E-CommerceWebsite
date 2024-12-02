@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { FiShoppingCart, FiUser, FiTrash2, FiChevronLeft, FiSearch } from "react-icons/fi";
+import { FiShoppingCart, FiUser, FiTrash2, FiChevronLeft, FiSearch, FiChevronDown } from "react-icons/fi";
 import { toast, ToastContainer } from "react-toastify";
+import { FaGoogle, FaFacebook } from "react-icons/fa";
 import "react-toastify/dist/ReactToastify.css";
 
 const CartPage = () => {
@@ -25,6 +26,18 @@ const CartPage = () => {
 
   const [discountCode, setDiscountCode] = useState("");
   const [isDiscountApplied, setIsDiscountApplied] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [cartItems, setCartItems] = useState(0);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [showBestSeller, setShowBestSeller] = useState(false);
+  const [showNewArrivals, setShowNewArrivals] = useState(false);
 
   const updateQuantity = (id, newQuantity) => {
     if (newQuantity < 1) return;
@@ -70,44 +83,67 @@ const CartPage = () => {
     }
   ];
 
+  const categories = [
+    { id: 1, name: "Phones", image: "images.unsplash.com/photo-1511707171634-5f897ff02aa9" },
+    { id: 2, name: "Laptops", image: "images.unsplash.com/photo-1496181133206-80ce9b88a853" },
+    { id: 3, name: "Best Sellers", image: "images.unsplash.com/photo-1531297484001-80022131f5a1" },
+    { id: 4, name: "New Arrivals", image: "images.unsplash.com/photo-1498049794561-7780e7231661" }
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
+      {/* Navigation */}
+      <nav className="fixed top-0 w-full bg-gray-900 text-white shadow-md z-40">
+        <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <button className="mr-4 text-gray-600 hover:text-gray-900">
-                <FiChevronLeft size={24} />
-              </button>
-              <h1 className="text-xl font-bold text-gray-900">E-Shop</h1>
+            <div className="flex items-center space-x-8">
+              <h1 className="text-2xl font-bold text-blue-400">TechStore</h1>
+              <div className="hidden md:flex space-x-6 relative">
+                {categories.map(category => (
+                  <div
+                    key={category.id}
+                    className="relative group"
+                    onMouseEnter={() => setShowCategoryDropdown(true)}
+                    onMouseLeave={() => setShowCategoryDropdown(false)}
+                  >
+                    <button className="flex items-center space-x-1 hover:text-blue-400 transition-colors">
+                      <span>{category.name}</span>
+                      <FiChevronDown />
+                    </button>
+                    {showCategoryDropdown && (
+                      <div className="absolute top-full left-0 w-48 bg-white text-gray-900 shadow-lg rounded-lg py-2 mt-2 transform opacity-0 group-hover:opacity-100 transition-all duration-200">
+                        <a href="#" className="block px-4 py-2 hover:bg-gray-100">Sub Category 1</a>
+                        <a href="#" className="block px-4 py-2 hover:bg-gray-100">Sub Category 2</a>
+                        <a href="#" className="block px-4 py-2 hover:bg-gray-100">Sub Category 3</a>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-6">
               <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <FiSearch className="absolute left-3 top-3 text-gray-400" />
+                <FiShoppingCart className="text-2xl" />
+                {cartItems > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                    {cartItems}
+                  </span>
+                )}
               </div>
-              <div className="relative">
-                <FiShoppingCart size={24} className="text-gray-600" />
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-                  {cart.length}
-                </span>
-              </div>
-              <FiUser size={24} className="text-gray-600" />
+              <button onClick={() => setShowLogin(true)} className="flex items-center space-x-2">
+                <FiUser className="text-2xl" />
+                <span>{isLoggedIn ? "John Doe" : "Login"}</span>
+              </button>
             </div>
           </div>
         </div>
-      </header>
+      </nav> 
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 mt-16">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Cart Items */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 text-left">
             <h2 className="text-2xl font-bold mb-4">Your Cart</h2>
             <p className="text-gray-600 mb-6">You have {cart.length} items in your cart</p>
 
@@ -244,7 +280,7 @@ const CartPage = () => {
 
         {/* Suggested Products */}
         <div className="mt-12">
-          <h2 className="text-2xl font-bold mb-6">You may also like</h2>
+          <h2 className="text-2xl font-bold mb-6 text-left">You may also like</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {suggestedProducts.map((product) => (
               <div key={product.id} className="bg-white p-4 rounded-lg shadow-sm">
@@ -262,28 +298,35 @@ const CartPage = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-800 text-white mt-12">
-        <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-lg font-semibold mb-4">Contact Information</h3>
-              <p>Email: support@eshop.com</p>
-              <p>Phone: (555) 123-4567</p>
+              <h3 className="text-xl font-bold mb-4">TechStore</h3>
+              <p className="text-gray-400">Your one-stop shop for all things tech</p>
             </div>
             <div>
-              <h3 className="text-lg font-semibold mb-4">Policies</h3>
+              <h4 className="font-bold mb-4">Quick Links</h4>
               <ul className="space-y-2">
-                <li>Shipping Policy</li>
-                <li>Return Policy</li>
-                <li>Privacy Policy</li>
+                <li><a href="#" className="text-gray-400 hover:text-white">Privacy Policy</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white">Terms of Use</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white">Return Policy</a></li>
               </ul>
             </div>
             <div>
-              <h3 className="text-lg font-semibold mb-4">Customer Support</h3>
-              <p>Available 24/7</p>
-              <button className="mt-2 bg-white text-gray-800 px-4 py-2 rounded">
-                Chat with us
-              </button>
+              <h4 className="font-bold mb-4">Contact</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li>123 Tech Street</li>
+                <li>Phone: (123) 456-7890</li>
+                <li>Email: support@techstore.com</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold mb-4">Follow Us</h4>
+              <div className="flex space-x-4">
+                <FaFacebook className="text-2xl hover:text-blue-500 cursor-pointer" />
+                <FaGoogle className="text-2xl hover:text-red-500 cursor-pointer" />
+              </div>
             </div>
           </div>
         </div>
