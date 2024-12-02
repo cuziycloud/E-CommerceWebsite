@@ -11,6 +11,7 @@ import NotFound from './components/NotFound';
 import AddProductForm from './components/AddProductForm';
 import ProductDetail from './components/ProductDetail';
 import CartPage from './components/CartPage';
+import Checkout from './components/Checkout';
 import './styles/tailwind.css';
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
           <Route path="/add-product" element={<AddProductForm/>}/>
           <Route path="/product-detail" element={<ProductDetail/>}/>
           <Route path="/cart-page" element={<CartPage/>}/>
+          <Route path="/checkout" element={<Checkout/>}/>
           {/* Route dành cho các đường dẫn không tồn tại */}
           <Route path="*" element={<NotFound />} />
         </Routes>
