@@ -223,6 +223,27 @@ const HomePage = () => {
 
   const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
 
+  // Clear timeout when component unmounts
+  const [timeoutId, setTimeoutId] = useState(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [timeoutId]);
+
+  const handleMouseEnter = () => {
+    if (timeoutId) clearTimeout(timeoutId);
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    const newTimeoutId = setTimeout(() => {
+      setIsHovered(false);
+    }, 300);
+    setTimeoutId(newTimeoutId);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
@@ -266,8 +287,8 @@ const HomePage = () => {
               <div className="relative">
                 <div
                   className="p-2 cursor-pointer transform hover:scale-110 transition-transform duration-200"
-                  onMouseEnter={() => setIsHovered(true)}
-                  onMouseLeave={() => setIsHovered(false)}
+                  onMouseEnter={handleMouseEnter}
+                  onMouseLeave={handleMouseLeave}
                 >
                   <div className="relative">
                     <FaShoppingCart className="text-2xl text-white hover:text-blue-400" />
@@ -278,6 +299,9 @@ const HomePage = () => {
 
                   {isHovered && (
                     <div className="absolute right-0 mt-6 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50 transition-all duration-300 ease-in-out">
+                      onMouseEnter={handleMouseEnter}
+                      onMouseLeave={handleMouseLeave}
+
                       <div className="p-4 border-b border-gray-200">
                         <h2 className="text-lg font-bold text-gray-800">Items in Cart</h2>
                       </div>
