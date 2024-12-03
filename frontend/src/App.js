@@ -15,6 +15,7 @@ import Checkout from './components/Checkout';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermOfService from './components/TermOfService';
 import ContactUs from './components/ContactUs';
+import Category from './components/Category';
 import './styles/tailwind.css';
 
 function App() {
@@ -37,6 +38,7 @@ function App() {
           <Route path="/privacy-policy" element={<PrivacyPolicy/>}/>
           <Route path="/contact-us" element={<ContactUs/>}/>
           <Route path="/term-of-service" element={<TermOfService/>}/>
+          <Route path="/category" element={<Category/>}/>
           {/* Route dành cho các đường dẫn không tồn tại */}
           <Route path="*" element={<NotFound />} />
         </Routes>
