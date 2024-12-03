@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FiShoppingCart, FiUser, FiSearch, FiEdit, FiMapPin, FiChevronDown } from "react-icons/fi";
-import { FaGoogle, FaFacebook } from "react-icons/fa";
+import { FaGoogle, FaFacebook, FaShoppingCart, FaTrash } from "react-icons/fa";
 import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
 
 
@@ -8,7 +8,7 @@ import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
 const HomePage = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [cartItems, setCartItems] = useState(0);
+  // const [cartItems, setCartItems] = useState(0);
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
@@ -190,6 +190,39 @@ const HomePage = () => {
     return () => clearInterval(interval);
   }, []);
 
+  //Shopping Cart
+  const [isHovered, setIsHovered] = useState(false);
+
+  const cartItems = [
+    {
+      id: 1,
+      name: "Premium Wireless Headphones",
+      price: 199.99,
+      quantity: 2,
+      image: "images.unsplash.com/photo-1505740420928-5e560c06d30e"
+    },
+    {
+      id: 2,
+      name: "Smart Fitness Watch",
+      price: 299.99,
+      quantity: 1,
+      image: "images.unsplash.com/photo-1523275335684-37898b6baf30"
+    },
+    {
+      id: 3,
+      name: "Portable Power Bank",
+      price: 49.99,
+      quantity: 3,
+      image: "images.unsplash.com/photo-1583394838336-acd977736f90"
+    }
+  ];
+
+  const calculateSubtotal = () => {
+    return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+  };
+
+  const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
@@ -220,52 +253,97 @@ const HomePage = () => {
                   </div>
                 ))}
               </div>
-              {/* <div className="hidden md:flex space-x-6 relative">
-              {categories.map(category => (
-                <div
-                  key={category.id}
-                  className="relative group"
-                  onMouseEnter={() => setShowCategoryDropdown(true)}
-                  onMouseLeave={() => setShowCategoryDropdown(false)}
-                >
-                  <button
-                    className="flex items-center space-x-1 hover:text-blue-400 transition-colors"
-                    onClick={() => {
-                      if (category.name === "Best Sellers") {
-                        setShowBestSeller(true);
-                        setShowNewArrivals(false);
-                      } else if (category.name === "New Arrivals") {
-                        setShowBestSeller(false);
-                        setShowNewArrivals(true);
-                      }
-                    }}
-                  >
-                    <span>{category.name}</span>
-                    <FiChevronDown />
-                  </button>
-                </div>
-              ))}
-            </div> */}
             </div>
             <div className="flex items-center space-x-6">
-              <div className="relative">
+              {/* <div className="relative">
                 <FiShoppingCart className="text-2xl" />
                 {cartItems > 0 && (
                   <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
                     {cartItems}
                   </span>
                 )}
+              </div> */}
+              <div className="relative">
+                <div
+                  className="p-2 cursor-pointer transform hover:scale-110 transition-transform duration-200"
+                  onMouseEnter={() => setIsHovered(true)}
+                  onMouseLeave={() => setIsHovered(false)}
+                >
+                  <div className="relative">
+                    <FaShoppingCart className="text-2xl text-white hover:text-blue-400" />
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                      {totalItems}
+                    </span>
+                  </div>
+
+                  {isHovered && (
+                    <div className="absolute right-0 mt-6 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50 transition-all duration-300 ease-in-out">
+                      <div className="p-4 border-b border-gray-200">
+                        <h2 className="text-lg font-bold text-gray-800">Items in Cart</h2>
+                      </div>
+
+                      <div className="max-h-96 overflow-y-auto">
+                        {cartItems.map((item) => (
+                          <div
+                            key={item.id}
+                            className="flex items-center p-4 hover:bg-gray-50 border-b border-gray-100"
+                          >
+                            <img
+                              src={`https://${item.image}`}
+                              alt={item.name}
+                              className="w-16 h-16 object-cover rounded-md"
+                              onError={(e) => {
+                                e.target.src = "https://images.unsplash.com/photo-1595246140520-1991cca1aaaa";
+                              }}
+                            />
+                            <div className="ml-4 flex-grow">
+                              <h3 className="text-sm font-medium text-gray-800">{item.name}</h3>
+                              <div className="flex items-center mt-1">
+                                <span className="text-sm text-gray-600">Qty: {item.quantity}</span>
+                                <span className="mx-2 text-gray-400">|</span>
+                                <span className="text-sm font-medium text-gray-800">
+                                  ${(item.price * item.quantity).toFixed(2)}
+                                </span>
+                              </div>
+                            </div>
+                            <button className="p-2 text-gray-400 hover:text-red-500 transition-colors duration-200">
+                              <FaTrash className="text-sm" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="p-4 border-t border-gray-200">
+                        <div className="flex justify-between items-center mb-4">
+                          <span className="text-gray-600">Subtotal:</span>
+                          <span className="text-lg font-bold text-gray-800">
+                            ${calculateSubtotal().toFixed(2)}
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <button className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-200">
+                            View Cart
+                          </button>
+                          <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors duration-200">
+                            Checkout
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
               <button onClick={() => setShowLogin(true)} className="flex items-center space-x-2">
                 <FiUser className="text-2xl" />
                 <span>{isLoggedIn ? "John Doe" : "Login"}</span>
               </button>
-              <button
+              {/* <button
                 onClick={() => setIsAdmin(!isAdmin)}
                 className={`p-2 rounded ${isAdmin ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-900"}`}
               >
                 {isAdmin ? "Admin" : "Customer"}
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
