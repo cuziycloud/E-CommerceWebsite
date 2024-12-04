@@ -1,13 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from 'react';
 import { FiSearch, FiShoppingCart, FiUser, FiStar, FiChevronDown, FiPlus, FiMinus, FiArrowLeft, FiArrowRight, FiMaximize2, FiX } from "react-icons/fi";
 import { FaFacebook, FaInstagram, FaTwitter, FaGoogle } from "react-icons/fa";
+import axios from 'axios';
+import { useParams } from 'react-router-dom';
 
 const ProductDetail = () => {
-  // const [selectedImage, setSelectedImage] = useState(0);
-  // const [quantity, setQuantity] = useState(1);
-  // const [selectedTab, setSelectedTab] = useState("description");
-  // const [showCart, setShowCart] = useState(false);
-  // const [isLoggedIn, setIsLoggedIn] = useState(false);;
+  
   const [isAdmin, setIsAdmin] = useState(false);
   const [cartItems, setCartItems] = useState(0);
   const [showLogin, setShowLogin] = useState(false);
@@ -25,56 +23,52 @@ const ProductDetail = () => {
   const [showCart, setShowCart] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showZoomModal, setShowZoomModal] = useState(false);
-  // Added navigation handlers
-  // const handlePrevImage = () => {
-  //   setSelectedImage((prev) => (prev === 0 ? product.images.length - 1 : prev - 1));
-  // };
+  const { slug } = useParams();
+  const [product, setProduct] = useState({
+    name: "",
+    description: "",
+    price: 0,
+    oldPrice: 0,
+    rating: 0,
+    reviewCount: 0,
+    tags: [],
+    images: [],
+    specs: [], // Đảm bảo `specs` được khởi tạo
+    reviews: [],
+  });
+  
+  
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/products/slug/${slug}`);
+        const productData = response.data.product;
+  
+        // Chuyển đổi `specs` từ đối tượng thành chuỗi
+        const updatedVariants = productData.variants.map(variant => ({
+          ...variant,
+          specs: variant.specs.map(spec => `${spec.label}: ${spec.value}`).join(', ')
+        }));
+  
+        setProduct({ ...productData, variants: updatedVariants });
+      } catch (error) {
+        console.error('Error fetching product:', error);
+      }
+    };
+  
+    fetchProduct();
+  }, [slug]);
+  
+  
+  
+  
+  
+  
+  if (!product) {
+    return <div>Loading...</div>;
+  }
+  
 
-  // const handleNextImage = () => {
-  //   setSelectedImage((prev) => (prev === product.images.length - 1 ? 0 : prev + 1));
-  // };
-
-  // const product = {
-  //   name: "Premium Wireless Headphones",
-  //   price: 299.99,
-  //   oldPrice: 399.99,
-  //   rating: 4.5,
-  //   reviewCount: 128,
-  //   description: "Experience premium sound quality with our latest wireless headphones featuring active noise cancellation.",
-  //   tags: [
-  //     { name: "Wireless", color: "bg-blue-100 text-blue-600" },
-  //     { name: "Noise Cancelling", color: "bg-purple-100 text-purple-600" },
-  //     { name: "Premium Audio", color: "bg-green-100 text-green-600" },
-  //     { name: "Bluetooth 5.0", color: "bg-yellow-100 text-yellow-600" },
-  //     { name: "Long Battery Life", color: "bg-red-100 text-red-600" }
-  //   ],
-  //   images: [
-  //     "images.unsplash.com/photo-1505740420928-5e560c06d30e",
-  //     "images.unsplash.com/photo-1583394838336-acd977736f90",
-  //     "images.unsplash.com/photo-1487215078519-e21cc028cb29",
-  //     "images.unsplash.com/photo-1524678714210-9917a6c619c2"
-  //   ],
-  //   specs: [
-  //     { label: "Battery Life", value: "Up to 30 hours" },
-  //     { label: "Bluetooth Version", value: "5.0" },
-  //     { label: "Noise Cancellation", value: "Active" },
-  //     { label: "Weight", value: "250g" }
-  //   ],
-  //   reviews: [
-  //     {
-  //       name: "John D.",
-  //       rating: 5,
-  //       comment: "Best headphones I've ever owned!",
-  //       date: "2023-12-01"
-  //     },
-  //     {
-  //       name: "Sarah M.",
-  //       rating: 4,
-  //       comment: "Great sound quality, but slightly expensive.",
-  //       date: "2023-11-28"
-  //     }
-  //   ]
-  // };
 
   const categories = [
     { id: 1, name: "Phones", image: "images.unsplash.com/photo-1511707171634-5f897ff02aa9" },
@@ -83,70 +77,30 @@ const ProductDetail = () => {
     { id: 4, name: "New Arrivals", image: "images.unsplash.com/photo-1498049794561-7780e7231661" }
   ];
 
-  // const relatedProducts = [
-  //   {
-  //     id: 1,
-  //     name: "Wireless Earbuds",
-  //     price: 149.99,
-  //     image: "images.unsplash.com/photo-1572569511254-d8f925fe2cbb"
-  //   },
-  //   {
-  //     id: 2,
-  //     name: "Over-Ear Headphones",
-  //     price: 199.99,
-  //     image: "images.unsplash.com/photo-1583394838336-acd977736f90"
-  //   }
-  // ];
+  
 
   const handlePrevImage = () => {
     setSelectedImage((prev) => (prev === 0 ? product.images.length - 1 : prev - 1));
   };
-
+  
   const handleNextImage = () => {
     setSelectedImage((prev) => (prev === product.images.length - 1 ? 0 : prev + 1));
   };
-
-  const product = {
-    name: "Premium Wireless Headphones",
-    price: 299.99,
-    oldPrice: 399.99,
-    rating: 4.5,
-    reviewCount: 128,
-    description: "Experience premium sound quality with our latest wireless headphones featuring active noise cancellation.",
-    tags: [
-      { name: "Wireless", color: "bg-blue-100 text-blue-600" },
-      { name: "Noise Cancelling", color: "bg-purple-100 text-purple-600" },
-      { name: "Premium Audio", color: "bg-green-100 text-green-600" },
-      { name: "Bluetooth 5.0", color: "bg-yellow-100 text-yellow-600" },
-      { name: "Long Battery Life", color: "bg-red-100 text-red-600" }
-    ],
-    images: [
-      "images.unsplash.com/photo-1505740420928-5e560c06d30e",
-      "images.unsplash.com/photo-1583394838336-acd977736f90",
-      "images.unsplash.com/photo-1487215078519-e21cc028cb29",
-      "images.unsplash.com/photo-1524678714210-9917a6c619c2"
-    ],
-    specs: [
-      { label: "Battery Life", value: "Up to 30 hours" },
-      { label: "Bluetooth Version", value: "5.0" },
-      { label: "Noise Cancellation", value: "Active" },
-      { label: "Weight", value: "250g" }
-    ],
-    reviews: [
-      {
-        name: "John D.",
-        rating: 5,
-        comment: "Best headphones I've ever owned!",
-        date: "2023-12-01"
-      },
-      {
-        name: "Sarah M.",
-        rating: 4,
-        comment: "Great sound quality, but slightly expensive.",
-        date: "2023-11-28"
-      }
-    ]
+  
+  const handleVariantChange = (index, field, value) => {
+    const newVariants = [...product.variants];
+    
+    if (field === "specs") {
+      newVariants[index][field] = value; // Giữ specs như một chuỗi
+    } else {
+      newVariants[index][field] = value;
+    }
+  
+    setProduct({ ...product, variants: newVariants });
   };
+  
+  
+  
 
   const relatedProducts = [
     {
@@ -176,7 +130,7 @@ const ProductDetail = () => {
           </button>
           <div className="w-full h-full overflow-auto p-4">
             <img
-              src={`https://${product.images[selectedImage]}`}
+              src={`http://localhost:5000${product.images[selectedImage]}`}
               alt={product.name}
               className="w-full h-auto object-contain cursor-zoom-in transform transition-transform duration-300 hover:scale-150"
             />
@@ -185,6 +139,7 @@ const ProductDetail = () => {
       </div>
     );
   };
+  
 
   return (
     <div className="min-h-screen bg-white">
@@ -216,32 +171,6 @@ const ProductDetail = () => {
                   </div>
                 ))}
               </div>
-              {/* <div className="hidden md:flex space-x-6 relative">
-              {categories.map(category => (
-                <div
-                  key={category.id}
-                  className="relative group"
-                  onMouseEnter={() => setShowCategoryDropdown(true)}
-                  onMouseLeave={() => setShowCategoryDropdown(false)}
-                >
-                  <button
-                    className="flex items-center space-x-1 hover:text-blue-400 transition-colors"
-                    onClick={() => {
-                      if (category.name === "Best Sellers") {
-                        setShowBestSeller(true);
-                        setShowNewArrivals(false);
-                      } else if (category.name === "New Arrivals") {
-                        setShowBestSeller(false);
-                        setShowNewArrivals(true);
-                      }
-                    }}
-                  >
-                    <span>{category.name}</span>
-                    <FiChevronDown />
-                  </button>
-                </div>
-              ))}
-            </div> */}
             </div>
             <div className="flex items-center space-x-6">
               <div className="relative">
@@ -268,238 +197,217 @@ const ProductDetail = () => {
       </nav> 
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 pt-24 pb-12 text-left">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Updated Product Images Section with Modern Navigation Arrows */}
-          {/* <div className="space-y-4">
-            <div className="relative h-[400px] w-full bg-gray-100 rounded-lg overflow-hidden">
-              <img
-                src={`https://${product.images[selectedImage]}`}
-                alt={product.name}
-                className="object-cover w-full h-full"
-              />
-              <button
-                onClick={handlePrevImage}
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/40 p-1.5 rounded-full hover:bg-white/60 transition-all backdrop-blur-sm"
-              >
-                <FiArrowLeft size={18} />
-              </button>
-              <button
-                onClick={handleNextImage}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/40 p-1.5 rounded-full hover:bg-white/60 transition-all backdrop-blur-sm"
-              >
-                <FiArrowRight size={18} />
-              </button>
-            </div>
-            <div className="grid grid-cols-4 gap-4">
-              {product.images.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedImage(index)}
-                  className={`h-24 w-full rounded-lg overflow-hidden ${selectedImage === index ? "ring-2 ring-blue-500" : ""}`}
-                >
-                  <img
-                    src={`https://${image}`}
-                    alt={`${product.name} ${index + 1}`}
-                    className="object-cover w-full h-full"
-                  />
-                </button>
-              ))}
-            </div>
-          </div> */}
-          {/* Updated Product Images Section with Zoom Button */}
-          <div className="space-y-4">
-            <div className="relative h-[400px] w-full bg-gray-100 rounded-lg overflow-hidden">
-              <img
-                src={`https://${product.images[selectedImage]}`}
-                alt={product.name}
-                className="object-cover w-full h-full"
-              />
-              {/* Zoom Button */}
-              <button
-                onClick={() => setShowZoomModal(true)}
-                className="absolute top-4 right-4 p-2 bg-white/40 rounded-full hover:bg-white/60 transition-all backdrop-blur-sm"
-              >
-                <FiMaximize2 size={18} />
-              </button>
-              {/* Navigation Arrows */}
-              <button
-                onClick={handlePrevImage}
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/40 p-1.5 rounded-full hover:bg-white/60 transition-all backdrop-blur-sm"
-              >
-                <FiArrowLeft size={18} />
-              </button>
-              <button
-                onClick={handleNextImage}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/40 p-1.5 rounded-full hover:bg-white/60 transition-all backdrop-blur-sm"
-              >
-                <FiArrowRight size={18} />
-              </button>
-            </div>
-            <div className="grid grid-cols-4 gap-4">
-              {product.images.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedImage(index)}
-                  className={`h-24 w-full rounded-lg overflow-hidden ${selectedImage === index ? "ring-2 ring-blue-500" : ""}`}
-                >
-                  <img
-                    src={`https://${image}`}
-                    alt={`${product.name} ${index + 1}`}
-                    className="object-cover w-full h-full"
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
+<main className="container mx-auto px-4 pt-24 pb-12 text-left">
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+    {/* Updated Product Images Section with Zoom Button */}
+    <div className="space-y-4">
+      <div className="relative h-[400px] w-full bg-gray-100 rounded-lg overflow-hidden">
+        {product.images && (
+          <>
+            <img
+              src={`http://localhost:5000${product.images[selectedImage]}`}
+              alt={product.name}
+              className="object-cover w-full h-full"
+            />
+            <button
+              onClick={() => setShowZoomModal(true)}
+              className="absolute top-4 right-4 p-2 bg-white/40 rounded-full hover:bg-white/60 transition-all backdrop-blur-sm"
+            >
+              <FiMaximize2 size={18} />
+            </button>
+            <button
+              onClick={handlePrevImage}
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/40 p-1.5 rounded-full hover:bg-white/60 transition-all backdrop-blur-sm"
+            >
+              <FiArrowLeft size={18} />
+            </button>
+            <button
+              onClick={handleNextImage}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/40 p-1.5 rounded-full hover:bg-white/60 transition-all backdrop-blur-sm"
+            >
+              <FiArrowRight size={18} />
+            </button>
+          </>
+        )}
+      </div>
+      <div className="grid grid-cols-4 gap-4">
+        {product.images && product.images.map((image, index) => (
+          <button
+            key={index}
+            onClick={() => setSelectedImage(index)}
+            className={`h-24 w-full rounded-lg overflow-hidden ${selectedImage === index ? "ring-2 ring-blue-500" : ""}`}
+          >
+            <img
+              src={`http://localhost:5000${image}`}
+              alt={`${product.name} ${index + 1}`}
+              className="object-cover w-full h-full"
+            />
+          </button>
+        ))}
+      </div>
+    </div>
+    
 
           {/* Product Info */}
-          <div className="space-y-6">
-            <h1 className="text-3xl font-bold">{product.name}</h1>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center">
-                {[...Array(5)].map((_, index) => (
-                  <FiStar
-                    key={index}
-                    className={index < Math.floor(product.rating) ? "text-yellow-400 fill-current" : "text-gray-300"}
-                  />
-                ))}
-              </div>
-              <span className="text-gray-600">{product.reviewCount} reviews</span>
-            </div>
+<div className="space-y-6">
+  <h1 className="text-3xl font-bold">{product.name}</h1>
+  <div className="flex items-center space-x-4">
+    <div className="flex items-center">
+      {[...Array(5)].map((_, index) => (
+        <FiStar
+          key={index}
+          className={index < Math.floor(product.rating) ? "text-yellow-400 fill-current" : "text-gray-300"}
+        />
+      ))}
+    </div>
+    <span className="text-gray-600">{product.reviewCount} reviews</span>
+  </div>
+  <div className="space-y-2">
+    <div className="flex items-center space-x-4">
+      <span className="text-3xl font-bold">${product.price}</span>
+      <span className="text-xl text-gray-500 line-through">${product.oldPrice}</span>
+      <span className="px-2 py-1 bg-red-100 text-red-600 rounded-md text-sm">25% OFF</span>
+    </div>
+    <p className="text-green-600">10% off when paying with e-wallet</p>
+  </div>
+  <p className="text-gray-600">{product.description}</p> {/* Đảm bảo hiển thị đúng mô tả */}
+  <div className="flex flex-wrap gap-2">
+    {product.tags && product.tags.map((tag, index) => (
+      <button
+        key={index}
+        className={`px-4 py-2 rounded-full bg-gray-200 text-sm font-medium transition-colors duration-200 hover:opacity-80`}
+      >
+        {tag}
+      </button>
+    ))}
+  </div>
+  <div className="space-y-4">
+    <div className="flex items-center space-x-4">
+      <span className="font-medium">Quantity:</span>
+      <div className="flex items-center space-x-2">
+        <button
+          onClick={() => setQuantity(Math.max(1, quantity - 1))}
+          className="p-2 rounded-md border hover:bg-gray-100"
+        >
+          <FiMinus />
+        </button>
+        <span className="w-12 text-center">{quantity}</span>
+        <button
+          onClick={() => setQuantity(quantity + 1)}
+          className="p-2 rounded-md border hover:bg-gray-100"
+        >
+          <FiPlus />
+        </button>
+      </div>
+    </div>
+    <div className="flex space-x-4">
+      <button className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+        Add to Cart
+      </button>
+      <button className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700">
+        Buy Now
+      </button>
+    </div>
+  </div>
+</div>
 
-            <div className="space-y-2">
-              <div className="flex items-center space-x-4">
-                <span className="text-3xl font-bold">${product.price}</span>
-                <span className="text-xl text-gray-500 line-through">${product.oldPrice}</span>
-                <span className="px-2 py-1 bg-red-100 text-red-600 rounded-md text-sm">25% OFF</span>
-              </div>
-              <p className="text-green-600">10% off when paying with e-wallet</p>
-            </div>
 
-            <p className="text-gray-600">{product.description}</p>
 
-            {/* Added Product Tags */}
-            <div className="flex flex-wrap gap-2">
-              {product.tags.map((tag, index) => (
-                <button
-                  key={index}
-                  className={`px-4 py-2 rounded-full ${tag.color} text-sm font-medium transition-colors duration-200 hover:opacity-80`}
-                >
-                  {tag.name}
-                </button>
-              ))}
-            </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center space-x-4">
-                <span className="font-medium">Quantity:</span>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="p-2 rounded-md border hover:bg-gray-100"
-                  >
-                    <FiMinus />
-                  </button>
-                  <span className="w-12 text-center">{quantity}</span>
-                  <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="p-2 rounded-md border hover:bg-gray-100"
-                  >
-                    <FiPlus />
-                  </button>
-                </div>
-              </div>
 
-              <div className="flex space-x-4">
-                <button className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                  Add to Cart
-                </button>
-                <button className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                  Buy Now
-                </button>
-              </div>
-            </div>
-          </div>
+
         </div>
 
         {/* Tabs */}
         <div className="mt-12">
-          <div className="border-b">
-            <div className="flex space-x-8">
-              <button
-                onClick={() => setSelectedTab("description")}
-                className={`py-4 ${selectedTab === "description" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500"}`}
-              >
-                Description
-              </button>
-              <button
-                onClick={() => setSelectedTab("reviews")}
-                className={`py-4 ${selectedTab === "reviews" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500"}`}
-              >
-                Reviews
-              </button>
+  <div className="border-b">
+    <div className="flex space-x-8">
+      <button
+        onClick={() => setSelectedTab("description")}
+        className={`py-4 ${selectedTab === "description" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500"}`}
+      >
+        Specifications
+      </button>
+      <button
+        onClick={() => setSelectedTab("reviews")}
+        className={`py-4 ${selectedTab === "reviews" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500"}`}
+      >
+        Reviews
+      </button>
+    </div>
+  </div>
+
+  <div className="py-8">
+    {selectedTab === "description" ? (
+      <div className="space-y-6">
+        <div className="grid grid-cols-2 gap-8">
+          {product.variants && product.variants.map((variant, index) => (
+            <div key={index}>
+              {variant.specs && variant.specs.split(',').map((spec, i) => {
+                const [label, value] = spec.split(':').map(item => item.trim());
+                return (
+                  <div key={i} className={`p-4 rounded-lg ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                    <span className="font-medium">{label}:</span>
+                    <span className="ml-20">{value}</span>
+                  </div>
+                );
+              })}
             </div>
-          </div>
-
-          <div className="py-8">
-            {selectedTab === "description" ? (
-              <div className="grid grid-cols-2 gap-8">
-                {product.specs.map((spec, index) => (
-                  <div key={index} className="border p-4 rounded-lg">
-                    <span className="font-medium">{spec.label}:</span>
-                    <span className="ml-2">{spec.value}</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-8">
-                {product.reviews.map((review, index) => (
-                  <div key={index} className="border-b pb-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <span className="font-medium">{review.name}</span>
-                        <div className="flex">
-                          {[...Array(5)].map((_, i) => (
-                            <FiStar
-                              key={i}
-                              className={i < review.rating ? "text-yellow-400 fill-current" : "text-gray-300"}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                      <span className="text-gray-500">{review.date}</span>
-                    </div>
-                    <p className="mt-2 text-gray-600">{review.comment}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          ))}
         </div>
-
-        {/* Related Products */}
-        <div className="mt-12">
-          <h2 className="text-2xl font-bold mb-6">Related Products</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {relatedProducts.map((product) => (
-              <div key={product.id} className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-                <img
-                  src={`https://${product.image}`}
-                  alt={product.name}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="font-medium">{product.name}</h3>
-                  <p className="text-lg font-bold mt-2">${product.price}</p>
-                  <button className="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                    View Details
-                  </button>
+      </div>
+    ) : (
+      <div className="space-y-8">
+        {product.reviews && product.reviews.map((review, index) => (
+          <div key={index} className="border-b pb-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <span className="font-medium">{review.name}</span>
+                <div className="flex">
+                  {[...Array(5)].map((_, i) => (
+                    <FiStar
+                      key={i}
+                      className={i < review.rating ? "text-yellow-400 fill-current" : "text-gray-300"}
+                    />
+                  ))}
                 </div>
               </div>
-            ))}
+              <span className="text-gray-500">{review.date}</span>
+            </div>
+            <p className="mt-2 text-gray-600">{review.comment}</p>
           </div>
+        ))}
+      </div>
+    )}
+  </div>
+</div>
+
+
+
+
+        {/* Related Products */}
+<div className="mt-12">
+  <h2 className="text-2xl font-bold mb-6">Related Products</h2>
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    {relatedProducts && relatedProducts.map((product) => (
+      <div key={product.id} className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+        <img
+          src={`https://${product.image}`}
+          alt={product.name}
+          className="w-full h-48 object-cover"
+        />
+        <div className="p-4">
+          <h3 className="font-medium">{product.name}</h3>
+          <p className="text-lg font-bold mt-2">${product.price}</p>
+          <button className="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            View Details
+          </button>
         </div>
+      </div>
+    ))}
+  </div>
+</div>
+
       </main>
       
       {/* Zoom Modal */}

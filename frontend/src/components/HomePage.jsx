@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { FiShoppingCart, FiUser, FiSearch, FiEdit, FiMapPin, FiChevronDown } from "react-icons/fi";
 import { FaGoogle, FaFacebook, FaShoppingCart, FaTrash } from "react-icons/fa";
 import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
-
+import { Link } from "react-router-dom"; // Thêm import Link
+import axios from "axios"
 
 
 const HomePage = () => {
@@ -18,6 +19,19 @@ const HomePage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showBestSeller, setShowBestSeller] = useState(false);
   const [showNewArrivals, setShowNewArrivals] = useState(false);
+  const [laptops, setLaptops] = useState([]);
+
+  useEffect(() => {
+    console.log("Fetching laptops");
+    axios.get("http://localhost:5000/api/products/category?category=Laptop") // Thay đổi URL thành URL đầy đủ với http://localhost:5000
+      .then(response => {
+        console.log("Laptops fetched:", response.data.products);
+        setLaptops(response.data.products);
+      })
+      .catch(error => {
+        console.error("There was an error fetching the laptops!", error);
+      });
+  }, []);
 
 
   const bannerSlides = [
@@ -498,6 +512,27 @@ const HomePage = () => {
           ))}
         </div>
       </div>
+      
+      {/* Laptops */}
+      <div className="container mx-auto px-4 py-12 bg-blue-50 rounded-lg">
+          <h2 className="text-3xl font-bold mb-8 text-left">Laptops</h2> {/* Thêm lớp text-left để căn lề trái */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {laptops.map(product => (
+              <Link to={`/product-detail/${product._id}`} key={product._id} className="bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 relative cursor-pointer">
+                <img
+                  src={`http://localhost:5000${product.images && product.images[0]}`}
+                  alt={product.name}
+                  className="w-full h-48 object-cover"
+                />
+                <div className="p-4">
+                  <h3 className="font-bold text-lg mb-2">{product.name}</h3>
+                  <p className="text-gray-600 mb-4">${product.price}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
 
       {/* Hiển thị sản phẩm theo danh mục */}
       <div className="container mx-auto px-4 py-24">

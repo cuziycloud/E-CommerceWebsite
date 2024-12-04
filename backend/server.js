@@ -7,6 +7,7 @@ const path = require('path');
 const authRoutes = require('./src/routes/auth');
 const productRoutes = require('./src/routes/productRoutes'); // Import route product
 const uploadRoutes = require('./src/routes/uploadRoutes'); // Import route upload
+const userRoutes = require('./src/routes/userRoutes');
 
 const app = express();
 
@@ -32,6 +33,7 @@ mongoose.connect(process.env.MONGO_URI)
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes); // Sử dụng route product
 app.use('/api/uploads', uploadRoutes); // Sử dụng route upload
+app.use('/api/users', userRoutes);
 
 // Đặt thư mục 'uploads' là static để phục vụ file ảnh
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

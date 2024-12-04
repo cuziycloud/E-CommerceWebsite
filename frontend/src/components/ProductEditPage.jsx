@@ -1,38 +1,99 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import axios from 'axios';
 import { FiUpload, FiTrash2, FiPlus } from "react-icons/fi";
 import { BiLoaderAlt } from "react-icons/bi";
+import slugify from 'slugify'; // Thêm slugify
+
 
 const ProductEditPage = () => {
+  const { id } = useParams();
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     price: "",
     category: "",
+    tags: "",
     images: [],
+    isAvailable: true,
     variants: [
       {
         color: "",
         size: "",
         stock: "",
-        material: "",
-        isAvailable: true,
+        specs: "" // Thêm specs vào state
       },
     ],
     createdAt: new Date().toISOString(),
   });
-
+  
+  
+  
+  
+  
+  
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewImages, setPreviewImages] = useState([]);
+  const [originalSlug, setOriginalSlug] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const categories = [
-    "Electronics",
-    "Clothing",
-    "Accessories",
-    "Home & Living",
-    "Books",
+    "Laptop",
+    "Phone",
+    "Tablet",
+    "Console",
+    "Accessory"
   ];
 
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const productResponse = await axios.get(`http://localhost:5000/api/products/slug/${id}`);
+        const product = productResponse.data.product;
+        const variantsWithSpecsAsString = product.variants.map(variant => ({
+          ...variant,
+          specs: variant.specs.map(spec => `${spec.label}: ${spec.value}`).join(', ')
+        }));
+        setFormData({
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          category: product.category,
+          tags: product.tags.join(', '),
+          images: product.images,
+          isAvailable: product.isAvailable,
+          variants: variantsWithSpecsAsString.length ? variantsWithSpecsAsString : [
+            {
+              color: "",
+              size: "",
+              stock: "",
+              specs: ""
+            },
+          ],
+          stock: calculateTotalStock(variantsWithSpecsAsString.length ? variantsWithSpecsAsString : [
+            {
+              color: "",
+              size: "",
+              stock: "",
+              specs: ""
+            },
+          ]),
+          createdAt: product.createdAt,
+        });
+        setPreviewImages(product.images.map(image => `http://localhost:5000${image}`));
+        setOriginalSlug(product.slug); // Lưu slug gốc
+      } catch (error) {
+        console.error("Error fetching product data:", error);
+      }
+    };
+  
+    fetchData();
+  }, [id]);
+  
+  
   const validateForm = () => {
     const newErrors = {};
     if (!formData.name) newErrors.name = "Product name is required";
@@ -41,28 +102,50 @@ const ProductEditPage = () => {
     if (!formData.price || isNaN(formData.price))
       newErrors.price = "Valid price is required";
     if (!formData.category) newErrors.category = "Category is required";
-
+    if (!formData.tags || formData.tags.length === 0)
+      newErrors.tags = "At least one tag is required";
+  
     formData.variants.forEach((variant, index) => {
       if (!variant.color)
         newErrors[`variant${index}color`] = "Color is required";
       if (!variant.size) newErrors[`variant${index}size`] = "Size is required";
       if (!variant.stock || isNaN(variant.stock))
         newErrors[`variant${index}stock`] = "Valid stock quantity is required";
-      if (!variant.material)
-        newErrors[`variant${index}material`] = "Material is required";
+      if (!variant.specs)
+        newErrors[`variant${index}specs`] = "Specifications are required"; // Thêm kiểm tra cho specs
     });
-
+  
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+  
+  
+
+  const handleTagsChange = (e) => {
+    setFormData({ ...formData, tags: e.target.value });
+  };
+  
+  
+  
+  const handleRemoveImage = (index) => {
+    const newImages = formData.images.filter((_, i) => i !== index);
+    const newPreviewImages = previewImages.filter((_, i) => i !== index);
+    setFormData({ ...formData, images: newImages });
+    setPreviewImages(newPreviewImages);
+  };
+  
+  
 
   const handleImageUpload = (e) => {
+    setIsLoading(true);
     const files = Array.from(e.target.files);
-    setFormData({ ...formData, images: [...formData.images, ...files] });
-
-    const newPreviewImages = files.map((file) => URL.createObjectURL(file));
+    const newPreviewImages = files.map(file => URL.createObjectURL(file));
     setPreviewImages([...previewImages, ...newPreviewImages]);
+    setFormData({ ...formData, images: [...formData.images, ...files] });
+    setIsLoading(false);
   };
+  
+  
 
   const removeImage = (index) => {
     const newImages = formData.images.filter((_, i) => i !== index);
@@ -73,9 +156,21 @@ const ProductEditPage = () => {
 
   const handleVariantChange = (index, field, value) => {
     const newVariants = [...formData.variants];
-    newVariants[index] = { ...newVariants[index], [field]: value };
+  
+    if (field === "specs") {
+      newVariants[index][field] = value.split(',').map(spec => {
+        const [label, specValue] = spec.split(':').map(item => item.trim());
+        return { label, value: specValue };
+      });
+    } else {
+      newVariants[index][field] = value;
+    }
+  
     setFormData({ ...formData, variants: newVariants });
   };
+  
+  
+  
 
   const addVariant = () => {
     setFormData({
@@ -86,12 +181,12 @@ const ProductEditPage = () => {
           color: "",
           size: "",
           stock: "",
-          material: "",
-          isAvailable: true,
+          specs: "" // Thêm specs vào biến thể mới
         },
       ],
     });
   };
+  
 
   const removeVariant = (index) => {
     const newVariants = formData.variants.filter((_, i) => i !== index);
@@ -103,9 +198,64 @@ const ProductEditPage = () => {
     if (validateForm()) {
       setIsSubmitting(true);
       try {
-        // Simulating API call
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        console.log("Form submitted:", formData);
+        const formDataCopy = { ...formData };
+  
+        if (!formDataCopy.name || typeof formDataCopy.name !== 'string') {
+          throw new Error('Name must be a valid string');
+        }
+  
+        const slug = slugify(formDataCopy.name, { lower: true, strict: true }); // Tạo slug từ tên sản phẩm
+        formDataCopy.slug = slug; // Thêm slug vào dữ liệu sản phẩm
+  
+        // Tải lên ảnh và lấy URL
+        const uploadedImageUrls = [];
+        for (const image of formData.images) {
+          if (typeof image === "object") {
+            const formDataImage = new FormData();
+            formDataImage.append("image", image);
+  
+            const uploadResponse = await axios.post('http://localhost:5000/api/uploads/upload', formDataImage, {
+              headers: { "Content-Type": "multipart/form-data" },
+            });
+  
+            uploadedImageUrls.push(uploadResponse.data.url);
+          } else {
+            uploadedImageUrls.push(image);
+          }
+        }
+  
+        formDataCopy.images = uploadedImageUrls;
+  
+        // Đảm bảo variants luôn là một mảng hợp lệ
+        formDataCopy.variants = formDataCopy.variants || [];
+  
+        // Tính toán lại tổng số lượng `stock`
+        formDataCopy.stock = calculateTotalStock(formDataCopy.variants);
+  
+        // Chuyển đổi tags thành mảng trước khi gửi
+        formDataCopy.tags = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== "");
+  
+        // Chuyển đổi specs từ chuỗi sang mảng đối tượng
+        formDataCopy.variants.forEach(variant => {
+          if (variant.specs && typeof variant.specs === "string") {
+            const specsArray = variant.specs.split(",").map(spec => {
+              const [label, specValue] = spec.split(":").map(item => item.trim());
+              return { label, value: specValue };
+            });
+            variant.specs = specsArray;
+          }
+        });
+  
+        console.log('Updating product data:', formDataCopy); // Log dữ liệu trước khi gửi
+        const response = await axios.put(`http://localhost:5000/api/products/slug/${originalSlug}`, formDataCopy); // Sử dụng slug gốc khi gửi yêu cầu PUT
+        console.log("Form submitted:", response.data);
+  
+        // Chuyển hướng tới trang mới với slug mới sau khi cập nhật thành công
+        if (slug !== originalSlug) {
+          window.location.href = `/admin/edit-product/${slug}`;
+        } else {
+          window.location.reload(); // Reload lại trang nếu slug không thay đổi
+        }
       } catch (error) {
         console.error("Error submitting form:", error);
       } finally {
@@ -113,13 +263,27 @@ const ProductEditPage = () => {
       }
     }
   };
-
-  const calculateTotalStock = () => {
-    return formData.variants.reduce(
-      (total, variant) => total + Number(variant.stock) || 0,
-      0
-    );
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  const calculateTotalStock = (variants) => {
+    if (!Array.isArray(variants)) {
+      return 0;
+    }
+    return variants.reduce((acc, variant) => acc + (parseInt(variant.stock, 10) || 0), 0);
   };
+  
+  
+  
+  
 
   // Format the date string
   const formatDate = (dateString) => {
@@ -227,7 +391,7 @@ const ProductEditPage = () => {
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div>
               <label
                 htmlFor="category"
@@ -264,6 +428,36 @@ const ProductEditPage = () => {
             </div>
 
             <div>
+                <label
+                  htmlFor="tags"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Tags (comma-separated)
+                </label>
+                <input
+                  type="text"
+                  id="tags"
+                  value={formData.tags}
+                  onChange={handleTagsChange}
+                  placeholder="Enter tags, separated by commas"
+                  className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${errors.tags ? "border-red-500" : ""}`}
+                  aria-invalid={errors.tags ? "true" : "false"}
+                  aria-describedby={errors.tags ? "tags-error" : undefined}
+                />
+                {errors.tags && (
+                  <p
+                    className="mt-1 text-sm text-red-600"
+                    id="tags-error"
+                    role="alert"
+                  >
+                    {errors.tags}
+                  </p>
+                )}
+              </div>
+              
+              
+
+            <div>
               <label className="block text-sm font-medium text-gray-700">
                 Created At
               </label>
@@ -280,186 +474,162 @@ const ProductEditPage = () => {
                 Total Stock
               </label>
               <div className="mt-1 p-3 bg-gray-100 rounded-md">
-                {calculateTotalStock()}
+              {calculateTotalStock(formData.variants)}
               </div>
             </div>
           </div>
+
+          <div className="mt-4">
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.isAvailable}
+                onChange={(e) =>
+                  setFormData({ ...formData, isAvailable: e.target.checked })
+                }
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+              <span className="ml-3 text-sm font-medium text-gray-700">
+                Product Availability
+              </span>
+            </label>
+          </div>
+
+
+
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Product Images
-            </label>
-            <div className="flex flex-wrap gap-4">
-              {previewImages.map((preview, index) => (
-                <div
-                  key={index}
-                  className="relative w-24 h-24 border rounded-lg overflow-hidden"
-                >
-                  <img
-                    src={preview}
-                    alt={`Product preview ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeImage(index)}
-                    className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                  >
-                    <FiTrash2 size={16} />
-                  </button>
-                </div>
-              ))}
-              <label className="w-24 h-24 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-indigo-500 transition-colors">
-                <input
-                  type="file"
-                  multiple
-                  onChange={handleImageUpload}
-                  className="hidden"
-                  accept="image/*"
-                />
-                <FiUpload className="text-gray-400" size={24} />
-              </label>
-            </div>
-          </div>
+  <label className="block text-sm font-medium text-gray-700 mb-2">
+    Product Images
+  </label>
+  <div className="flex flex-wrap gap-4">
+    {previewImages.map((preview, index) => (
+      <div
+        key={index}
+        className="relative w-24 h-24 border rounded-lg overflow-hidden"
+      >
+        <img
+          src={preview}
+          alt={`Product preview ${index + 1}`}
+          className="w-full h-full object-cover"
+        />
+        <button
+          type="button"
+          onClick={() => handleRemoveImage(index)}
+          className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+        >
+          <FiTrash2 size={16} />
+        </button>
+      </div>
+    ))}
+    <label className="w-24 h-24 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-indigo-500 transition-colors">
+      <input
+        type="file"
+        multiple
+        onChange={handleImageUpload}
+        className="hidden"
+        accept="image/*"
+      />
+      <FiUpload className="text-gray-400" size={24} />
+    </label>
+  </div>
+  {isLoading && (
+    <div className="mt-4 flex justify-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+    </div>
+  )}
+</div>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-800">Variants</h2>
-              <button
-                type="button"
-                onClick={addVariant}
-                className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
-              >
-                <FiPlus className="mr-2" /> Add Variant
-              </button>
-            </div>
+            
 
-            {formData.variants.map((variant, index) => (
-              <div
-                key={index}
-                className="p-4 border rounded-lg bg-gray-50 space-y-4"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Color
-                    </label>
-                    <input
-                      type="text"
-                      value={variant.color}
-                      onChange={(e) =>
-                        handleVariantChange(index, "color", e.target.value)
-                      }
-                      className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${errors[`variant${index}color`] ? "border-red-500" : ""}`}
-                    />
-                    {errors[`variant${index}color`] && (
-                      <p className="mt-1 text-sm text-red-600" role="alert">
-                        {errors[`variant${index}color`]}
-                      </p>
-                    )}
-                  </div>
+<div className="space-y-4">
+  <div className="flex items-center justify-between">
+    <h2 className="text-xl font-semibold text-gray-800">Variants</h2>
+    <button
+      type="button"
+      onClick={addVariant}
+      className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+    >
+      <FiPlus className="mr-2" /> Add Variant
+    </button>
+  </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Size
-                    </label>
-                    <input
-                      type="text"
-                      value={variant.size}
-                      onChange={(e) =>
-                        handleVariantChange(index, "size", e.target.value)
-                      }
-                      className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${errors[`variant${index}size`] ? "border-red-500" : ""}`}
-                    />
-                    {errors[`variant${index}size`] && (
-                      <p className="mt-1 text-sm text-red-600" role="alert">
-                        {errors[`variant${index}size`]}
-                      </p>
-                    )}
-                  </div>
+  {formData.variants.map((variant, index) => (
+  <div key={index} className="space-y-4 p-4 border rounded-lg bg-gray-50">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Size</label>
+        <input
+          type="text"
+          placeholder="Size"
+          value={variant.size}
+          onChange={(e) => handleVariantChange(index, "size", e.target.value)}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Color</label>
+        <input
+          type="text"
+          placeholder="Color"
+          value={variant.color}
+          onChange={(e) => handleVariantChange(index, "color", e.target.value)}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Stock</label>
+        <input
+          type="number"
+          placeholder="Stock"
+          value={variant.stock}
+          min="0"
+          onChange={(e) => handleVariantChange(index, "stock", e.target.value)}
+          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${errors[`variant${index}stock`] ? "border-red-500" : ""}`}
+        />
+        {errors[`variant${index}stock`] && (
+          <p className="mt-1 text-sm text-red-500" role="alert">
+            {errors[`variant${index}stock`]}
+          </p>
+        )}
+      </div>
+    </div>
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        Specifications (comma-separated)
+      </label>
+      <textarea
+        placeholder="e.g., CPU: Intel i7, RAM: 16GB, Storage: 512GB SSD"
+        value={variant.specs && Array.isArray(variant.specs) 
+          ? variant.specs.map(spec => `${spec.label}: ${spec.value}`).join(', ') 
+          : variant.specs || ""}
+        onChange={(e) => handleVariantChange(index, "specs", e.target.value)}
+        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+        rows="3"
+      />
+    </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Stock
-                    </label>
-                    <input
-                      type="number"
-                      value={variant.stock}
-                      onChange={(e) =>
-                        handleVariantChange(index, "stock", e.target.value)
-                      }
-                      className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${errors[`variant${index}stock`] ? "border-red-500" : ""}`}
-                    />
-                    {errors[`variant${index}stock`] && (
-                      <p className="mt-1 text-sm text-red-600" role="alert">
-                        {errors[`variant${index}stock`]}
-                      </p>
-                    )}
-                  </div>
+    <button
+      type="button"
+      onClick={() => removeVariant(index)}
+      className="mt-2 p-2 text-red-600 hover:text-red-800"
+    >
+      <FiTrash2 />
+    </button>
+  </div>
+))}
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Material
-                    </label>
-                    <input
-                      type="text"
-                      value={variant.material}
-                      onChange={(e) =>
-                        handleVariantChange(index, "material", e.target.value)
-                      }
-                      className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${errors[`variant${index}material`] ? "border-red-500" : ""}`}
-                    />
-                    {errors[`variant${index}material`] && (
-                      <p className="mt-1 text-sm text-red-600" role="alert">
-                        {errors[`variant${index}material`]}
-                      </p>
-                    )}
-                  </div>
-                </div>
+</div>
 
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={variant.isAvailable}
-                        onChange={(e) =>
-                          handleVariantChange(
-                            index,
-                            "isAvailable",
-                            e.target.checked
-                          )
-                        }
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-                      <span className="ml-3 text-sm font-medium text-gray-700">
-                        Available
-                      </span>
-                    </label>
-                  </div>
-
-                  {formData.variants.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeVariant(index)}
-                      className="flex items-center px-3 py-1 text-red-600 hover:text-red-700 transition-colors"
-                    >
-                      <FiTrash2 className="mr-1" /> Remove
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
 
           <div className="flex items-center justify-end space-x-4">
-            <button
-              type="button"
+            <Link
+              to="/admin"
               className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
             >
               Cancel
-            </button>
+            </Link>
             <button
               type="submit"
               disabled={isSubmitting}
