@@ -28,7 +28,7 @@ const AdminDashboard = () => {
         setUsers(userResponse.data.users);
   
         const productResponse = await axios.get("http://localhost:5000/api/products");
-        setProducts(productResponse.data.products);
+        setProducts(productResponse.data.products); // Đảm bảo rằng sản phẩm có trường slug
       } catch (error) {
         console.error("There was an error fetching the data!", error);
       }
@@ -36,6 +36,7 @@ const AdminDashboard = () => {
   
     fetchData();
   }, []);
+  
   
   
 
@@ -266,12 +267,13 @@ const AdminDashboard = () => {
                         </span>
                       </td>
                       <td className="p-4">
-                        <Link 
-                          to={`/admin/edit-product/${product._id}`}
-                          className="text-blue-600 hover:text-blue-800 mr-2"
-                        >
-                          Edit
-                        </Link>
+                      <Link 
+  to={`/admin/edit-product/${product.slug}`} // Sử dụng slug thay vì ObjectId
+  className="text-blue-600 hover:text-blue-800 mr-2"
+>
+  Edit
+</Link>
+
                         <button 
                           className="text-red-600 hover:text-red-800"
                           onClick={() => deleteProduct(product._id)}

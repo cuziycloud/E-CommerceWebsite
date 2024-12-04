@@ -1,7 +1,16 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const { addProduct, getProducts, getProductById, getProductsByCategory, deleteProduct, updateProduct } = require('../controllers/productController');
+const {
+  addProduct,
+  getProducts,
+  getProductById,
+  getProductsByCategory,
+  getProductBySlug,
+  deleteProduct,
+  updateProduct,
+  updateProductBySlug, // Thêm hàm cập nhật sản phẩm theo slug
+} = require('../controllers/productController');
 
 const router = express.Router();
 
@@ -18,11 +27,28 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+// Route thêm sản phẩm mới
 router.post('/add-product', upload.array('images', 5), addProduct);
-router.get('/category', getProductsByCategory); // Định nghĩa route lấy sản phẩm theo category, đưa lên trên
-router.get('/', getProducts); // Định nghĩa route lấy danh sách sản phẩm
-router.get('/:id', getProductById); // Định nghĩa route lấy thông tin sản phẩm theo ID
-router.delete('/:id', deleteProduct); // Định nghĩa route xóa sản phẩm
-router.put('/:id', updateProduct); // Định nghĩa route cập nhật sản phẩm
+
+// Route lấy sản phẩm theo category
+router.get('/category', getProductsByCategory);
+
+// Route lấy sản phẩm theo slug
+router.get('/slug/:slug', getProductBySlug);
+
+// Route cập nhật sản phẩm theo slug
+router.put('/slug/:slug', updateProductBySlug); // Thêm route cập nhật sản phẩm theo slug
+
+// Route lấy danh sách sản phẩm
+router.get('/', getProducts);
+
+// Route lấy thông tin sản phẩm theo ID
+router.get('/:id', getProductById);
+
+// Route xóa sản phẩm
+router.delete('/:id', deleteProduct);
+
+// Route cập nhật sản phẩm
+router.put('/:id', updateProduct);
 
 module.exports = router;

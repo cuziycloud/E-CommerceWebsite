@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import axios from 'axios';
 import { FiUpload, FiTrash2, FiPlus } from "react-icons/fi";
 import { BiLoaderAlt } from "react-icons/bi";
+import slugify from 'slugify'; // Thêm slugify
 
 
 const ProductEditPage = () => {
@@ -21,7 +22,7 @@ const ProductEditPage = () => {
         color: "",
         size: "",
         stock: "",
-        material: ""
+        specs: "" // Thêm specs vào state
       },
     ],
     createdAt: new Date().toISOString(),
@@ -30,10 +31,12 @@ const ProductEditPage = () => {
   
   
   
+  
+  
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewImages, setPreviewImages] = useState([]);
-
+  const [originalSlug, setOriginalSlug] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const categories = [
@@ -46,11 +49,15 @@ const ProductEditPage = () => {
 
   
   useEffect(() => {
-    axios.get(`http://localhost:5000/api/products/${id}`)
-      .then(response => {
-        const product = response.data.product;
+    const fetchData = async () => {
+      try {
+        const productResponse = await axios.get(`http://localhost:5000/api/products/slug/${id}`);
+        const product = productResponse.data.product;
+        const variantsWithSpecsAsString = product.variants.map(variant => ({
+          ...variant,
+          specs: variant.specs.map(spec => `${spec.label}: ${spec.value}`).join(', ')
+        }));
         setFormData({
-          ...formData,
           name: product.name,
           description: product.description,
           price: product.price,
@@ -58,37 +65,35 @@ const ProductEditPage = () => {
           tags: product.tags.join(', '),
           images: product.images,
           isAvailable: product.isAvailable,
-          variants: product.variants.length ? product.variants : [
+          variants: variantsWithSpecsAsString.length ? variantsWithSpecsAsString : [
             {
               color: "",
               size: "",
               stock: "",
-              material: ""
+              specs: ""
             },
-          ], // Đảm bảo variants luôn là một mảng
-          stock: calculateTotalStock(product.variants.length ? product.variants : [
+          ],
+          stock: calculateTotalStock(variantsWithSpecsAsString.length ? variantsWithSpecsAsString : [
             {
               color: "",
               size: "",
               stock: "",
-              material: ""
+              specs: ""
             },
-          ]), // Tính tổng số stock
+          ]),
           createdAt: product.createdAt,
         });
         setPreviewImages(product.images.map(image => `http://localhost:5000${image}`));
-      })
-      .catch(error => {
+        setOriginalSlug(product.slug); // Lưu slug gốc
+      } catch (error) {
         console.error("Error fetching product data:", error);
-      });
+      }
+    };
+  
+    fetchData();
   }, [id]);
   
   
-
-  
-  
-
-
   const validateForm = () => {
     const newErrors = {};
     if (!formData.name) newErrors.name = "Product name is required";
@@ -99,20 +104,22 @@ const ProductEditPage = () => {
     if (!formData.category) newErrors.category = "Category is required";
     if (!formData.tags || formData.tags.length === 0)
       newErrors.tags = "At least one tag is required";
-
+  
     formData.variants.forEach((variant, index) => {
       if (!variant.color)
         newErrors[`variant${index}color`] = "Color is required";
       if (!variant.size) newErrors[`variant${index}size`] = "Size is required";
       if (!variant.stock || isNaN(variant.stock))
         newErrors[`variant${index}stock`] = "Valid stock quantity is required";
-      if (!variant.material)
-        newErrors[`variant${index}material`] = "Material is required";
+      if (!variant.specs)
+        newErrors[`variant${index}specs`] = "Specifications are required"; // Thêm kiểm tra cho specs
     });
-
+  
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+  
+  
 
   const handleTagsChange = (e) => {
     setFormData({ ...formData, tags: e.target.value });
@@ -149,9 +156,21 @@ const ProductEditPage = () => {
 
   const handleVariantChange = (index, field, value) => {
     const newVariants = [...formData.variants];
-    newVariants[index] = { ...newVariants[index], [field]: value };
+  
+    if (field === "specs") {
+      newVariants[index][field] = value.split(',').map(spec => {
+        const [label, specValue] = spec.split(':').map(item => item.trim());
+        return { label, value: specValue };
+      });
+    } else {
+      newVariants[index][field] = value;
+    }
+  
     setFormData({ ...formData, variants: newVariants });
   };
+  
+  
+  
 
   const addVariant = () => {
     setFormData({
@@ -162,11 +181,12 @@ const ProductEditPage = () => {
           color: "",
           size: "",
           stock: "",
-          material: ""
+          specs: "" // Thêm specs vào biến thể mới
         },
       ],
     });
   };
+  
 
   const removeVariant = (index) => {
     const newVariants = formData.variants.filter((_, i) => i !== index);
@@ -179,6 +199,13 @@ const ProductEditPage = () => {
       setIsSubmitting(true);
       try {
         const formDataCopy = { ...formData };
+  
+        if (!formDataCopy.name || typeof formDataCopy.name !== 'string') {
+          throw new Error('Name must be a valid string');
+        }
+  
+        const slug = slugify(formDataCopy.name, { lower: true, strict: true }); // Tạo slug từ tên sản phẩm
+        formDataCopy.slug = slug; // Thêm slug vào dữ liệu sản phẩm
   
         // Tải lên ảnh và lấy URL
         const uploadedImageUrls = [];
@@ -199,14 +226,36 @@ const ProductEditPage = () => {
   
         formDataCopy.images = uploadedImageUrls;
   
+        // Đảm bảo variants luôn là một mảng hợp lệ
+        formDataCopy.variants = formDataCopy.variants || [];
+  
         // Tính toán lại tổng số lượng `stock`
-        formDataCopy.stock = calculateTotalStock(formData.variants);
+        formDataCopy.stock = calculateTotalStock(formDataCopy.variants);
   
         // Chuyển đổi tags thành mảng trước khi gửi
         formDataCopy.tags = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== "");
   
-        await axios.put(`http://localhost:5000/api/products/${id}`, formDataCopy);
-        console.log("Form submitted:", formDataCopy);
+        // Chuyển đổi specs từ chuỗi sang mảng đối tượng
+        formDataCopy.variants.forEach(variant => {
+          if (variant.specs && typeof variant.specs === "string") {
+            const specsArray = variant.specs.split(",").map(spec => {
+              const [label, specValue] = spec.split(":").map(item => item.trim());
+              return { label, value: specValue };
+            });
+            variant.specs = specsArray;
+          }
+        });
+  
+        console.log('Updating product data:', formDataCopy); // Log dữ liệu trước khi gửi
+        const response = await axios.put(`http://localhost:5000/api/products/slug/${originalSlug}`, formDataCopy); // Sử dụng slug gốc khi gửi yêu cầu PUT
+        console.log("Form submitted:", response.data);
+  
+        // Chuyển hướng tới trang mới với slug mới sau khi cập nhật thành công
+        if (slug !== originalSlug) {
+          window.location.href = `/admin/edit-product/${slug}`;
+        } else {
+          window.location.reload(); // Reload lại trang nếu slug không thay đổi
+        }
       } catch (error) {
         console.error("Error submitting form:", error);
       } finally {
@@ -214,6 +263,13 @@ const ProductEditPage = () => {
       }
     }
   };
+  
+  
+  
+  
+  
+  
+  
   
   
   
@@ -487,115 +543,85 @@ const ProductEditPage = () => {
 
             
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-800">Variants</h2>
-              <button
-                type="button"
-                onClick={addVariant}
-                className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
-              >
-                <FiPlus className="mr-2" /> Add Variant
-              </button>
-            </div>
+<div className="space-y-4">
+  <div className="flex items-center justify-between">
+    <h2 className="text-xl font-semibold text-gray-800">Variants</h2>
+    <button
+      type="button"
+      onClick={addVariant}
+      className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+    >
+      <FiPlus className="mr-2" /> Add Variant
+    </button>
+  </div>
 
-            {formData.variants.map((variant, index) => (
-              <div
-                key={index}
-                className="p-4 border rounded-lg bg-gray-50 space-y-4"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Color
-                    </label>
-                    <input
-                      type="text"
-                      value={variant.color}
-                      onChange={(e) =>
-                        handleVariantChange(index, "color", e.target.value)
-                      }
-                      className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${errors[`variant${index}color`] ? "border-red-500" : ""}`}
-                    />
-                    {errors[`variant${index}color`] && (
-                      <p className="mt-1 text-sm text-red-600" role="alert">
-                        {errors[`variant${index}color`]}
-                      </p>
-                    )}
-                  </div>
+  {formData.variants.map((variant, index) => (
+  <div key={index} className="space-y-4 p-4 border rounded-lg bg-gray-50">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Size</label>
+        <input
+          type="text"
+          placeholder="Size"
+          value={variant.size}
+          onChange={(e) => handleVariantChange(index, "size", e.target.value)}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Color</label>
+        <input
+          type="text"
+          placeholder="Color"
+          value={variant.color}
+          onChange={(e) => handleVariantChange(index, "color", e.target.value)}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Stock</label>
+        <input
+          type="number"
+          placeholder="Stock"
+          value={variant.stock}
+          min="0"
+          onChange={(e) => handleVariantChange(index, "stock", e.target.value)}
+          className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${errors[`variant${index}stock`] ? "border-red-500" : ""}`}
+        />
+        {errors[`variant${index}stock`] && (
+          <p className="mt-1 text-sm text-red-500" role="alert">
+            {errors[`variant${index}stock`]}
+          </p>
+        )}
+      </div>
+    </div>
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        Specifications (comma-separated)
+      </label>
+      <textarea
+        placeholder="e.g., CPU: Intel i7, RAM: 16GB, Storage: 512GB SSD"
+        value={variant.specs && Array.isArray(variant.specs) 
+          ? variant.specs.map(spec => `${spec.label}: ${spec.value}`).join(', ') 
+          : variant.specs || ""}
+        onChange={(e) => handleVariantChange(index, "specs", e.target.value)}
+        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+        rows="3"
+      />
+    </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Size
-                    </label>
-                    <input
-                      type="text"
-                      value={variant.size}
-                      onChange={(e) =>
-                        handleVariantChange(index, "size", e.target.value)
-                      }
-                      className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${errors[`variant${index}size`] ? "border-red-500" : ""}`}
-                    />
-                    {errors[`variant${index}size`] && (
-                      <p className="mt-1 text-sm text-red-600" role="alert">
-                        {errors[`variant${index}size`]}
-                      </p>
-                    )}
-                  </div>
+    <button
+      type="button"
+      onClick={() => removeVariant(index)}
+      className="mt-2 p-2 text-red-600 hover:text-red-800"
+    >
+      <FiTrash2 />
+    </button>
+  </div>
+))}
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Stock
-                    </label>
-                    <input
-                      type="number"
-                      value={variant.stock}
-                      onChange={(e) =>
-                        handleVariantChange(index, "stock", e.target.value)
-                      }
-                      className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${errors[`variant${index}stock`] ? "border-red-500" : ""}`}
-                    />
-                    {errors[`variant${index}stock`] && (
-                      <p className="mt-1 text-sm text-red-600" role="alert">
-                        {errors[`variant${index}stock`]}
-                      </p>
-                    )}
-                  </div>
+</div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Material
-                    </label>
-                    <input
-                      type="text"
-                      value={variant.material}
-                      onChange={(e) =>
-                        handleVariantChange(index, "material", e.target.value)
-                      }
-                      className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${errors[`variant${index}material`] ? "border-red-500" : ""}`}
-                    />
-                    {errors[`variant${index}material`] && (
-                      <p className="mt-1 text-sm text-red-600" role="alert">
-                        {errors[`variant${index}material`]}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-end">
-                  {formData.variants.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeVariant(index)}
-                      className="flex items-center px-3 py-1 text-red-600 hover:text-red-700 transition-colors"
-                    >
-                      <FiTrash2 className="mr-1" /> Remove
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
 
           <div className="flex items-center justify-end space-x-4">
             <Link

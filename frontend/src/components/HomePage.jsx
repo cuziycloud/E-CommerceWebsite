@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { FiShoppingCart, FiUser, FiSearch, FiEdit, FiMapPin, FiChevronDown } from "react-icons/fi";
-import { FaGoogle, FaFacebook } from "react-icons/fa";
+import { FaGoogle, FaFacebook, FaShoppingCart, FaTrash } from "react-icons/fa";
 import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
-import { FiMessageCircle, FiX, FiPhone } from "react-icons/fi";
-import { FaTelegramPlane, FaFacebookMessenger } from "react-icons/fa";
-import { SiZalo } from "react-icons/si";
 import { Link } from "react-router-dom"; // Thêm import Link
 import axios from "axios"
+
 
 const HomePage = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [cartItems, setCartItems] = useState(0);
+  // const [cartItems, setCartItems] = useState(0);
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
@@ -22,7 +20,7 @@ const HomePage = () => {
   const [showBestSeller, setShowBestSeller] = useState(false);
   const [showNewArrivals, setShowNewArrivals] = useState(false);
   const [laptops, setLaptops] = useState([]);
-  
+
   useEffect(() => {
     console.log("Fetching laptops");
     axios.get("http://localhost:5000/api/products/category?category=Laptop") // Thay đổi URL thành URL đầy đủ với http://localhost:5000
@@ -34,11 +32,7 @@ const HomePage = () => {
         console.error("There was an error fetching the laptops!", error);
       });
   }, []);
-  
-  
-  
-  
-  
+
 
   const bannerSlides = [
     {
@@ -202,7 +196,6 @@ const HomePage = () => {
     </div>
   );
   
-  //Chuyển banner
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev === bannerSlides.length - 1 ? 0 : prev + 1));
@@ -211,53 +204,59 @@ const HomePage = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Hàm đăng xuất
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    alert("You have been logged out.");
-  };
+  //Shopping Cart
+  const [isHovered, setIsHovered] = useState(false);
 
-  //Chat
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  const toggleExpand = () => {
-    setIsExpanded(!isExpanded);
-  };
-
-  const handleSubButtonClick = (url) => {
-    window.open(url, "_blank");
-  };
-
-  const subButtons = [
+  const cartItems = [
     {
-      icon: <FiPhone className="w-6 h-6" />,
-      color: "bg-green-500",
-      hoverColor: "hover:bg-green-600",
-      label: "Call us",
-      action: "tel:+1234567890"
+      id: 1,
+      name: "Premium Wireless Headphones",
+      price: 199.99,
+      quantity: 2,
+      image: "images.unsplash.com/photo-1505740420928-5e560c06d30e"
     },
     {
-      icon: <FaFacebookMessenger className="w-6 h-6" />,
-      color: "bg-blue-600",
-      hoverColor: "hover:bg-blue-700",
-      label: "Messenger",
-      action: "https://m.me/your-page-id"
+      id: 2,
+      name: "Smart Fitness Watch",
+      price: 299.99,
+      quantity: 1,
+      image: "images.unsplash.com/photo-1523275335684-37898b6baf30"
     },
     {
-      icon: <SiZalo className="w-6 h-6" />,
-      color: "bg-gray-500",
-      hoverColor: "hover:bg-gray-600",
-      label: "Zalo",
-      action: "https://zalo.me/your-zalo-id"
-    },
-    {
-      icon: <FaTelegramPlane className="w-6 h-6" />,
-      color: "bg-blue-400",
-      hoverColor: "hover:bg-blue-500",
-      label: "Telegram",
-      action: "https://t.me/your-telegram-id"
+      id: 3,
+      name: "Portable Power Bank",
+      price: 49.99,
+      quantity: 3,
+      image: "images.unsplash.com/photo-1583394838336-acd977736f90"
     }
   ];
+
+  const calculateSubtotal = () => {
+    return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+  };
+
+  const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
+
+  // Clear timeout when component unmounts
+  const [timeoutId, setTimeoutId] = useState(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [timeoutId]);
+
+  const handleMouseEnter = () => {
+    if (timeoutId) clearTimeout(timeoutId);
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    const newTimeoutId = setTimeout(() => {
+      setIsHovered(false);
+    }, 300);
+    setTimeoutId(newTimeoutId);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -291,18 +290,98 @@ const HomePage = () => {
               </div>
             </div>
             <div className="flex items-center space-x-6">
-              <div className="relative">
+              {/* <div className="relative">
                 <FiShoppingCart className="text-2xl" />
                 {cartItems > 0 && (
                   <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
                     {cartItems}
                   </span>
                 )}
+              </div> */}
+              <div className="relative">
+                <div
+                  className="p-2 cursor-pointer transform hover:scale-110 transition-transform duration-200"
+                  onMouseEnter={handleMouseEnter}
+                  onMouseLeave={handleMouseLeave}
+                >
+                  <div className="relative">
+                    <FaShoppingCart className="text-2xl text-white hover:text-blue-400" />
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                      {totalItems}
+                    </span>
+                  </div>
+
+                  {isHovered && (
+                    <div className="absolute right-0 mt-6 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50 transition-all duration-300 ease-in-out">
+                      onMouseEnter={handleMouseEnter}
+                      onMouseLeave={handleMouseLeave}
+
+                      <div className="p-4 border-b border-gray-200">
+                        <h2 className="text-lg font-bold text-gray-800">Items in Cart</h2>
+                      </div>
+
+                      <div className="max-h-96 overflow-y-auto">
+                        {cartItems.map((item) => (
+                          <div
+                            key={item.id}
+                            className="flex items-center p-4 hover:bg-gray-50 border-b border-gray-100"
+                          >
+                            <img
+                              src={`https://${item.image}`}
+                              alt={item.name}
+                              className="w-16 h-16 object-cover rounded-md"
+                              onError={(e) => {
+                                e.target.src = "https://images.unsplash.com/photo-1595246140520-1991cca1aaaa";
+                              }}
+                            />
+                            <div className="ml-4 flex-grow">
+                              <h3 className="text-sm font-medium text-gray-800">{item.name}</h3>
+                              <div className="flex items-center mt-1">
+                                <span className="text-sm text-gray-600">Qty: {item.quantity}</span>
+                                <span className="mx-2 text-gray-400">|</span>
+                                <span className="text-sm font-medium text-gray-800">
+                                  ${(item.price * item.quantity).toFixed(2)}
+                                </span>
+                              </div>
+                            </div>
+                            <button className="p-2 text-gray-400 hover:text-red-500 transition-colors duration-200">
+                              <FaTrash className="text-sm" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="p-4 border-t border-gray-200">
+                        <div className="flex justify-between items-center mb-4">
+                          <span className="text-gray-600">Subtotal:</span>
+                          <span className="text-lg font-bold text-gray-800">
+                            ${calculateSubtotal().toFixed(2)}
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <button className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-200">
+                            View Cart
+                          </button>
+                          <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors duration-200">
+                            Checkout
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
               <button onClick={() => setShowLogin(true)} className="flex items-center space-x-2">
                 <FiUser className="text-2xl" />
                 <span>{isLoggedIn ? "John Doe" : "Login"}</span>
               </button>
+              {/* <button
+                onClick={() => setIsAdmin(!isAdmin)}
+                className={`p-2 rounded ${isAdmin ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-900"}`}
+              >
+                {isAdmin ? "Admin" : "Customer"}
+              </button> */}
             </div>
           </div>
         </div>
@@ -435,7 +514,7 @@ const HomePage = () => {
       </div>
       
       {/* Laptops */}
-        <div className="container mx-auto px-4 py-12 bg-blue-50 rounded-lg">
+      <div className="container mx-auto px-4 py-12 bg-blue-50 rounded-lg">
           <h2 className="text-3xl font-bold mb-8 text-left">Laptops</h2> {/* Thêm lớp text-left để căn lề trái */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {laptops.map(product => (
@@ -453,6 +532,7 @@ const HomePage = () => {
             ))}
           </div>
         </div>
+
 
       {/* Hiển thị sản phẩm theo danh mục */}
       <div className="container mx-auto px-4 py-24">
@@ -486,48 +566,6 @@ const HomePage = () => {
           </div>
         )}
       </div>
-
-      {/* Chat */}
-      <div className="fixed bottom-20 right-4 z-50">
-      <div className="relative">
-        {/* Sub Buttons */}
-        <div
-          className={`absolute bottom-0 right-0 transition-all duration-300 ${
-            isExpanded ? "opacity-100 visible" : "opacity-0 invisible"
-          }`}
-        >
-          {subButtons.map((button, index) => (
-            <button
-              key={index}
-              onClick={() => handleSubButtonClick(button.action)}
-              className={`absolute bottom-0 right-0 w-10 h-10 rounded-full ${button.color} ${button.hoverColor} text-white shadow-lg transform transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-${button.color}`}
-              style={{
-                transform: isExpanded
-                  ? `translate(-${index * 20}px, -${(index + 1) * 60}px)`
-                  : "translate(0, 0)",
-                transitionDelay: `${index * 50}ms`
-              }}
-              aria-label={button.label}
-            >
-              {button.icon}
-            </button>
-          ))}
-        </div>
-
-        {/* Main Button */}
-        <button
-          onClick={toggleExpand}
-          className="w-14 h-14 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg transform transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
-          aria-label="Toggle chat options"
-        >
-          {isExpanded ? (
-            <FiX className="w-8 h-8" />
-          ) : (
-            <FiMessageCircle className="w-8 h-8" />
-          )}
-        </button>
-      </div>
-    </div>
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
