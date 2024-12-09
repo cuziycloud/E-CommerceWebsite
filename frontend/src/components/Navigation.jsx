@@ -61,14 +61,18 @@ const Navigation = ({ isLoggedIn, userName, handleLogout, cartItems, setCartItem
           });
           console.log("Cart after removing product:", response.data.cartItems);
           setCartItems(response.data.cartItems); // Cập nhật giỏ hàng sau khi xoá sản phẩm
+          window.location.reload(); // Tự động tải lại trang ngay lập tức
         } catch (error) {
           console.error("There was an error removing the item from the cart!", error);
         }
       } else {
         setCartItems((prevItems) => prevItems.filter(item => item.productId !== productId));
+        window.location.reload(); // Tự động tải lại trang ngay lập tức
       }
     }
   };
+  
+  
 
   useEffect(() => {
     return () => {
@@ -207,28 +211,23 @@ const Navigation = ({ isLoggedIn, userName, handleLogout, cartItems, setCartItem
 
 
 
-                    <div className="p-4 border-t border-gray-200">
-                      <div className="flex justify-between items-center mb-4">
-                        <span className="text-gray-600">Subtotal:</span>
-                        <span className="text-lg font-bold text-gray-800">
-                          ${calculateSubtotal().toFixed(2)}
-                        </span>
-                      </div>
+<div className="p-4 border-t border-gray-200">
+  <div className="flex justify-between items-center mb-4">
+    <span className="text-gray-600">Subtotal:</span>
+    <span className="text-lg font-bold text-gray-800">
+      ${calculateSubtotal().toFixed(2)}
+    </span>
+  </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                      <Link to="/cart">
-  <button className="px-4 py-2 w-full text-sm font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-200">
-    View Cart
-  </button>
-</Link>
-<Link to="/checkout">
-  <button className="px-4 py-2 w-full text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors duration-200">
-    Checkout
-  </button>
-</Link>
+  <div className="grid grid-cols-2 gap-4">
+    <Link to="/cart" className="col-span-2">
+      <button className="px-2 py-2 w-full text-sm font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-200">
+        View Cart
+      </button>
+    </Link>
+  </div>
+</div>
 
-                      </div>
-                    </div>
                   </div>
                 )}
               </div>

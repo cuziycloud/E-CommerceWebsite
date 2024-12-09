@@ -11,10 +11,7 @@ import NotFound from './components/NotFound';
 import AddProductForm from './components/AddProductForm';
 import ProductEditPage from './components/ProductEditPage';
 import CheckoutPage from './components/CheckoutPage';
-import TermsOfService from './components/TermsOfService';
-import ContactUs from './components/ContactUs';
 import BannedNotification from "./components/BannedNotification"
-import PrivacyPolicy from './components/PrivacyPolicy';
 import ProductDetail from './components/ProductDetail';
 import CartPage from './components/CartPage';
 import './styles/tailwind.css';

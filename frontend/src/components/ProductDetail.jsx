@@ -73,13 +73,6 @@ const ProductDetail = ({ onAddToCart }) => {
     fetchProduct();
   }, [slug]);
   
-  
-
-  
-  
-  
-  
-  
 
   const handlePrevImage = () => {
     setSelectedImage((prev) => (prev === 0 ? product.images.length - 1 : prev - 1));
@@ -189,14 +182,6 @@ const ProductDetail = ({ onAddToCart }) => {
     }
   };
   
-  
-  
-  
-  
-  
-  
-  
-
   const ZoomModal = () => {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
@@ -468,29 +453,29 @@ const ProductDetail = ({ onAddToCart }) => {
           </div>
         </div>
 
-        {/* Related Products */}
-        <div className="mt-12">
-          <h2 className="text-2xl font-bold mb-6">Related Products</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {relatedProducts && relatedProducts.map((product) => (
-              <div key={product._id} className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-                <img
-                  src={`http://localhost:5000${product.images[0]}`}
-                  alt={product.name}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="font-medium">{product.name}</h3>
-                  <p className="text-lg font-bold mt-2">${product.price}</p>
-                  <Link to={`/product-detail/${product.slug}`} className="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-center block">
-                    View Details
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
+       {/* Related Products */}
+<div className="mt-12">
+  <h2 className="text-2xl font-bold mb-6">Related Products</h2>
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    {relatedProducts && relatedProducts.map((product) => (
+      <Link to={`/product-detail/${product.slug}`} key={product._id} className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+        <img
+          src={`http://localhost:5000${product.images[0]}`}
+          alt={product.name}
+          className="w-full h-48 object-cover"
+        />
+        <div className="p-4">
+          <h3 className="font-medium">{product.name}</h3>
+          <p className="text-lg font-bold mt-2">${product.price}</p>
+          <button className="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-center block">
+            View Details
+          </button>
         </div>
-      </main>
+      </Link>
+    ))}
+  </div>
+</div>
+</main>
 
       {/* Zoom Modal */}
       {showZoomModal && <ZoomModal />}

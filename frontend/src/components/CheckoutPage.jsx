@@ -150,10 +150,15 @@ const CheckoutPage = () => {
   };
 
   const handlePlaceOrder = async () => {
-  if (!selectedAddress) {
-    toast.error("Please select a shipping address.");
-    return;
-  }
+    if (cartItems.length === 0) {
+      toast.error("Your cart is empty. Please add items to your cart before placing an order.");
+      return;
+    }
+  
+    if (!selectedAddress) {
+      toast.error("Please select a shipping address.");
+      return;
+    }
 
   let calculatedTotal = Math.max(total, 0);
   calculatedTotal = calculatedTotal === 0 ? 0.0 : parseFloat(calculatedTotal.toFixed(2)); // Đảm bảo kiểu double
@@ -418,11 +423,13 @@ const CheckoutPage = () => {
             </div>
           </div>
           <button
-            className="w-full mt-6 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            onClick={handlePlaceOrder}
-          >
-            Place Order
-          </button>
+  className={`w-full mt-6 py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 ${cartItems.length === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+  onClick={handlePlaceOrder}
+  disabled={cartItems.length === 0}
+>
+  Place Order
+</button>
+
         </div>
       </div>
     </div>

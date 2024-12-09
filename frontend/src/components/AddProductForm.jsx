@@ -261,7 +261,8 @@ const AddProductForm = () => {
   
   
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 mt-12">
+      <ToastContainer />
       <div className="max-w-4xl mx-auto">
         <div className="bg-white shadow-xl rounded-lg p-6">
           <div className="flex justify-between items-center mb-6">
@@ -633,7 +634,7 @@ const AddProductForm = () => {
                       </div>
                     );
                   };
-                  <ToastContainer />
+
 
 
                   

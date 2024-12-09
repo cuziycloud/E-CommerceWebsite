@@ -15,10 +15,29 @@ const UserProfileManagement = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [currentPageTransactions, setCurrentPageTransactions] = useState(1);
+  const [currentPageRewards, setCurrentPageRewards] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
+  const itemsPerPage = 10;
 
+  const handleNextPageTransactions = () => {
+    setCurrentPageTransactions((prevPage) => prevPage + 1);
+  };
+  
+  const handlePrevPageTransactions = () => {
+    setCurrentPageTransactions((prevPage) => Math.max(prevPage - 1, 1));
+  };
+  
+  const handleNextPageRewards = () => {
+    setCurrentPageRewards((prevPage) => prevPage + 1);
+  };
+  
+  const handlePrevPageRewards = () => {
+    setCurrentPageRewards((prevPage) => Math.max(prevPage - 1, 1));
+  };
+  
 
   const [newAddress, setNewAddress] = useState({
     name: "",
@@ -303,52 +322,78 @@ const UserProfileManagement = () => {
     <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-4">{title}</h2>
   );
 
-  const renderRewards = () => (
-    <div className="space-y-6 text-left">
-      {renderSectionTitle("Rewards & Points")}
-      <div className="overflow-x-auto rounded-lg border border-gray-200">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-4 text-sm font-semibold text-gray-600 uppercase tracking-wider text-center">Order Date</th>
-              <th className="px-6 py-4 text-sm font-semibold text-gray-600 uppercase tracking-wider text-center">Products</th>
-              <th className="px-6 py-4 text-sm font-semibold text-gray-600 uppercase tracking-wider text-center">Quantity</th>
-              <th className="px-6 py-4 text-sm font-semibold text-gray-600 uppercase tracking-wider text-center">Total</th> {/* Đổi Details thành Total */}
-              <th className="px-6 py-4 text-sm font-semibold text-gray-600 uppercase tracking-wider text-center">Points Earned</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {transactions.map((transaction) => (
-              <tr key={transaction._id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">{new Date(transaction.createdAt).toLocaleDateString()}</td>
-                <td className="px-6 py-4 text-sm text-gray-700 text-center">
-                  {transaction.products.map((product) => (
-                    <div key={product._id}>
-                      {product.productId ? `${product.productId.name} (${product.quantity})` : 'Product not found'}
-                    </div>
-                  ))}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-700 text-center">
-                  {transaction.products.reduce((total, product) => total + product.quantity, 0)} {/* Hiển thị tổng số lượng sản phẩm */}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-700 text-center">
-                  ${transaction.total.toFixed(2)} {/* Hiển thị giá trị Total */}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600 text-center">{transaction.pointsEarned}</td>
+  const renderRewards = () => {
+    // Sắp xếp transactions theo ngày từ mới nhất đến cũ nhất
+    const sortedTransactions = transactions.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  
+    // Tính toán phân trang
+    const startIndex = (currentPageRewards - 1) * itemsPerPage;
+    const paginatedRewards = sortedTransactions.slice(startIndex, startIndex + itemsPerPage);
+  
+    return (
+      <div className="space-y-6 text-left">
+        {renderSectionTitle("Rewards & Points")}
+        <div className="overflow-x-auto rounded-lg border border-gray-200">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-4 text-sm font-semibold text-gray-600 uppercase tracking-wider text-center">Order Date</th>
+                <th className="px-6 py-4 text-sm font-semibold text-gray-600 uppercase tracking-wider text-center">Products</th>
+                <th className="px-6 py-4 text-sm font-semibold text-gray-600 uppercase tracking-wider text-center">Quantity</th>
+                <th className="px-6 py-4 text-sm font-semibold text-gray-600 uppercase tracking-wider text-center">Total</th> {/* Đổi Details thành Total */}
+                <th className="px-6 py-4 text-sm font-semibold text-gray-600 uppercase tracking-wider text-center">Points Earned</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <div className="flex justify-end">
-        <div className="bg-indigo-50 p-3 lg:p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-          <p className="text-lg font-semibold text-indigo-800">
-            Total Points: {transactions.reduce((sum, transaction) => sum + transaction.pointsEarned, 0)}
-          </p>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {paginatedRewards.map((transaction) => (
+                <tr key={transaction._id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">{new Date(transaction.createdAt).toLocaleDateString()}</td>
+                  <td className="px-6 py-4 text-sm text-gray-700 text-center">
+                    {transaction.products.map((product) => (
+                      <div key={product._id}>
+                        {product.productId ? `${product.productId.name} (${product.quantity})` : 'Product not found'}
+                      </div>
+                    ))}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-700 text-center">
+                    {transaction.products.reduce((total, product) => total + product.quantity, 0)} {/* Hiển thị tổng số lượng sản phẩm */}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-700 text-center">
+                    ${transaction.total.toFixed(2)} {/* Hiển thị giá trị Total */}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600 text-center">{transaction.pointsEarned}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="flex justify-end">
+          <div className="bg-indigo-50 p-3 lg:p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+            <p className="text-lg font-semibold text-indigo-800">
+              Total Points: {transactions.reduce((sum, transaction) => sum + transaction.pointsEarned, 0)}
+            </p>
+          </div>
+        </div>
+  
+        {/* Nút điều hướng phân trang */}
+        <div className="flex justify-end space-x-2 mt-4">
+          <button
+            onClick={handlePrevPageRewards}
+            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition-colors"
+          >
+            Previous
+          </button>
+          <button
+            onClick={handleNextPageRewards}
+            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition-colors"
+          >
+            Next
+          </button>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
+  
   
   
 
@@ -617,6 +662,13 @@ const UserProfileManagement = () => {
     const renderTransactions = () => {
       console.log("Render Transactions:", transactions);
     
+      // Sắp xếp transactions theo ngày từ mới nhất đến cũ nhất
+      const sortedTransactions = transactions.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    
+      // Tính toán phân trang
+      const startIndex = (currentPageTransactions - 1) * itemsPerPage;
+      const paginatedTransactions = sortedTransactions.slice(startIndex, startIndex + itemsPerPage);
+    
       return (
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
@@ -630,7 +682,7 @@ const UserProfileManagement = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {transactions.map((transaction) => (
+              {paginatedTransactions.map((transaction) => (
                 <tr key={transaction._id} onClick={() => openModal(transaction)} className="cursor-pointer hover:bg-gray-100">
                   <td className="px-6 py-4 whitespace-nowrap">{`OD-${transaction._id.slice(-6)}`}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{new Date(transaction.createdAt).toLocaleDateString()}</td>
@@ -651,9 +703,27 @@ const UserProfileManagement = () => {
               ))}
             </tbody>
           </table>
+    
+          {/* Nút điều hướng phân trang */}
+          <div className="flex justify-end space-x-2 mt-4">
+            <button
+              onClick={handlePrevPageTransactions}
+              className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition-colors"
+            >
+              Previous
+            </button>
+            <button
+              onClick={handleNextPageTransactions}
+              className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition-colors"
+            >
+              Next
+            </button>
+          </div>
         </div>
       );
     };
+    
+    
     
     
     

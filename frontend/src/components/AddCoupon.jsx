@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import { FaToggleOn, FaToggleOff } from "react-icons/fa";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+
 
 const AddCoupon = () => {
   const [formData, setFormData] = useState({
@@ -84,6 +88,7 @@ const AddCoupon = () => {
         if (response.ok) {
           const data = await response.json();
           console.log("Promotion created:", data);
+          toast.success('Coupon added successfully!'); // Thêm thông báo thành công
           setFormData({
             code: "",
             discount: "",
@@ -102,8 +107,10 @@ const AddCoupon = () => {
     }
   };
   
+  
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 mt-24">
+      <ToastContainer />
       <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Add New Coupon</h2>
         
