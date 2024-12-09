@@ -10,7 +10,7 @@ const promotionSchema = new mongoose.Schema({
   discount: {
     type: Number,
     required: [true, 'Discount amount is required'],
-    min: [0, 'Discount must be a positive integer'] // Giá trị giảm trực tiếp bằng số nguyên
+    min: [0, 'Discount must be a positive integer'] 
   },
   validFrom: {
     type: Date,

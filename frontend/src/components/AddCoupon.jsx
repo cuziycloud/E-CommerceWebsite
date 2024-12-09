@@ -18,34 +18,34 @@ const AddCoupon = () => {
 
   const validateForm = () => {
     const newErrors = {};
-  
+
     if (!formData.code.trim()) {
       newErrors.code = "Coupon code is required";
     }
-  
+
     const discountValue = parseFloat(formData.discount);
     if (isNaN(discountValue) || discountValue <= 0) {
       newErrors.discount = "Discount must be a positive number representing the dollar amount.";
     }
-  
+
     if (!formData.validFrom) {
       newErrors.validFrom = "Valid from date is required";
     }
-  
+
     if (!formData.validTo) {
       newErrors.validTo = "Valid to date is required";
     }
-  
+
     if (formData.validFrom && formData.validTo && new Date(formData.validFrom) > new Date(formData.validTo)) {
       newErrors.validTo = "Valid to date must be after valid from date";
     }
-  
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  
-  
-  
+
+
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -67,15 +67,13 @@ const AddCoupon = () => {
     if (validateForm()) {
       const formDataToSend = {
         code: formData.code,
-        discount: parseInt(formData.discount, 10), // Ensure this is an integer
+        discount: parseInt(formData.discount, 10),
         validFrom: new Date(formData.validFrom).toISOString(),
         validTo: new Date(formData.validTo).toISOString(),
         status: formData.isActive ? 'active' : 'canceled',
         createdAt: new Date().toISOString()
       };
-  
-      console.log("Form data to be sent:", formDataToSend); // Log dữ liệu gửi đi
-  
+
       try {
         const response = await fetch("http://localhost:5000/api/promotions/add", {
           method: "POST",
@@ -84,11 +82,10 @@ const AddCoupon = () => {
           },
           body: JSON.stringify(formDataToSend)
         });
-  
+
         if (response.ok) {
           const data = await response.json();
-          console.log("Promotion created:", data);
-          toast.success('Coupon added successfully!'); // Thêm thông báo thành công
+          toast.success('Coupon added successfully!');
           setFormData({
             code: "",
             discount: "",
@@ -106,14 +103,14 @@ const AddCoupon = () => {
       }
     }
   };
-  
-  
+
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 mt-24">
       <ToastContainer />
       <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Add New Coupon</h2>
-        
+
         <form onSubmit={handleSubmit} className="space-y-6 text-left">
           <div>
             <label htmlFor="code" className="block text-sm font-medium text-gray-700 text-left">

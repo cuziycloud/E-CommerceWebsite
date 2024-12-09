@@ -10,7 +10,7 @@ router.post('/create', authenticateJWT, async (req, res) => {
     const newCart = new Cart({
       userId: req.user.userId,
       products: [],
-      loyaltyPoints: 0, // Điểm thưởng mặc định là 0
+      loyaltyPoints: 0,
       shippingMethod: 'none'
     });
     await newCart.save();
@@ -21,18 +21,16 @@ router.post('/create', authenticateJWT, async (req, res) => {
   }
 });
 
-// Lấy giỏ hàng của người dùng
+
 router.get('/', authenticateJWT, async (req, res) => {
   try {
     const cart = await Cart.findOne({ userId: req.user.userId })
-      .populate('products.productId', 'name price slug image') // Thêm slug
+      .populate('products.productId', 'name price slug image')
       .populate('voucher');
 
     if (!cart) {
       return res.status(404).json({ message: 'Cart not found' });
     }
-
-    console.log('Cart Loyalty Points:', cart.loyaltyPoints); // Log giá trị loyaltyPoints từ cơ sở dữ liệu
 
     res.status(200).json({
       cartItems: cart.products,
@@ -48,10 +46,9 @@ router.get('/', authenticateJWT, async (req, res) => {
 
 
 
-// Thêm sản phẩm vào giỏ hàng
+
 router.post('/', authenticateJWT, async (req, res) => {
   const { product, voucher, shippingMethod } = req.body;
-  console.log('Adding product to cart:', product, voucher, shippingMethod);
 
   try {
     const productDetails = await Product.findById(product.id);
@@ -88,7 +85,6 @@ router.post('/', authenticateJWT, async (req, res) => {
     }
 
     await cart.save();
-    console.log('Cart after adding product:', cart);
     res.status(201).json({ message: 'Product added to cart', cartItems: cart.products });
   } catch (error) {
     console.error('Error adding to cart:', error);
@@ -96,10 +92,10 @@ router.post('/', authenticateJWT, async (req, res) => {
   }
 });
 
-// Xoá sản phẩm khỏi giỏ hàng
+
 router.delete('/:productId', authenticateJWT, async (req, res) => {
   const { productId } = req.params;
-  console.log('Deleting product from cart:', productId);
+
   try {
     const cart = await Cart.findOne({ userId: req.user.userId });
     if (!cart) {
@@ -119,7 +115,7 @@ router.delete('/:productId', authenticateJWT, async (req, res) => {
   }
 });
 
-// Xóa toàn bộ giỏ hàng của người dùng
+
 router.delete('/', authenticateJWT, async (req, res) => {
   try {
     const result = await Cart.deleteOne({ userId: req.user.userId });
@@ -134,10 +130,9 @@ router.delete('/', authenticateJWT, async (req, res) => {
   }
 });
 
-// Cập nhật số lượng sản phẩm trong giỏ hàng
+
 router.post('/update', authenticateJWT, async (req, res) => {
   const { productId, quantity } = req.body;
-  console.log('Updating product quantity:', productId, quantity);
 
   try {
     let cart = await Cart.findOne({ userId: req.user.userId });
@@ -152,7 +147,6 @@ router.post('/update', authenticateJWT, async (req, res) => {
 
     cart.products[itemIndex].quantity = quantity;
     await cart.save();
-    console.log('Cart after updating product quantity:', cart);
     res.status(200).json({ message: 'Product quantity updated', cartItems: cart.products });
   } catch (error) {
     console.error('Error updating product quantity:', error.message);
@@ -160,7 +154,7 @@ router.post('/update', authenticateJWT, async (req, res) => {
   }
 });
 
-// Cập nhật chi tiết giỏ hàng
+
 router.post('/update-details', authenticateJWT, async (req, res) => {
   const { shippingMethod, voucher, loyaltyPoints } = req.body;
   try {
@@ -191,7 +185,6 @@ router.post('/update-details', authenticateJWT, async (req, res) => {
     res.status(500).json({ message: 'Error updating cart details', error: error.message });
   }
 });
-
 
 
 module.exports = router;

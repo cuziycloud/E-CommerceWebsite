@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FiShoppingCart, FiUser, FiSearch } from "react-icons/fi";
 import { FaStar, FaFacebook, FaShoppingCart, FaTrash } from "react-icons/fa";
 import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
-import { Link, useNavigate } from "react-router-dom"; 
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const HomePage = () => {
@@ -105,7 +105,7 @@ const HomePage = () => {
       })
       .catch(error => {
         setError("Error fetching featured products. Please try again.");
-        console.error('Error fetching featured products:', error); // Thêm logging chi tiết
+        console.error('Error fetching featured products:', error);
       });
   }, []);
 
@@ -131,64 +131,6 @@ const HomePage = () => {
     return items.slice(currentPage * productsPerPage, (currentPage + 1) * productsPerPage);
   };
 
-  const ProductDetail = ({ product }) => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-8 rounded-lg w-4/5 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-center space-x-8">
-          {/* Cột Ảnh */}
-          <div className="w-1/2 flex justify-center">
-            <div className="grid grid-cols-2 gap-4">
-              {product.images.map((image, index) => (
-                <img
-                  key={index}
-                  src={`https://${image}`}
-                  alt={`${product.name} ${index + 1}`}
-                  className="w-full h-48 object-cover rounded-lg"
-                />
-              ))}
-            </div>
-          </div>
-  
-          {/* Cột Thông tin sản phẩm */}
-          <div className="w-1/2 flex flex-col items-center justify-center">
-            {/* Tiêu đề */}
-            <h2 className="text-3xl font-bold mb-4 text-center">{product.name}</h2>
-            
-            {/* Giá sản phẩm */}
-            <p className="text-2xl text-blue-600 mb-4 text-center">{product.price}</p>
-  
-            {/* Mô tả sản phẩm */}
-            <p className="text-gray-600 mb-6 text-center">{product.description}</p>
-  
-            {/* Số lượng */}
-            <div className="flex items-center justify-center space-x-4 mb-6">
-              <label className="text-lg font-semibold">Quantity:</label>
-              <input type="number" min="1" defaultValue="1" className="w-20 p-2 border rounded" />
-            </div>
-  
-            {/* Nút thêm vào giỏ hàng và mua ngay */}
-            <div className="space-x-4 flex justify-center">
-              <button className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
-                Add to Cart
-              </button>
-              <button className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
-                Buy Now
-              </button>
-            </div>
-          </div>
-        </div>
-  
-        {/* Nút đóng */}
-        <button
-          onClick={() => setSelectedProduct(null)}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-        >
-          ×
-        </button>
-      </div>
-    </div>
-  );
-
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev === bannerSlides.length - 1 ? 0 : prev + 1));
@@ -205,22 +147,22 @@ const HomePage = () => {
           <input
             type="text"
             placeholder="Search products..."
-            value={searchKeyword} // Liên kết với state từ khóa
-            onChange={(e) => setSearchKeyword(e.target.value)} // Cập nhật state từ khóa
-            onKeyDown={handleKeyDown} // Thêm sự kiện onKeyDown
+            value={searchKeyword}
+            onChange={(e) => setSearchKeyword(e.target.value)}
+            onKeyDown={handleKeyDown}
             className="w-3/4 md:w-1/2 p-4 pl-10 rounded-lg border"
           />
           <button
             className="ml-2 p-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            onClick={handleSearch} // Gọi hàm xử lý tìm kiếm khi nhấp vào nút
+            onClick={handleSearch}
           >
             <FiSearch className="text-xl" />
           </button>
         </div>
       </div>
 
-            {/* Banner Slider */}
-            <div className="relative h-96">
+      {/* Banner Slider */}
+      <div className="relative h-96">
         {bannerSlides.map((slide, index) => (
           <div
             key={slide.id}
@@ -282,37 +224,37 @@ const HomePage = () => {
       </div>
 
       {/* Featured Products */}
-<div className="container mx-auto px-4 py-12">
-  <h2 className="text-3xl font-bold mb-8">Featured Products</h2>
-  <div className="bg-white p-6 rounded-lg shadow-lg">
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {getCurrentProducts(featuredProducts, currentPage).map(product => (
-        <Link to={`/product-detail/${product.slug}`} key={product._id} className="bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-transform duration-300">
-          <img
-            src={`http://localhost:5000${product.images[0]}`}
-            alt={product.name}
-            className="w-full h-48 object-cover"
-          />
-          <div className="p-4">
-            <h3 className="font-bold text-lg mb-2">{product.name}</h3>
-            <p className="text-gray-600 mb-4">${product.price}</p>
-            <div className="flex items-center justify-end">
-              <span className="text-gray-600 mr-2">{product.averageRating ? product.averageRating.toFixed(1) : 'No rating'}</span>
-              <FaStar className="text-yellow-400 fill-current" />
-            </div>
-            <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
-              Buy Now
-            </button>
+      <div className="container mx-auto px-4 py-12">
+        <h2 className="text-3xl font-bold mb-8">Featured Products</h2>
+        <div className="bg-white p-6 rounded-lg shadow-lg">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {getCurrentProducts(featuredProducts, currentPage).map(product => (
+              <Link to={`/product-detail/${product.slug}`} key={product._id} className="bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-transform duration-300">
+                <img
+                  src={`http://localhost:5000${product.images[0]}`}
+                  alt={product.name}
+                  className="w-full h-48 object-cover"
+                />
+                <div className="p-4">
+                  <h3 className="font-bold text-lg mb-2">{product.name}</h3>
+                  <p className="text-gray-600 mb-4">${product.price}</p>
+                  <div className="flex items-center justify-end">
+                    <span className="text-gray-600 mr-2">{product.averageRating ? product.averageRating.toFixed(1) : 'No rating'}</span>
+                    <FaStar className="text-yellow-400 fill-current" />
+                  </div>
+                  <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+                    Buy Now
+                  </button>
+                </div>
+              </Link>
+            ))}
           </div>
-        </Link>
-      ))}
-    </div>
-    <div className="flex justify-end space-x-4 mt-4">
-      <button onClick={() => handlePrevPage(setCurrentPage, currentPage, featuredProducts)} className="bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">Previous</button>
-      <button onClick={() => handleNextPage(setCurrentPage, currentPage, featuredProducts)} className="bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">Next</button>
-    </div>
-  </div>
-</div>
+          <div className="flex justify-end space-x-4 mt-4">
+            <button onClick={() => handlePrevPage(setCurrentPage, currentPage, featuredProducts)} className="bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">Previous</button>
+            <button onClick={() => handleNextPage(setCurrentPage, currentPage, featuredProducts)} className="bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">Next</button>
+          </div>
+        </div>
+      </div>
 
 
       {/* Laptops */}
@@ -366,7 +308,7 @@ const HomePage = () => {
           ))}
         </div>
         <div className="flex justify-end space-x-4 mt-4">
-        <button onClick={() => handlePrevPage(setCurrentPhonePage, currentPhonePage, phones)} className="bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">Previous</button>
+          <button onClick={() => handlePrevPage(setCurrentPhonePage, currentPhonePage, phones)} className="bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">Previous</button>
           <button onClick={() => handleNextPage(setCurrentPhonePage, currentPhonePage, phones)} className="bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">Next</button>
         </div>
       </div>

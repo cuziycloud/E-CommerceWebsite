@@ -27,16 +27,16 @@ const Footer = () => {
             </ul>
           </div>
           <div>
-  <h4 className="font-bold mb-4">Follow Us</h4>
-  <div className="flex space-x-4">
-    <a href="https://www.facebook.com/binh.hinb" target="_blank" rel="noopener noreferrer">
-      <FaFacebook className="text-2xl hover:text-blue-500 cursor-pointer" />
-    </a>
-    <a href="https://www.tdtu.edu.vn/" target="_blank" rel="noopener noreferrer">
-      <FaGoogle className="text-2xl hover:text-red-500 cursor-pointer" />
-    </a>
-  </div>
-</div>
+            <h4 className="font-bold mb-4">Follow Us</h4>
+            <div className="flex space-x-4">
+              <a href="https://www.facebook.com/binh.hinb" target="_blank" rel="noopener noreferrer">
+                <FaFacebook className="text-2xl hover:text-blue-500 cursor-pointer" />
+              </a>
+              <a href="https://www.tdtu.edu.vn/" target="_blank" rel="noopener noreferrer">
+                <FaGoogle className="text-2xl hover:text-red-500 cursor-pointer" />
+              </a>
+            </div>
+          </div>
 
         </div>
       </div>

@@ -34,7 +34,6 @@ const Register = ({ onLoginSuccess }) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
 
-    // Xóa lỗi nếu người dùng bắt đầu chỉnh sửa
     if (errors[name]) {
       setErrors({ ...errors, [name]: "" });
     }
@@ -74,7 +73,7 @@ const Register = ({ onLoginSuccess }) => {
           name: formData.fullName,
           email: formData.email,
           password: formData.password,
-          role: "customer", // Mặc định role là 'customer'
+          role: "customer",
         });
 
         setSuccessMessage("Registration successful! Please log in.");
@@ -96,22 +95,22 @@ const Register = ({ onLoginSuccess }) => {
   };
 
   const handleGoogleLoginSuccess = async (response) => {
-    console.log("Google login successful:", response);
+
     const token = response.credential;
-  
+
     try {
       const res = await axios.post("http://localhost:5000/api/auth/google-login", { token });
-      console.log("Backend response:", res.data);
-  
-      // Kiểm tra trạng thái isActive
+
+
+
       if (res.data.user.isActive) {
         localStorage.setItem("authToken", res.data.token);
         localStorage.setItem("userName", res.data.user.name);
         localStorage.setItem("userRole", res.data.user.role);
-  
-        // Gọi hàm onLoginSuccess để cập nhật trạng thái đăng nhập
+
+
         onLoginSuccess(res.data.user.name, res.data.user.role);
-        // Chuyển hướng về trang Home sau khi đăng nhập thành công
+
         navigate("/");
       } else {
         setErrors({ general: "Your account has been banned. Please contact support for more details." });
@@ -122,15 +121,15 @@ const Register = ({ onLoginSuccess }) => {
       setErrors({ general: "Google login failed, please try again!" });
     }
   };
-  
-  
-  
-  
+
+
+
+
   const handleGoogleLoginFailure = (error) => {
     console.error("Google login failed:", error);
     setErrors({ general: "Google registration failed, please try again!" });
   };
-  
+
 
   return (
     <GoogleOAuthProvider clientId={clientId}>
@@ -180,7 +179,7 @@ const Register = ({ onLoginSuccess }) => {
                 className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
                 onClick={() => setShowPassword(!showPassword)}
               >
-               
+
               </button>
               {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
             </div>
@@ -199,7 +198,7 @@ const Register = ({ onLoginSuccess }) => {
                 className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               >
-             
+
               </button>
               {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
             </div>
@@ -227,22 +226,22 @@ const Register = ({ onLoginSuccess }) => {
             </div>
 
             <div className="flex items-center justify-center">
-  <GoogleLogin
-    onSuccess={handleGoogleLoginSuccess}
-    onError={handleGoogleLoginFailure}
-    render={(renderProps) => (
-      <button
-        type="button"
-        onClick={renderProps.onClick}
-        disabled={renderProps.disabled}
-        className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200"
-      >
-        <FaGoogle className="text-red-500 mr-2" />
-        Google
-      </button>
-    )}
-  />
-</div>
+              <GoogleLogin
+                onSuccess={handleGoogleLoginSuccess}
+                onError={handleGoogleLoginFailure}
+                render={(renderProps) => (
+                  <button
+                    type="button"
+                    onClick={renderProps.onClick}
+                    disabled={renderProps.disabled}
+                    className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                  >
+                    <FaGoogle className="text-red-500 mr-2" />
+                    Google
+                  </button>
+                )}
+              />
+            </div>
 
           </form>
 

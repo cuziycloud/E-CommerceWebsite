@@ -20,28 +20,27 @@ const Login = ({ onLoginSuccess }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-  
+
     const validationErrors = {};
     if (!email) validationErrors.email = "Email is required";
     if (!password) validationErrors.password = "Password is required";
-  
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       setLoading(false);
       return;
     }
-  
+
     try {
       const trimmedEmail = email.trim().toLowerCase();
-      console.log('Attempting login with', { email: trimmedEmail, password });
       const response = await axios.post("http://localhost:5000/api/auth/login", { email: trimmedEmail, password });
-  
-      // Kiểm tra trạng thái isActive
+
+
       if (response.data.user.isActive) {
         localStorage.setItem("authToken", response.data.token);
         localStorage.setItem("userName", response.data.user.name);
         localStorage.setItem("userRole", response.data.user.role);
-  
+
         onLoginSuccess(response.data.user.name, response.data.user.role);
         navigate("/");
       } else {
@@ -49,8 +48,8 @@ const Login = ({ onLoginSuccess }) => {
       }
     } catch (error) {
       console.error('Login failed:', error);
-  
-      // Kiểm tra mã lỗi 403 (Forbidden) để điều hướng đến trang bị cấm
+
+
       if (error.response && error.response.status === 403) {
         setErrors({ general: "Your account has been banned. Please contact support for more details." });
         navigate("/banned");
@@ -61,26 +60,26 @@ const Login = ({ onLoginSuccess }) => {
       setLoading(false);
     }
   };
-  
-  
+
+
 
   const handleGoogleLoginSuccess = async (response) => {
-    console.log("Google login successful:", response);
+
     const token = response.credential;
-  
+
     try {
       const res = await axios.post("http://localhost:5000/api/auth/google-login", { token });
-      console.log("Backend response:", res.data);
-  
-      // Kiểm tra trạng thái isActive
+
+
+
       if (res.data.user.isActive) {
         localStorage.setItem("authToken", res.data.token);
         localStorage.setItem("userName", res.data.user.name);
         localStorage.setItem("userRole", res.data.user.role);
-  
-        // Gọi hàm onLoginSuccess để cập nhật trạng thái đăng nhập
+
+
         onLoginSuccess(res.data.user.name, res.data.user.role);
-        // Chuyển hướng về trang Home sau khi đăng nhập thành công
+
         navigate("/");
       } else {
         setErrors({ general: "Your account has been banned. Please contact support for more details." });
@@ -91,8 +90,8 @@ const Login = ({ onLoginSuccess }) => {
       setErrors({ general: "Google login failed, please try again!" });
     }
   };
-  
-  
+
+
 
   const handleGoogleLoginFailure = (error) => {
     console.error("Google login failed:", error);
@@ -138,7 +137,7 @@ const Login = ({ onLoginSuccess }) => {
                     className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    
+
                   </button>
                 </div>
                 {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password}</p>}

@@ -14,7 +14,7 @@ const LaptopCatalog = () => {
   useEffect(() => {
     axios.get("http://localhost:5000/api/products/category?category=Laptop")
       .then(response => {
-        console.log(response.data.products); // Debug: In ra response từ API
+
         setLaptops(response.data.products);
       })
       .catch(error => {
@@ -107,41 +107,41 @@ const LaptopCatalog = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-  {getCurrentPageItems().map((laptop) => (
-    <div
-      key={laptop._id}
-      className="bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105 cursor-pointer"
-      role="article"
-      onClick={() => navigate(`/laptop/${laptop.slug}`)}
-    >
-      <img
-        src={`http://localhost:5000${laptop.images[0]}`}
-        alt={laptop.name}
-        className="w-full h-48 object-cover"
-        onError={(e) => {
-          e.target.src = "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=500&h=350";
-        }}
-      />
-      <div className="p-4">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">{laptop.name}</h2>
-        <p className="text-gray-600 mb-4">{laptop.description}</p> {/* Thêm mô tả laptop */}
-        <div className="flex justify-between items-center">
-          <span className="text-2xl font-bold text-indigo-600">${laptop.price}</span>
-          <div className="flex items-center justify-end w-full">
-            <span className="text-gray-600 mr-2">{laptop.averageRating ? laptop.averageRating.toFixed(1) : 'No rating'}</span>
-            <FaStar className="text-yellow-400 fill-current" /> {/* Hiển thị một ngôi sao */}
-          </div>
+          {getCurrentPageItems().map((laptop) => (
+            <div
+              key={laptop._id}
+              className="bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105 cursor-pointer"
+              role="article"
+              onClick={() => navigate(`/laptop/${laptop.slug}`)}
+            >
+              <img
+                src={`http://localhost:5000${laptop.images[0]}`}
+                alt={laptop.name}
+                className="w-full h-48 object-cover"
+                onError={(e) => {
+                  e.target.src = "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=500&h=350";
+                }}
+              />
+              <div className="p-4">
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">{laptop.name}</h2>
+                <p className="text-gray-600 mb-4">{laptop.description}</p>
+                <div className="flex justify-between items-center">
+                  <span className="text-2xl font-bold text-indigo-600">${laptop.price}</span>
+                  <div className="flex items-center justify-end w-full">
+                    <span className="text-gray-600 mr-2">{laptop.averageRating ? laptop.averageRating.toFixed(1) : 'No rating'}</span>
+                    <FaStar className="text-yellow-400 fill-current" />
+                  </div>
+                </div>
+                <button
+                  className="mt-4 w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-300"
+                  aria-label={`Add ${laptop.name} to cart`}
+                >
+                  Add to Cart
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
-        <button
-          className="mt-4 w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-300"
-          aria-label={`Add ${laptop.name} to cart`}
-        >
-          Add to Cart
-        </button>
-      </div>
-    </div>
-  ))}
-</div>
 
 
 

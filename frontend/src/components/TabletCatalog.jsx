@@ -9,9 +9,9 @@ const TabletCatalog = () => {
   const [sortBy, setSortBy] = useState("default");
   const [filterPrice, setFilterPrice] = useState("");
   const [error, setError] = useState(null);
-  const navigate = useNavigate(); // Sử dụng useNavigate để điều hướng
+  const navigate = useNavigate();
 
-  // Gọi API để lấy dữ liệu sản phẩm
+
   useEffect(() => {
     axios.get("http://localhost:5000/api/products/category?category=Tablet")
       .then(response => {
@@ -106,7 +106,7 @@ const TabletCatalog = () => {
           <span className="ml-2 text-gray-700">USD</span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"> {/* Cập nhật khoảng cách */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {getCurrentPageItems().map((tablet) => (
             <div
               key={tablet._id}
@@ -122,14 +122,14 @@ const TabletCatalog = () => {
                   e.target.src = "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=500&h=350";
                 }}
               />
-              <div className="p-4"> {/* Cập nhật khoảng cách */}
+              <div className="p-4">
                 <h2 className="text-xl font-semibold text-gray-900 mb-2">{tablet.name}</h2>
-                <p className="text-gray-600 mb-4">{tablet.description}</p> {/* Thêm mô tả tablet */}
+                <p className="text-gray-600 mb-4">{tablet.description}</p>
                 <div className="flex items-center space-x-4">
                   <span className="text-2xl font-bold text-indigo-600">${tablet.price}</span>
                   <div className="flex items-center justify-end w-full">
                     <span className="text-gray-600 mr-2">{tablet.averageRating ? tablet.averageRating.toFixed(1) : 'No rating'}</span>
-                    <FaStar className="text-yellow-400 fill-current" /> {/* Hiển thị một ngôi sao */}
+                    <FaStar className="text-yellow-400 fill-current" />
                   </div>
                 </div>
                 <button

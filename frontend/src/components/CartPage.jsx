@@ -13,24 +13,24 @@ const CartPage = ({ cartItems = [], setCartItems }) => {
   const [isDiscountApplied, setIsDiscountApplied] = useState(false);
   const [selectedPoints, setSelectedPoints] = useState(0);
   const [selectedVoucher, setSelectedVoucher] = useState(null);
-  const [selectedShipping, setSelectedShipping] = useState("standard"); // Thêm state cho tùy chọn giao hàng
+  const [selectedShipping, setSelectedShipping] = useState("standard");
   const [showPoints, setShowPoints] = useState(false);
   const [showVouchers, setShowVouchers] = useState(false);
   const [availableVouchers, setAvailableVouchers] = useState([]);
 
-  const totalPoints = loyaltyPoints; // Sử dụng loyaltyPoints từ state
+  const totalPoints = loyaltyPoints;
   const pointsOptions = [100, 200, 500];
   const pointsValue = selectedPoints * 0.1;
 
   const updateQuantity = async (id, newQuantity) => {
     if (newQuantity < 1) return;
-    
+
     try {
       const token = localStorage.getItem("authToken");
       const headers = { Authorization: `Bearer ${token}` };
       const response = await axios.post(`http://localhost:5000/api/cart/update`, { productId: id, quantity: newQuantity }, { headers });
-      
-      setCartItems(response.data.cartItems); // Cập nhật giỏ hàng sau khi thay đổi số lượng
+
+      setCartItems(response.data.cartItems);
       toast.success("Quantity updated successfully");
     } catch (error) {
       console.error("There was an error updating the quantity!", error);
@@ -43,52 +43,52 @@ const CartPage = ({ cartItems = [], setCartItems }) => {
       try {
         const token = localStorage.getItem("authToken");
         const headers = { Authorization: `Bearer ${token}` };
-  
+
         const cartResponse = await axios.get("http://localhost:5000/api/cart", { headers });
         const pointsResponse = await axios.get("http://localhost:5000/api/users/loyalty-points", { headers });
         const vouchersResponse = await axios.get("http://localhost:5000/api/promotions", { headers });
-  
+
         setCart(cartResponse.data.cartItems);
         setLoyaltyPoints(pointsResponse.data.loyaltyPoints);
-  
+
         const validVouchers = vouchersResponse.data.filter(voucher => voucher.status !== "canceled" && voucher.status !== "expired");
         setAvailableVouchers(validVouchers);
-  
+
         if (cartResponse.data.shippingMethod) {
           setSelectedShipping(cartResponse.data.shippingMethod);
         } else {
           setSelectedShipping("none");
         }
-  
+
         if (cartResponse.data.voucher) {
           setSelectedVoucher(cartResponse.data.voucher);
         }
-  
-        setSelectedPoints(0); 
+
+        setSelectedPoints(0);
       } catch (error) {
         console.error("Error fetching cart data:", error);
         toast.error("Error fetching cart data");
       }
     };
-  
+
     fetchCartAndPoints();
   }, []);
-  
-  
+
+
   const removeItem = async (id) => {
     try {
       const token = localStorage.getItem("authToken");
       const headers = { Authorization: `Bearer ${token}` };
       const response = await axios.delete(`http://localhost:5000/api/cart/${id}`, { headers });
-      
-      setCartItems(response.data.cartItems); // Cập nhật giỏ hàng sau khi xóa sản phẩm
+
+      setCartItems(response.data.cartItems);
       toast.success("Product removed from cart");
     } catch (error) {
       console.error("There was an error removing the item from the cart!", error);
       toast.error("Failed to remove product from cart");
     }
   };
-  
+
   useEffect(() => {
     const updateCartDetails = async () => {
       try {
@@ -99,19 +99,18 @@ const CartPage = ({ cartItems = [], setCartItems }) => {
           voucher: selectedVoucher?._id,
           loyaltyPoints: selectedPoints,
         }, { headers });
-        console.log("Cart details updated with shipping method:", selectedShipping); // Kiểm tra xem giá trị shippingMethod có được lưu đúng hay không
       } catch (error) {
         console.error("There was an error updating the cart details!", error);
       }
     };
-  
+
     updateCartDetails();
   }, [selectedShipping, selectedVoucher, selectedPoints]);
-  
+
   const handlePointsSelection = async (points) => {
     setSelectedPoints(points);
     toast.success(`${points} points selected`);
-  
+
     try {
       const token = localStorage.getItem("authToken");
       const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
@@ -124,11 +123,11 @@ const CartPage = ({ cartItems = [], setCartItems }) => {
       toast.error("Failed to update points");
     }
   };
-  
+
   const handleCancelPoints = async () => {
     setSelectedPoints(0);
     toast.info("Points selection canceled");
-  
+
     try {
       const token = localStorage.getItem("authToken");
       const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
@@ -144,42 +143,40 @@ const CartPage = ({ cartItems = [], setCartItems }) => {
   const handleVoucherSelection = async (voucher) => {
     setSelectedVoucher(voucher);
     toast.success(`${voucher.code} voucher selected`);
-  
+
     try {
       const token = localStorage.getItem("authToken");
       const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
       const response = await axios.post("http://localhost:5000/api/cart/update-details", {
         voucher: voucher._id,
       }, { headers });
-      console.log("Voucher added to cart:", response.data); // Ghi nhật ký phản hồi
     } catch (error) {
-      console.error("There was an error adding the voucher!", error); // Ghi nhật ký lỗi chi tiết
+      console.error("There was an error adding the voucher!", error);
       toast.error("Failed to add voucher");
     }
   };
-  
+
   const handleCancelVoucherSelection = async () => {
     setSelectedVoucher(null);
-  
+
     try {
       const token = localStorage.getItem("authToken");
       const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
       const response = await axios.post("http://localhost:5000/api/cart/update-details", {
         voucher: null,
       }, { headers });
-      console.log("Voucher removed from cart:", response.data); // Ghi nhật ký phản hồi
-      toast.success("Voucher removed from cart"); // Thông báo thành công khi yêu cầu đã hoàn thành
+      toast.success("Voucher removed from cart");
     } catch (error) {
-      console.error("There was an error canceling the voucher!", error); // Ghi nhật ký lỗi chi tiết
+      console.error("There was an error canceling the voucher!", error);
       toast.error("Failed to cancel voucher");
     }
   };
-  
+
   const handleShippingSelection = (e) => {
     const selectedValue = e.target.value;
     setSelectedShipping(selectedValue === "store" ? "none" : selectedValue);
   };
-  
+
   const calculateShippingCost = () => {
     if (selectedShipping === "store") return 0;
     if (selectedShipping === "standard") return subtotal * 0.05;
@@ -189,34 +186,34 @@ const CartPage = ({ cartItems = [], setCartItems }) => {
 
   const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
   const tax = subtotal * 0.10;
-  const shipping = calculateShippingCost(); // Tính phí vận chuyển
-  const discount = isDiscountApplied ? subtotal * 0.20 : 0; // Nếu có mã giảm giá áp dụng phần trăm
+  const shipping = calculateShippingCost();
+  const discount = isDiscountApplied ? subtotal * 0.20 : 0;
   const pointsDiscount = pointsValue;
-  const voucherDiscount = selectedVoucher ? selectedVoucher.discount : 0; // Sử dụng giá trị giảm từ voucher
+  const voucherDiscount = selectedVoucher ? selectedVoucher.discount : 0;
   let total = subtotal + tax + shipping - discount - pointsDiscount - voucherDiscount;
-  total = Math.max(total, 0); // Đảm bảo tổng giá trị không âm
-  const earnedPoints = Math.floor(total * 0.05); // Tính điểm loyalty earned
-  
+  total = Math.max(total, 0);
+  const earnedPoints = Math.floor(total * 0.05);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 mt-16">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Cart Items */}
           <div className="lg:col-span-2 text-left">
             <h2 className="text-2xl font-bold mb-4">YOUR CART</h2>
             <p className="text-gray-600 mb-6">You have {cart.length} products in your cart ^-^</p>
 
             {cart.length === 0 ? (
-  <div className="text-center py-12">
-    <p className="text-xl text-gray-600 mb-4">Your cart is empty. Keep shopping!</p>
-    <button 
-      className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
-      onClick={() => window.location.href = "/"} // Thêm sự kiện onClick để điều hướng
-    >
-      Continue Shopping
-    </button>
-  </div>
+              <div className="text-center py-12">
+                <p className="text-xl text-gray-600 mb-4">Your cart is empty. Keep shopping!</p>
+                <button
+                  className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
+                  onClick={() => window.location.href = "/"}
+                >
+                  Continue Shopping
+                </button>
+              </div>
             ) : (
               <div className="space-y-4">
                 {cartItems.map((item) => (
@@ -376,26 +373,26 @@ const CartPage = ({ cartItems = [], setCartItems }) => {
                 {showVouchers && (
                   <div className="mt-4 space-y-4">
                     {availableVouchers.filter(voucher => voucher.status !== "canceled" && voucher.status !== "expired").map((voucher) => (
-  <div
-    key={voucher._id}
-    className={`border rounded-lg p-3 ${selectedVoucher?._id === voucher._id ? "border-blue-500" : "border-gray-200"}`}
-  >
-    <div className="flex items-center justify-between">
-      <div>
-        <h4 className="font-semibold">{voucher.code}</h4>
-        <p className="text-green-600">${voucher.discount}</p>
-        <p className="text-sm text-gray-500">Expires: {new Date(voucher.validTo).toLocaleDateString()}</p>
-      </div>
-      <input
-        type="radio"
-        name="voucher"
-        checked={selectedVoucher?._id === voucher._id}
-        onChange={() => handleVoucherSelection(voucher)}
-        className="ml-4"
-      />
-    </div>
-  </div>
-))}
+                      <div
+                        key={voucher._id}
+                        className={`border rounded-lg p-3 ${selectedVoucher?._id === voucher._id ? "border-blue-500" : "border-gray-200"}`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-semibold">{voucher.code}</h4>
+                            <p className="text-green-600">${voucher.discount}</p>
+                            <p className="text-sm text-gray-500">Expires: {new Date(voucher.validTo).toLocaleDateString()}</p>
+                          </div>
+                          <input
+                            type="radio"
+                            name="voucher"
+                            checked={selectedVoucher?._id === voucher._id}
+                            onChange={() => handleVoucherSelection(voucher)}
+                            className="ml-4"
+                          />
+                        </div>
+                      </div>
+                    ))}
 
                     {selectedVoucher && (
                       <button
@@ -456,20 +453,20 @@ const CartPage = ({ cartItems = [], setCartItems }) => {
 
               {/* Action Buttons */}
               <div className="space-y-4">
-                <Link 
+                <Link
                   to="/"
                   className="w-full inline-block text-center py-3 px-4 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50 transition-colors"
                 >
                   Continue Shopping
                 </Link>
-                <Link 
+                <Link
                   to="/checkout"
                   className={`w-full inline-block text-center py-3 px-4 rounded-md font-medium transition-colors ${cartItems.length === 0 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
                   style={{ pointerEvents: cartItems.length === 0 ? 'none' : 'auto' }}
                 >
                   Proceed to Checkout
                 </Link>
-              </div>                       
+              </div>
             </div>
           </div>
         </div>

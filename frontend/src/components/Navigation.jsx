@@ -10,7 +10,7 @@ const Navigation = ({ isLoggedIn, userName, handleLogout, cartItems, setCartItem
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
-  
+
   const handleMouseEnter = () => {
     if (timeoutId) clearTimeout(timeoutId);
     setIsHovered(true);
@@ -28,14 +28,14 @@ const Navigation = ({ isLoggedIn, userName, handleLogout, cartItems, setCartItem
       setShowNotifications(!showNotifications);
     }
   };
-  
-  
+
+
 
   const markNotificationsAsRead = async () => {
     try {
-      await axios.post('http://localhost:5000/api/orders/mark-as-read'); // Gửi yêu cầu cập nhật trạng thái đơn hàng
+      await axios.post('http://localhost:5000/api/orders/mark-as-read');
       setNotifications([]);
-      localStorage.setItem('notifications', JSON.stringify([])); // Lưu trạng thái vào localStorage
+      localStorage.setItem('notifications', JSON.stringify([]));
     } catch (error) {
       console.error("There was an error marking the notifications as read!", error);
     }
@@ -48,9 +48,9 @@ const Navigation = ({ isLoggedIn, userName, handleLogout, cartItems, setCartItem
   const handleRemoveFromCart = async (productId) => {
     if (userRole !== 'admin') {
       const token = localStorage.getItem("authToken");
-      console.log("Removing product from cart:", productId);
+
       if (typeof productId === 'object' && productId._id) {
-        productId = productId._id; // Sửa lỗi Object
+        productId = productId._id;
       }
       if (token) {
         try {
@@ -59,20 +59,20 @@ const Navigation = ({ isLoggedIn, userName, handleLogout, cartItems, setCartItem
               Authorization: `Bearer ${token}`
             }
           });
-          console.log("Cart after removing product:", response.data.cartItems);
-          setCartItems(response.data.cartItems); // Cập nhật giỏ hàng sau khi xoá sản phẩm
-          window.location.reload(); // Tự động tải lại trang ngay lập tức
+
+          setCartItems(response.data.cartItems);
+          window.location.reload();
         } catch (error) {
           console.error("There was an error removing the item from the cart!", error);
         }
       } else {
         setCartItems((prevItems) => prevItems.filter(item => item.productId !== productId));
-        window.location.reload(); // Tự động tải lại trang ngay lập tức
+        window.location.reload();
       }
     }
   };
-  
-  
+
+
 
   useEffect(() => {
     return () => {
@@ -80,11 +80,10 @@ const Navigation = ({ isLoggedIn, userName, handleLogout, cartItems, setCartItem
     };
   }, [timeoutId]);
 
-  // Sử dụng polling để kiểm tra đơn hàng mới
   useEffect(() => {
     const savedNotifications = JSON.parse(localStorage.getItem('notifications')) || [];
     setNotifications(savedNotifications);
-  
+
     const fetchNewOrders = async () => {
       if (userRole === 'admin') {
         try {
@@ -95,28 +94,28 @@ const Navigation = ({ isLoggedIn, userName, handleLogout, cartItems, setCartItem
         }
       }
     };
-  
+
     if (userRole === 'admin') {
       fetchNewOrders();
-      const intervalId = setInterval(fetchNewOrders, 30000); // Kiểm tra đơn hàng mới mỗi 30 giây
+      const intervalId = setInterval(fetchNewOrders, 30000);
       return () => clearInterval(intervalId);
     } else {
-      setShowNotifications(false); // Reset trạng thái showNotifications nếu không phải admin
+      setShowNotifications(false);
     }
   }, [userRole]);
-  
+
   const consolidateCartItems = (items) => {
-  const consolidatedItems = [];
-  items.forEach(item => {
-    const existingItem = consolidatedItems.find(i => i.productId === item.productId);
-    if (existingItem) {
-      existingItem.quantity += item.quantity;
-    } else {
-      consolidatedItems.push({ ...item });
-    }
-  });
-  return consolidatedItems;
-};
+    const consolidatedItems = [];
+    items.forEach(item => {
+      const existingItem = consolidatedItems.find(i => i.productId === item.productId);
+      if (existingItem) {
+        existingItem.quantity += item.quantity;
+      } else {
+        consolidatedItems.push({ ...item });
+      }
+    });
+    return consolidatedItems;
+  };
 
   return (
     <nav className="fixed top-0 w-full bg-gray-900 text-white shadow-md z-40">
@@ -165,68 +164,68 @@ const Navigation = ({ isLoggedIn, userName, handleLogout, cartItems, setCartItem
                     </div>
 
                     <div className="max-h-96 overflow-y-auto">
-  {cartItems.map((item) => (
-    <Link
-      key={item.productId?._id || item.productId}
-      to={item.productId?.slug ? `/product-detail/${item.productId.slug}` : '#'} // Kiểm tra slug
-      onClick={(e) => {
-        if (!item.productId?.slug) {
-          e.preventDefault();
-        }
-      }}
-    >
-      <div className="flex items-center p-4 hover:bg-gray-50 border-b border-gray-100">
-        {console.log("Cart item:", item)}
-        <img
-          src={item.image ? `http://localhost:5000${item.image}` : "https://images.unsplash.com/photo-1595246140520-1991cca1aaaa"} // Kiểm tra và sử dụng ảnh dự phòng
-          alt={item.name}
-          className="w-16 h-16 object-cover rounded-md"
-        />
-        <div className="ml-4 flex-grow">
-          <h3 className="text-sm font-medium text-gray-800 text-left">{item.name}</h3>
-          <div className="flex items-center mt-1">
-            <span className="text-sm text-gray-600">Qty: {item.quantity}</span>
-            <span className="mx-2 text-gray-400">|</span>
-            <span className="text-sm font-medium text-gray-800">
-              ${(item.price * item.quantity).toFixed(2)}
-            </span>
-          </div>
-        </div>
-        <button
-          className="p-2 text-gray-400 hover:text-red-500 transition-colors duration-200"
-          onClick={(e) => {
-            e.preventDefault();
-            handleRemoveFromCart(item.productId?._id || item.productId);
-          }}
-        >
-          <FaTrash className="text-sm" />
-        </button>
-      </div>
-    </Link>
-  ))}
-</div>
+                      {cartItems.map((item) => (
+                        <Link
+                          key={item.productId?._id || item.productId}
+                          to={item.productId?.slug ? `/product-detail/${item.productId.slug}` : '#'}
+                          onClick={(e) => {
+                            if (!item.productId?.slug) {
+                              e.preventDefault();
+                            }
+                          }}
+                        >
+                          <div className="flex items-center p-4 hover:bg-gray-50 border-b border-gray-100">
+
+                            <img
+                              src={item.image ? `http://localhost:5000${item.image}` : "https://images.unsplash.com/photo-1595246140520-1991cca1aaaa"}
+                              alt={item.name}
+                              className="w-16 h-16 object-cover rounded-md"
+                            />
+                            <div className="ml-4 flex-grow">
+                              <h3 className="text-sm font-medium text-gray-800 text-left">{item.name}</h3>
+                              <div className="flex items-center mt-1">
+                                <span className="text-sm text-gray-600">Qty: {item.quantity}</span>
+                                <span className="mx-2 text-gray-400">|</span>
+                                <span className="text-sm font-medium text-gray-800">
+                                  ${(item.price * item.quantity).toFixed(2)}
+                                </span>
+                              </div>
+                            </div>
+                            <button
+                              className="p-2 text-gray-400 hover:text-red-500 transition-colors duration-200"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handleRemoveFromCart(item.productId?._id || item.productId);
+                              }}
+                            >
+                              <FaTrash className="text-sm" />
+                            </button>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
 
 
 
 
 
 
-<div className="p-4 border-t border-gray-200">
-  <div className="flex justify-between items-center mb-4">
-    <span className="text-gray-600">Subtotal:</span>
-    <span className="text-lg font-bold text-gray-800">
-      ${calculateSubtotal().toFixed(2)}
-    </span>
-  </div>
+                    <div className="p-4 border-t border-gray-200">
+                      <div className="flex justify-between items-center mb-4">
+                        <span className="text-gray-600">Subtotal:</span>
+                        <span className="text-lg font-bold text-gray-800">
+                          ${calculateSubtotal().toFixed(2)}
+                        </span>
+                      </div>
 
-  <div className="grid grid-cols-2 gap-4">
-    <Link to="/cart" className="col-span-2">
-      <button className="px-2 py-2 w-full text-sm font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-200">
-        View Cart
-      </button>
-    </Link>
-  </div>
-</div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <Link to="/cart" className="col-span-2">
+                          <button className="px-2 py-2 w-full text-sm font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-200">
+                            View Cart
+                          </button>
+                        </Link>
+                      </div>
+                    </div>
 
                   </div>
                 )}
@@ -283,7 +282,7 @@ const Navigation = ({ isLoggedIn, userName, handleLogout, cartItems, setCartItem
           </div>
           {notifications.length > 0 && (
             <div className="p-4 border-t border-gray-200">
-              <button 
+              <button
                 className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors duration-200"
                 onClick={markNotificationsAsRead}
               >

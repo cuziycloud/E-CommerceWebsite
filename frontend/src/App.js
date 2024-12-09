@@ -15,7 +15,7 @@ import BannedNotification from "./components/BannedNotification"
 import ProductDetail from './components/ProductDetail';
 import CartPage from './components/CartPage';
 import './styles/tailwind.css';
-import ProductCategoryPage from './components/ProductCategoryPage';
+
 import LaptopCatalog from './components/LaptopCatalog';
 import PhoneCatalog from './components/PhoneCatalog';
 import ResetPassword from './components/ResetPassword';
@@ -48,10 +48,10 @@ const LoginRedirectRoute = ({ element }) => {
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState("");
-  const [userRole, setUserRole] = useState("customer"); // Default role is 'customer'
+  const [userRole, setUserRole] = useState("customer");
   const [cartItems, setCartItems] = useState([]);
-  const [readNotifications, setReadNotifications] = useState([]); // Thêm trạng thái để lưu trữ thông báo đã đọc
-  const [orderConfirmed, setOrderConfirmed] = useState(false); // Thêm trạng thái để theo dõi việc hoàn thành đơn hàng
+  const [readNotifications, setReadNotifications] = useState([]);
+  const [orderConfirmed, setOrderConfirmed] = useState(false);
 
   const fetchCartItems = async (token) => {
     try {
@@ -60,18 +60,18 @@ function App() {
           Authorization: `Bearer ${token}`
         }
       });
-      console.log("Fetched cart items:", response.data.cartItems);
+
       setCartItems(response.data.cartItems);
     } catch (error) {
       if (error.response && error.response.status === 404) {
-        console.log("Cart not found, possibly empty.");
-        setCartItems([]); // Giỏ hàng trống
+
+        setCartItems([]);
       } else {
         console.error("There was an error fetching the cart items!", error);
       }
     }
   };
-  
+
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
@@ -84,10 +84,10 @@ function App() {
       setUserName(name);
       setUserRole(role);
       if (role !== 'admin') {
-        fetchCartItems(token); // Chỉ gọi hàm này nếu role không phải là admin
+        fetchCartItems(token);
       }
     }
-    setReadNotifications(readNotif); // Cập nhật trạng thái từ local storage
+    setReadNotifications(readNotif);
 
     const fetchUserRole = async () => {
       try {
@@ -96,7 +96,7 @@ function App() {
             Authorization: `Bearer ${token}`
           }
         });
-        setUserRole(response.data.role); // Đảm bảo response.data.role là 'admin' hoặc 'customer'
+        setUserRole(response.data.role);
       } catch (error) {
         console.error("There was an error fetching the user role!", error);
       }
@@ -119,12 +119,12 @@ function App() {
     localStorage.removeItem("authToken");
     localStorage.removeItem("userName");
     localStorage.removeItem("userRole");
-    localStorage.removeItem("readNotifications"); // Xóa thông báo đã đọc khi logout
+    localStorage.removeItem("readNotifications");
     setIsLoggedIn(false);
     setUserName("");
     setUserRole("customer");
-    setCartItems([]); // Reset cart items on logout
-    setReadNotifications([]); // Reset trạng thái thông báo đã đọc
+    setCartItems([]);
+    setReadNotifications([]);
   };
 
   const handleAddToCart = async (product) => {
@@ -136,7 +136,7 @@ function App() {
             Authorization: `Bearer ${token}`
           }
         });
-        fetchCartItems(token); // Cập nhật giỏ hàng sau khi thêm sản phẩm
+        fetchCartItems(token);
       } catch (error) {
         console.error("There was an error adding the item to the cart!", error.response.data);
       }
@@ -145,10 +145,10 @@ function App() {
         const itemIndex = prevItems.findIndex(item => item.productId === product.id);
         if (itemIndex > -1) {
           const updatedItems = [...prevItems];
-          updatedItems[itemIndex].quantity += product.quantity; // Cập nhật số lượng sản phẩm
+          updatedItems[itemIndex].quantity += product.quantity;
           return updatedItems;
         } else {
-          return [...prevItems, product]; // Truyền product với quantity
+          return [...prevItems, product];
         }
       });
     }
@@ -171,7 +171,7 @@ function App() {
           userRole={userRole}
           readNotifications={readNotifications}
           handleMarkNotificationsAsRead={handleMarkNotificationsAsRead}
-          orderConfirmed={orderConfirmed} // Truyền trạng thái xuống Navigation
+          orderConfirmed={orderConfirmed}
         />
         <Routes>
           <Route path="/" element={<HomePage onAddToCart={handleAddToCart} />} />
@@ -188,7 +188,6 @@ function App() {
           <Route path="/cart" element={<CartPage cartItems={cartItems} setCartItems={setCartItems} />} />
           <Route path="/product-detail/:slug" element={<ProductDetail onAddToCart={handleAddToCart} />} />
           <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/category" element={<ProductCategoryPage />} />
           <Route path="/laptop" element={<LaptopCatalog />} />
           <Route path="/phone" element={<PhoneCatalog />} />
           <Route path="/tablet" element={<TabletCatalog />} />

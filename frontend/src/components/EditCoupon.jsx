@@ -86,15 +86,14 @@ const EditCoupon = () => {
       try {
         const response = await axios.put(`http://localhost:5000/api/promotions/${id}`, {
           code: formData.code,
-          discount: parseInt(formData.discount, 10), // Ensure this is an integer
+          discount: parseInt(formData.discount, 10),
           validFrom: new Date(formData.validFrom).toISOString(),
           validTo: new Date(formData.validTo).toISOString(),
           status: formData.isActive ? 'active' : 'canceled'
         });
-  
+
         if (response.status === 200) {
-          console.log("Promotion updated:", response.data);
-          toast.success('Coupon updated successfully!'); // Thêm thông báo thành công
+          toast.success('Coupon updated successfully!');
         } else {
           console.error("Error updating promotion:", response.data);
         }
@@ -103,14 +102,14 @@ const EditCoupon = () => {
       }
     }
   };
-  
+
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 mt-24">
       <ToastContainer />
       <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Edit Coupon</h2>
-        
+
         <form onSubmit={handleSubmit} className="space-y-6 text-left">
           <div>
             <label htmlFor="code" className="block text-sm font-medium text-gray-700 text-left">

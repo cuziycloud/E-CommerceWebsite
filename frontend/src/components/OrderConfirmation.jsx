@@ -3,7 +3,7 @@ import { FaCheckCircle } from "react-icons/fa";
 
 const OrderConfirmation = () => {
   useEffect(() => {
-    // Cài đặt cờ để đảm bảo trang chỉ reload một lần
+
     const hasReloaded = sessionStorage.getItem('hasReloaded');
     if (!hasReloaded) {
       sessionStorage.setItem('hasReloaded', 'true');

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FiMail, FiArrowLeft, FiCheck } from "react-icons/fi";
-import { Link } from 'react-router-dom'; 
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 
 const ForgotPassword = () => {

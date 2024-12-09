@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 
 const NotFound = () => {
   const handleHomeClick = () => {
-    console.log("Navigating to home");
   };
 
   return (
@@ -20,14 +19,14 @@ const NotFound = () => {
         </div>
 
         <div className="space-y-6">
-  <Link
-    to="/" // Đường dẫn đến trang chủ
-    className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transform hover:scale-105 transition-all duration-200 flex items-center justify-center mx-auto space-x-2"
-  >
-    <FaHome className="text-xl" />
-    <span>Return to Homepage</span>
-  </Link>
-</div>
+          <Link
+            to="/"
+            className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transform hover:scale-105 transition-all duration-200 flex items-center justify-center mx-auto space-x-2"
+          >
+            <FaHome className="text-xl" />
+            <span>Return to Homepage</span>
+          </Link>
+        </div>
 
 
         <footer className="mt-12 text-gray-600">

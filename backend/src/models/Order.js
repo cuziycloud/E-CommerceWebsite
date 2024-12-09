@@ -22,7 +22,7 @@ const orderSchema = new Schema({
     }
   ],
   total: {
-    type: Schema.Types.Mixed, // Sử dụng Mixed để hỗ trợ cả int và double
+    type: Schema.Types.Mixed, 
     required: true,
     min: 0
   },

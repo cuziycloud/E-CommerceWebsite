@@ -57,7 +57,7 @@ const SearchResults = () => {
               key={product._id}
               className="bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105 cursor-pointer"
               role="article"
-              onClick={() => navigate(`/product-detail/${product.slug}`)} // Điều chỉnh đường dẫn ở đây
+              onClick={() => navigate(`/product-detail/${product.slug}`)}
             >
               <img
                 src={`http://localhost:5000${product.images[0]}`}

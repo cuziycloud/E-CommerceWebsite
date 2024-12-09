@@ -4,12 +4,12 @@ const mongoose = require('mongoose');
 const Order = require('../models/Order');
 const User = require('../models/User');
 const Cart = require('../models/Cart');
-const Product = require('../models/Product'); // Import thêm model Product
+const Product = require('../models/Product');
 const { formatOrderId } = require('../utils/utils');
-const { sendOrderConfirmationEmail } = require('../utils/emailService'); // Import dịch vụ gửi email
-const authenticateJWT = require('../middleware/authenticateJWT'); // Import middleware xác thực
+const { sendOrderConfirmationEmail } = require('../utils/emailService');
+const authenticateJWT = require('../middleware/authenticateJWT');
 
-// Hàm giảm số lượng sản phẩm trong kho
+
 async function updateProductStock(orderItems) {
   for (const item of orderItems) {
     const product = await Product.findById(item.productId);
@@ -23,7 +23,7 @@ async function updateProductStock(orderItems) {
   }
 }
 
-// Định nghĩa route để lưu đơn hàng
+
 router.post('/', async (req, res) => {
   try {
     const { userId, pointsEarned, pointsUsed } = req.body;
@@ -40,7 +40,7 @@ router.post('/', async (req, res) => {
 
     await Cart.findOneAndDelete({ userId });
 
-    // Lấy chi tiết sản phẩm từ Product model
+
     const productDetails = await Product.find({
       _id: { $in: newOrder.products.map(p => p.productId) }
     });
@@ -50,10 +50,10 @@ router.post('/', async (req, res) => {
       return map;
     }, {});
 
-    // Gọi hàm giảm số lượng sản phẩm
+
     await updateProductStock(newOrder.products);
 
-    // Tạo nội dung email
+
     const orderDetails = `
       Order ID: ${formatOrderId(newOrder._id.toString())}
       Total: $${newOrder.total}
@@ -63,7 +63,7 @@ router.post('/', async (req, res) => {
       ${newOrder.products.map(product => ` - ${productMap[product.productId]} (Quantity: ${product.quantity})`).join('\n')}
     `;
 
-    // Gửi email xác nhận
+
     sendOrderConfirmationEmail(user.email, orderDetails);
 
     res.status(201).send(newOrder);
@@ -79,7 +79,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// API để kiểm tra các đơn hàng với trạng thái "pending"
+
 router.get('/pending', async (req, res) => {
   try {
     const pendingOrders = await Order.find({ status: 'pending' });
@@ -90,7 +90,7 @@ router.get('/pending', async (req, res) => {
   }
 });
 
-// API để cập nhật trạng thái các đơn hàng từ "pending" sang "processing"
+
 router.post('/mark-as-read', async (req, res) => {
   try {
     await Order.updateMany({ status: 'pending' }, { status: 'processing' });
@@ -101,7 +101,7 @@ router.post('/mark-as-read', async (req, res) => {
   }
 });
 
-// API để lấy chi tiết đơn hàng theo ID
+
 router.get('/:id', async (req, res) => {
   try {
     const orderId = req.params.id;
@@ -118,7 +118,7 @@ router.get('/:id', async (req, res) => {
 
     const formattedOrder = {
       ...order.toObject(),
-      customerName: user.name, // Thêm thông tin customerName từ User
+      customerName: user.name,
       orderId: formatOrderId(order._id.toString())
     };
 
@@ -129,7 +129,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// API để lấy tất cả các đơn hàng
+
 router.get('/', async (req, res) => {
   try {
     const orders = await Order.find().populate('products.productId');
@@ -143,7 +143,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// API để cập nhật trạng thái đơn hàng
+
 router.put('/:id/status', async (req, res) => {
   try {
     const orderId = req.params.id;
@@ -166,7 +166,7 @@ router.put('/:id/status', async (req, res) => {
   }
 });
 
-// API để cập nhật thông tin đơn hàng
+
 router.put('/:id', async (req, res) => {
   try {
     const orderId = req.params.id;

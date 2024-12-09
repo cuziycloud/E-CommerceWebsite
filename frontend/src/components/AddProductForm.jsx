@@ -20,13 +20,13 @@ const AddProductForm = () => {
         color: "",
         size: "",
         stock: "",
-        specs: [] // Khởi tạo specs là một mảng trống
+        specs: []
       },
     ],
     createdAt: new Date().toISOString(),
   });
-  
-  
+
+
   const [errors, setErrors] = useState({});
   const [isPreview, setIsPreview] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -69,11 +69,11 @@ const AddProductForm = () => {
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     let fieldValue = type === "checkbox" ? checked : value;
-  
+
     if (name === "price") {
       fieldValue = parseFloat(value);
     }
-  
+
     setFormData({ ...formData, [name]: fieldValue });
     const error = validateField(name, fieldValue);
     setErrors({ ...errors, [name]: error });
@@ -81,15 +81,15 @@ const AddProductForm = () => {
 
   const handleVariantChange = (index, field, value) => {
     const newVariants = [...formData.variants];
-  
+
     if (field === "specs") {
-      newVariants[index][field] = value; // Giữ specs như một chuỗi
+      newVariants[index][field] = value;
     } else {
       newVariants[index][field] = value;
     }
-  
+
     setFormData({ ...formData, variants: newVariants });
-  
+
     if (field === "stock") {
       const error = validateField("stock", value);
       if (error) {
@@ -101,12 +101,12 @@ const AddProductForm = () => {
       }
     }
   };
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
 
   const addVariant = () => {
     setFormData({
@@ -128,13 +128,13 @@ const AddProductForm = () => {
     setIsLoading(true);
     const files = Array.from(e.target.files);
     const imageUrls = [];
-  
+
     files.forEach((file) => {
       const reader = new FileReader();
       reader.onloadend = () => {
         const imageUrl = URL.createObjectURL(file);
-        imageUrls.push(imageUrl); 
-  
+        imageUrls.push(imageUrl);
+
         if (imageUrls.length === files.length) {
           setFormData({ ...formData, images: [...formData.images, ...imageUrls] });
           setIsLoading(false);
@@ -156,14 +156,14 @@ const AddProductForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
-  
+
     Object.keys(formData).forEach((key) => {
       if (key !== "variants" && key !== "images" && key !== "isAvailable") {
         const error = validateField(key, formData[key]);
         if (error) newErrors[key] = error;
       }
     });
-  
+
     formData.variants.forEach((variant, index) => {
       if (!variant.stock || isNaN(variant.stock) || variant.stock < 0) {
         newErrors[`variant${index}stock`] = 'Stock is required and must be a non-negative number';
@@ -179,11 +179,11 @@ const AddProductForm = () => {
         variant.specs = specsArray;
       }
     });
-  
+
     if (formData.variants.length === 0) {
       newErrors.variants = "At least one variant is required";
     }
-  
+
     if (Object.keys(newErrors).length === 0) {
       formData.price = parseFloat(formData.price);
       formData.stock = formData.variants.reduce((acc, variant) => acc + parseInt(variant.stock, 10), 0);
@@ -191,13 +191,13 @@ const AddProductForm = () => {
         ...variant,
         stock: parseInt(variant.stock, 10)
       }));
-  
+
       formData.isActive = formData.isAvailable;
       delete formData.isAvailable;
-  
+
       const slug = slugify(formData.name, { lower: true, strict: true });
       formData.slug = slug;
-  
+
       const uploadedImageUrls = [];
       for (const imageUrl of formData.images) {
         if (imageUrl.startsWith('blob:')) {
@@ -205,7 +205,7 @@ const AddProductForm = () => {
           const blob = await response.blob();
           const formDataImage = new FormData();
           formDataImage.append('image', blob, `${Date.now()}.png`);
-  
+
           try {
             const uploadResponse = await fetch('http://localhost:5000/api/uploads/upload', {
               method: 'POST',
@@ -224,10 +224,10 @@ const AddProductForm = () => {
           uploadedImageUrls.push(imageUrl);
         }
       }
-  
+
       const productData = { ...formData, images: uploadedImageUrls };
       productData.tags = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== "");
-  
+
       try {
         const response = await fetch('http://localhost:5000/api/products/add-product', {
           method: 'POST',
@@ -236,16 +236,15 @@ const AddProductForm = () => {
           },
           body: JSON.stringify(productData),
         });
-  
+
         if (response.ok) {
           const result = await response.json();
-          console.log('Form submitted:', result);
           toast.success('Product added successfully!');
-  
-          // Reload trang sau khi thông báo thành công
+
+
           setTimeout(() => {
             window.location.reload();
-          }, 2000); // Đợi 2 giây để hiển thị toast trước khi reload trang
+          }, 2000);
         } else {
           const errorResponse = await response.json();
           console.error('Error submitting form:', errorResponse.error);
@@ -257,9 +256,9 @@ const AddProductForm = () => {
       setErrors(newErrors);
     }
   };
-  
-  
-  
+
+
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 mt-12">
       <ToastContainer />
@@ -337,20 +336,20 @@ const AddProductForm = () => {
                 </div>
 
                 <div>
-                    <label htmlFor="price" className="block text-sm font-medium text-gray-700">
-                      Price *
-                    </label>
-                    <input
-                      type="number"
-                      id="price"
-                      name="price"
-                      value={formData.price}
-                      onChange={handleInputChange}
-                      step="0.01" // Thêm thuộc tính này để cho phép số thực
-                      className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${errors.price ? "border-red-500" : ""}`}
-                    />
-                    {errors.price && <p className="mt-1 text-sm text-red-500">{errors.price}</p>}
-                  </div>                                    
+                  <label htmlFor="price" className="block text-sm font-medium text-gray-700">
+                    Price *
+                  </label>
+                  <input
+                    type="number"
+                    id="price"
+                    name="price"
+                    value={formData.price}
+                    onChange={handleInputChange}
+                    step="0.01"
+                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${errors.price ? "border-red-500" : ""}`}
+                  />
+                  {errors.price && <p className="mt-1 text-sm text-red-500">{errors.price}</p>}
+                </div>
                 <div className="col-span-2">
                   <label htmlFor="description" className="block text-sm font-medium text-gray-700">
                     Description
@@ -434,17 +433,17 @@ const AddProductForm = () => {
                       </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Specifications (comma-separated)
-                        </label>
-                        <textarea
-                          placeholder="e.g., CPU: Intel i7, RAM: 16GB, Storage: 512GB SSD"
-                          value={variant.specs || ""}  // Đảm bảo `specs` là chuỗi
-                          onChange={(e) => handleVariantChange(index, "specs", e.target.value)}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                          rows="3"
-                        />
-                      </div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Specifications (comma-separated)
+                      </label>
+                      <textarea
+                        placeholder="e.g., CPU: Intel i7, RAM: 16GB, Storage: 512GB SSD"
+                        value={variant.specs || ""}
+                        onChange={(e) => handleVariantChange(index, "specs", e.target.value)}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        rows="3"
+                      />
+                    </div>
 
 
 
@@ -511,134 +510,128 @@ const AddProductForm = () => {
 
               <div className="pt-4">
                 <button
-                                    type="submit"
-                                    className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-                                  >
-                                    Save Product
-                                  </button>
-                                </div>
-                              </form>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  };
-                  
-                  
-
-                  const PreviewSection = ({ formData }) => {
-                    const tags = formData.tags.split(",").map(tag => tag.trim()).filter(tag => tag !== "");
-                  
-                    return (
-                      <div className="space-y-6">
-                        {/* Thông tin sản phẩm chính */}
-                        <div>
-                          <h3 className="text-lg font-medium text-gray-900">Product Details</h3>
-                          <dl className="mt-2 divide-y divide-gray-200">
-                            <div className="py-3 flex justify-between">
-                              <dt className="text-sm font-medium text-gray-500">Name</dt>
-                              <dd className="text-sm text-gray-900">{formData.name}</dd>
-                            </div>
-                            <div className="py-3 flex justify-between">
-                              <dt className="text-sm font-medium text-gray-500">Category</dt>
-                              <dd className="text-sm text-gray-900">{formData.category}</dd>
-                            </div>
-                            <div className="py-3 flex justify-between">
-                              <dt className="text-sm font-medium text-gray-500">Price</dt>
-                              <dd className="text-sm text-gray-900">${formData.price}</dd>
-                            </div>
-                            <div className="py-3">
-                              <dt className="text-sm font-medium text-gray-500">Tags</dt>
-                              <dd className="mt-1 text-sm text-gray-900">
-                                <div className="flex flex-wrap gap-2">
-                                  {tags.map((tag, index) => (
-                                    <span
-                                      key={index}
-                                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
-                                    >
-                                      {tag}
-                                    </span>
-                                  ))}
-                                </div>
-                              </dd>
-                            </div>
-                            <div className="py-3 flex justify-between">
-                              <dt className="text-sm font-medium text-gray-500">Availability</dt>
-                              <dd className="text-sm text-gray-900">
-                                {formData.isAvailable ? "Available" : "Not Available"}
-                              </dd>
-                            </div>
-                            <div className="py-3">
-                              <dt className="text-sm font-medium text-gray-500">Description</dt>
-                              <dd className="mt-1 text-sm text-gray-900">{formData.description}</dd>
-                            </div>
-                          </dl>
-                        </div>
-                  
-                        {/* Thông tin variants */}
-                        <div>
-                          <h3 className="text-lg font-medium text-gray-900">Variants</h3>
-                          <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            {formData.variants.map((variant, index) => (
-                              <div key={index} className="border rounded-lg p-4 bg-gray-50">
-                                <dl className="divide-y divide-gray-200">
-                                  <div className="py-2 flex justify-between">
-                                    <dt className="text-sm font-medium text-gray-500">Size</dt>
-                                    <dd className="text-sm text-gray-900">{variant.size}</dd>
-                                  </div>
-                                  <div className="py-2 flex justify-between">
-                                    <dt className="text-sm font-medium text-gray-500">Color</dt>
-                                    <dd className="text-sm text-gray-900">{variant.color}</dd>
-                                  </div>
-                                  <div className="py-2 flex justify-between">
-                                    <dt className="text-sm font-medium text-gray-500">Stock</dt>
-                                    <dd className="text-sm text-gray-900">{variant.stock}</dd>
-                                  </div>
-                                  <div className="py-2">
-                                    <dt className="text-sm font-medium text-gray-500">Specifications</dt>
-                                    <dd className="mt-1 text-sm text-gray-900">
-                                      <ul className="list-disc pl-5 text-left"> {/* Căn trái ở đây */}
-                                        {/* Kiểm tra variant.specs trước khi gọi split */}
-                                        {variant.specs && typeof variant.specs === 'string' ? (
-                                          variant.specs.split(",").map((spec, i) => (
-                                            <li key={i}>{spec.trim()}</li>
-                                          ))
-                                        ) : (
-                                          <li>No specifications provided</li>
-                                        )}
-                                      </ul>
-                                    </dd>
-                                  </div>
-                                </dl>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                  
-                        {/* Thông tin ảnh */}
-                        <div>
-                          <h3 className="text-lg font-medium text-gray-900">Product Images</h3>
-                          <div className="mt-2 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-                            {formData.images.map((image, index) => (
-                              <img
-                                key={index}
-                                src={image}
-                                alt={`Product ${index + 1}`}
-                                className="h-45 w-50 object-cover rounded-lg"
-                              />
-                            ))}
-                           
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  };
+                  type="submit"
+                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                >
+                  Save Product
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 
 
-                  
-                  
-                  
+const PreviewSection = ({ formData }) => {
+  const tags = formData.tags.split(",").map(tag => tag.trim()).filter(tag => tag !== "");
+
+  return (
+    <div className="space-y-6">
+      {/* Thông tin sản phẩm chính */}
+      <div>
+        <h3 className="text-lg font-medium text-gray-900">Product Details</h3>
+        <dl className="mt-2 divide-y divide-gray-200">
+          <div className="py-3 flex justify-between">
+            <dt className="text-sm font-medium text-gray-500">Name</dt>
+            <dd className="text-sm text-gray-900">{formData.name}</dd>
+          </div>
+          <div className="py-3 flex justify-between">
+            <dt className="text-sm font-medium text-gray-500">Category</dt>
+            <dd className="text-sm text-gray-900">{formData.category}</dd>
+          </div>
+          <div className="py-3 flex justify-between">
+            <dt className="text-sm font-medium text-gray-500">Price</dt>
+            <dd className="text-sm text-gray-900">${formData.price}</dd>
+          </div>
+          <div className="py-3">
+            <dt className="text-sm font-medium text-gray-500">Tags</dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              <div className="flex flex-wrap gap-2">
+                {tags.map((tag, index) => (
+                  <span
+                    key={index}
+                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </dd>
+          </div>
+          <div className="py-3 flex justify-between">
+            <dt className="text-sm font-medium text-gray-500">Availability</dt>
+            <dd className="text-sm text-gray-900">
+              {formData.isAvailable ? "Available" : "Not Available"}
+            </dd>
+          </div>
+          <div className="py-3">
+            <dt className="text-sm font-medium text-gray-500">Description</dt>
+            <dd className="mt-1 text-sm text-gray-900">{formData.description}</dd>
+          </div>
+        </dl>
+      </div>
+
+      {/* Thông tin variants */}
+      <div>
+        <h3 className="text-lg font-medium text-gray-900">Variants</h3>
+        <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {formData.variants.map((variant, index) => (
+            <div key={index} className="border rounded-lg p-4 bg-gray-50">
+              <dl className="divide-y divide-gray-200">
+                <div className="py-2 flex justify-between">
+                  <dt className="text-sm font-medium text-gray-500">Size</dt>
+                  <dd className="text-sm text-gray-900">{variant.size}</dd>
+                </div>
+                <div className="py-2 flex justify-between">
+                  <dt className="text-sm font-medium text-gray-500">Color</dt>
+                  <dd className="text-sm text-gray-900">{variant.color}</dd>
+                </div>
+                <div className="py-2 flex justify-between">
+                  <dt className="text-sm font-medium text-gray-500">Stock</dt>
+                  <dd className="text-sm text-gray-900">{variant.stock}</dd>
+                </div>
+                <div className="py-2">
+                  <dt className="text-sm font-medium text-gray-500">Specifications</dt>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    <ul className="list-disc pl-5 text-left">
+                      {/* Kiểm tra variant.specs trước khi gọi split */}
+                      {variant.specs && typeof variant.specs === 'string' ? (
+                        variant.specs.split(",").map((spec, i) => (
+                          <li key={i}>{spec.trim()}</li>
+                        ))
+                      ) : (
+                        <li>No specifications provided</li>
+                      )}
+                    </ul>
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Thông tin ảnh */}
+      <div>
+        <h3 className="text-lg font-medium text-gray-900">Product Images</h3>
+        <div className="mt-2 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+          {formData.images.map((image, index) => (
+            <img
+              key={index}
+              src={image}
+              alt={`Product ${index + 1}`}
+              className="h-45 w-50 object-cover rounded-lg"
+            />
+          ))}
+
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default AddProductForm;
-                  
