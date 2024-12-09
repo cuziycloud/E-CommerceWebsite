@@ -159,6 +159,17 @@ exports.updateProductBySlug = async (req, res) => {
   }
 };
 
+// Lấy sản phẩm liên quan dựa trên tag
+exports.getRelatedProducts = async (req, res) => {
+  const { tags } = req.body;
+  try {
+    const products = await Product.find({ tags: { $in: tags } }).limit(4); // Giới hạn số sản phẩm liên quan
+    res.status(200).json({ success: true, products });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error fetching related products', error: error.message });
+  }
+};
+
 
 
 
