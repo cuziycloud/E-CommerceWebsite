@@ -4,6 +4,7 @@ const router = express.Router();
 const authenticateJWT = require('../middleware/authenticateJWT');
 const User = require('../models/User');  // Đảm bảo rằng User model được import
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs'); // hoặc 'bcrypt' tùy vào gói bạn cài đặt
 
 router.get('/', getUsers);
 
@@ -35,24 +36,36 @@ router.put('/change-password', authenticateJWT, async (req, res) => {
     const { currentPassword, newPassword } = req.body;
     const user = await User.findById(req.user.userId);
 
+    // Log user và thông tin đầu vào
+    console.log('User ID:', req.user.userId);
+    console.log('Current Password:', currentPassword);
+    console.log('New Password:', newPassword);
+
     if (!user) {
+      console.log('User not found');
       return res.status(404).json({ message: 'User not found' });
     }
 
     const isMatch = await user.comparePassword(currentPassword);
+    console.log('Current password match:', isMatch);
+
     if (!isMatch) {
+      console.log('Current password is incorrect');
       return res.status(400).json({ message: 'Current password is incorrect' });
     }
 
-    user.password = newPassword;
+    user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
 
+    console.log('Password updated successfully for user:', user.email);
     res.status(200).json({ message: 'Password updated successfully' });
   } catch (error) {
     console.error('Error updating password:', error);
     res.status(500).json({ message: 'Error updating password', error: error.message });
   }
 });
+
+
 
 router.get('/addresses', authenticateJWT, async (req, res) => {
   try {

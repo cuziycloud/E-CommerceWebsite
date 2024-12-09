@@ -71,7 +71,6 @@ router.post('/login', async (req, res) => {
       return res.status(403).json({ message: 'Tài khoản của bạn đã bị cấm' });
     }
 
-    // Tạo JWT Token
     const token = jwt.sign(
       { userId: user._id, email: user.email, role: user.role, isActive: user.isActive },
       process.env.JWT_SECRET,
@@ -92,7 +91,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Middleware đã được import từ middleware/authenticateJWT.js, không cần định nghĩa lại ở đây
 
 // Route để lấy thông tin người dùng hiện tại
 router.get('/me', authenticateJWT, async (req, res) => {
