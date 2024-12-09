@@ -12,8 +12,6 @@ const EditOrder = () => {
     status: "pending",
     orderDate: ""
   });
-  
-
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
@@ -46,10 +44,6 @@ const EditOrder = () => {
     fetchOrder();
   }, [id]);
   
-  
-  
-  
-
   const validateForm = () => {
     const newErrors = {};
 
@@ -227,7 +221,6 @@ const handleInputChange = (e) => {
       <option value="canceled">Canceled</option>
     </select>
   </div>
-
   <div>
     <button
       type="submit"
@@ -237,10 +230,6 @@ const handleInputChange = (e) => {
     </button>
   </div>
 </form>
-
-
-
-
       </div>
     </div>
   );

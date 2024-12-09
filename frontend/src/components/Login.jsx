@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaEye, FaEyeSlash, FaGoogle, FaFacebook, FaTwitter, FaLinkedin, FaInstagram } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaGoogle, FaTwitter, FaLinkedin, FaInstagram } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
 import { BiLock } from "react-icons/bi";
 import { Link, useNavigate } from "react-router-dom";
@@ -31,47 +31,67 @@ const Login = ({ onLoginSuccess }) => {
     }
   
     try {
-      const trimmedEmail = email.trim().toLowerCase(); // Chuyển email về chữ thường và loại bỏ khoảng trắng
+      const trimmedEmail = email.trim().toLowerCase();
       console.log('Attempting login with', { email: trimmedEmail, password });
       const response = await axios.post("http://localhost:5000/api/auth/login", { email: trimmedEmail, password });
-      localStorage.setItem("authToken", response.data.token);
-      localStorage.setItem("userName", response.data.user.name);
-      localStorage.setItem("userRole", response.data.user.role);
   
-      onLoginSuccess(response.data.user.name, response.data.user.role);
-      navigate("/");
+      // Kiểm tra trạng thái isActive
+      if (response.data.user.isActive) {
+        localStorage.setItem("authToken", response.data.token);
+        localStorage.setItem("userName", response.data.user.name);
+        localStorage.setItem("userRole", response.data.user.role);
+  
+        onLoginSuccess(response.data.user.name, response.data.user.role);
+        navigate("/");
+      } else {
+        navigate("/banned");
+      }
     } catch (error) {
       console.error('Login failed:', error);
-      setErrors({ general: "Đăng nhập thất bại, vui lòng thử lại!" });
+  
+      // Kiểm tra mã lỗi 403 (Forbidden) để điều hướng đến trang bị cấm
+      if (error.response && error.response.status === 403) {
+        setErrors({ general: "Your account has been banned. Please contact support for more details." });
+        navigate("/banned");
+      } else {
+        setErrors({ general: "Đăng nhập thất bại, vui lòng thử lại!" });
+      }
     } finally {
       setLoading(false);
     }
   };
   
   
-  
-  
 
   const handleGoogleLoginSuccess = async (response) => {
     console.log("Google login successful:", response);
     const token = response.credential;
-
+  
     try {
       const res = await axios.post("http://localhost:5000/api/auth/google-login", { token });
       console.log("Backend response:", res.data);
-
-      localStorage.setItem("authToken", res.data.token);
-      localStorage.setItem("userName", res.data.user.name);
-      localStorage.setItem("userRole", res.data.user.role); // Lưu vai trò người dùng
-
-      onLoginSuccess(res.data.user.name, res.data.user.role); // Cập nhật cả userRole
-
-      navigate("/");
+  
+      // Kiểm tra trạng thái isActive
+      if (res.data.user.isActive) {
+        localStorage.setItem("authToken", res.data.token);
+        localStorage.setItem("userName", res.data.user.name);
+        localStorage.setItem("userRole", res.data.user.role);
+  
+        // Gọi hàm onLoginSuccess để cập nhật trạng thái đăng nhập
+        onLoginSuccess(res.data.user.name, res.data.user.role);
+        // Chuyển hướng về trang Home sau khi đăng nhập thành công
+        navigate("/");
+      } else {
+        setErrors({ general: "Your account has been banned. Please contact support for more details." });
+        navigate("/banned");
+      }
     } catch (error) {
       console.error("Error during backend call:", error);
-      setErrors({ general: "Đăng nhập bằng Google thất bại, vui lòng thử lại!" });
+      setErrors({ general: "Google login failed, please try again!" });
     }
   };
+  
+  
 
   const handleGoogleLoginFailure = (error) => {
     console.error("Google login failed:", error);
@@ -152,7 +172,7 @@ const Login = ({ onLoginSuccess }) => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <GoogleLogin
                   onSuccess={handleGoogleLoginSuccess}
                   onError={handleGoogleLoginFailure}
@@ -168,10 +188,6 @@ const Login = ({ onLoginSuccess }) => {
                     </button>
                   )}
                 />
-                <button type="button" className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-300">
-                  <FaFacebook className="text-blue-600 mr-2" />
-                  Facebook
-                </button>
               </div>
 
               <p className="text-center text-sm text-gray-600">

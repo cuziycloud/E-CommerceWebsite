@@ -13,6 +13,7 @@ import ProductEditPage from './components/ProductEditPage';
 import CheckoutPage from './components/CheckoutPage';
 import TermsOfService from './components/TermsOfService';
 import ContactUs from './components/ContactUs';
+import BannedNotification from "./components/BannedNotification"
 import PrivacyPolicy from './components/PrivacyPolicy';
 import ProductDetail from './components/ProductDetail';
 import CartPage from './components/CartPage';
@@ -20,26 +21,32 @@ import './styles/tailwind.css';
 import ProductCategoryPage from './components/ProductCategoryPage';
 import LaptopCatalog from './components/LaptopCatalog';
 import PhoneCatalog from './components/PhoneCatalog';
+import ResetPassword from './components/ResetPassword';
 import TabletCatalog from './components/TabletCatalog';
 import ConsoleCatalog from './components/ConsoleCatalog';
 import AccessoryCatalog from './components/AccessoryCatalog';
 import OrderConfirmation from './components/OrderConfirmation';
 import EditOrder from './components/EditOrder';
 import AddCoupon from './components/AddCoupon';
+import SearchResults from './components/SearchResults';
 import EditCoupon from './components/EditCoupon';
 import Navigation from './components/Navigation';
 import Footer from './components/Footer';
 import axios from 'axios';
 
-const PrivateRoute = ({ element }) => {
+const PrivateRoute = ({ element, role }) => {
   const token = localStorage.getItem("authToken");
-  return token ? element : <Navigate to="/login" />;
+  const userRole = localStorage.getItem("userRole");
+  return token && userRole === role ? element : <Navigate to="*" />;
 };
+
 
 const LoginRedirectRoute = ({ element }) => {
   const token = localStorage.getItem("authToken");
   return token ? <Navigate to="/" /> : element;
 };
+
+
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -171,13 +178,16 @@ function App() {
         />
         <Routes>
           <Route path="/" element={<HomePage onAddToCart={handleAddToCart} />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/register" element={<Register onLoginSuccess={handleLoginSuccess} />} />
           <Route path="/login" element={<LoginRedirectRoute element={<Login onLoginSuccess={handleLoginSuccess} />} />} />
-          <Route path="/admin" element={<PrivateRoute element={<AdminDashboard />} />} />
+          <Route path="/admin" element={<PrivateRoute element={<AdminDashboard />} role="admin" />} />
+          <Route path="/admin/add-product" element={<PrivateRoute element={<AddProductForm />} role="admin" />} />
+          <Route path="/admin/edit-product/:id" element={<PrivateRoute element={<ProductEditPage />} role="admin" />} />
+          <Route path="/admin/add-promotion" element={<PrivateRoute element={<AddCoupon />} role="admin" />} />
+          <Route path="/admin/edit-promotion/:id" element={<PrivateRoute element={<EditCoupon />} role="admin" />} />
+          <Route path="/admin/edit-order/:id" element={<PrivateRoute element={<EditOrder />} role="admin" />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/user-profile" element={<UserProfileManagement />} />
-          <Route path="/admin/add-product" element={<PrivateRoute element={<AddProductForm />} />} />
-          <Route path="/admin/edit-product/:id" element={<PrivateRoute element={<ProductEditPage />} />} />
           <Route path="/cart" element={<CartPage cartItems={cartItems} setCartItems={setCartItems} />} />
           <Route path="/product-detail/:slug" element={<ProductDetail onAddToCart={handleAddToCart} />} />
           <Route path="/checkout" element={<CheckoutPage />} />
@@ -192,12 +202,13 @@ function App() {
           <Route path="/tablet/:slug" element={<ProductDetail onAddToCart={handleAddToCart} />} />
           <Route path="/console/:slug" element={<ProductDetail onAddToCart={handleAddToCart} />} />
           <Route path="/accessory/:slug" element={<ProductDetail onAddToCart={handleAddToCart} />} />
-          <Route path="/admin/add-promotion" element={<PrivateRoute element={<AddCoupon />} />} />
-          <Route path="/admin/edit-promotion/:id" element={<PrivateRoute element={<EditCoupon />} />} />
-          <Route path="/admin/edit-order/:id" element={<PrivateRoute element={<EditOrder />} />} />
           <Route path="/order-confirmation" element={<OrderConfirmation setOrderConfirmed={setOrderConfirmed} />} /> {/* Truyền hàm setOrderConfirmed */}
+          <Route path="/search/:keyword" element={<SearchResults />} />
+          <Route path="/banned" element={<BannedNotification />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+
         <Footer />
       </div>
     </Router>

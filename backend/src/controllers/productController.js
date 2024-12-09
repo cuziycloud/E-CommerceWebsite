@@ -1,5 +1,8 @@
 const Product = require('../models/Product');
 const slugify = require('slugify');
+const Review = require('../models/Review'); 
+const Order = require('../models/Order');
+
 // Thêm sản phẩm mới
 exports.addProduct = async (req, res) => {
   const { name, description, price, category, tags, variants, stock, isActive, images } = req.body;
@@ -75,31 +78,49 @@ exports.getProductsByCategory = async (req, res) => {
   const { category } = req.query;
   console.log('Category query:', category);
   try {
-    const products = await Product.find({ category: category }, 'name price images slug');
+    // Lấy danh sách sản phẩm theo category và populate reviews để tính averageRating
+    const products = await Product.find({ category: category }).populate('reviews');
     console.log('Products found:', products);
-    res.status(200).json({ success: true, products });
+
+    // Tính toán averageRating cho từng sản phẩm
+    const productsWithRatings = products.map(product => {
+      const ratings = product.reviews.map(review => review.rating);
+      const averageRating = ratings.length > 0 ? ratings.reduce((acc, rating) => acc + rating, 0) / ratings.length : 0;
+      return { ...product._doc, averageRating };
+    });
+
+    res.status(200).json({ success: true, products: productsWithRatings });
   } catch (error) {
     console.log('Error fetching products by category:', error);
     res.status(500).json({ success: false, message: 'Failed to fetch products', error: error.message });
   }
 };
 
+
 // Lấy sản phẩm theo slug
 exports.getProductBySlug = async (req, res) => {
   const { slug } = req.params;
-  console.log('Fetching product by slug:', slug);
+
   try {
-    const product = await Product.findOne({ slug: slug });
+    const product = await Product.findOne({ slug }).populate({
+      path: 'reviews',
+      populate: {
+        path: 'user',
+        select: 'name'
+      }
+    });
+
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found' });
     }
-    console.log('Product found:', product);
+
     res.status(200).json({ success: true, product });
   } catch (error) {
-    console.log('Error fetching product by slug:', error);
+    console.error('Error fetching product by slug:', error);
     res.status(500).json({ success: false, message: 'Error fetching product', error: error.message });
   }
 };
+
 
 // Xóa sản phẩm
 exports.deleteProduct = async (req, res) => {
@@ -171,7 +192,30 @@ exports.getRelatedProducts = async (req, res) => {
 };
 
 
+exports.searchProducts = async (req, res) => {
+  try {
+    const { keyword } = req.query;
+    if (!keyword) {
+      return res.status(400).json({ success: false, message: 'Keyword is required' });
+    }
 
+    const regex = new RegExp(keyword, 'i');
+
+    const products = await Product.find({ name: { $regex: regex } })
+      .select('name price images slug') // Chỉ lấy các trường cần thiết
+      .limit(20); // Giới hạn số kết quả trả về (tùy chỉnh theo nhu cầu)
+
+    if (products.length === 0) {
+      return res.status(404).json({ success: false, message: 'No products found' });
+    }
+
+    res.status(200).json({ success: true, products });
+
+  } catch (error) {
+    console.error('Error searching products:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error', error: error.message });
+  }
+};
 
 
 
@@ -206,3 +250,77 @@ exports.updateProduct = async (req, res) => {
     res.status(500).json({ success: false, message: 'Cannot update product', error: error.message });
   }
 };
+
+
+exports.addReview = async (req, res) => {
+  const { rating, comment } = req.body;
+  const { productId } = req.params;
+  const userId = req.user.userId;
+
+  try {
+    const order = await Order.findOne({
+      userId: userId,
+      'products.productId': productId
+    });
+
+    if (!order && rating !== undefined) {
+      return res.status(400).json({ success: false, message: 'You can only rate products you have purchased' });
+    }
+
+    const newReview = new Review({
+      user: userId,
+      product: productId,
+      comment,
+      rating: order ? rating : undefined
+    });
+
+    await newReview.save();
+
+    // Cập nhật danh sách reviews của sản phẩm và tính lại averageRating
+    const product = await Product.findById(productId);
+    product.reviews.push(newReview._id);
+    const validRatings = product.reviews.filter(reviewId => newReview._id.equals(reviewId) && rating !== null).map(() => rating);
+    const allRatings = await Review.find({ _id: { $in: product.reviews } });
+    const ratings = allRatings.filter(r => r.rating !== null).map(r => r.rating);
+    product.averageRating = ratings.length > 0 ? (ratings.reduce((acc, curr) => acc + curr, 0) / ratings.length) : 0;
+    await product.save();
+
+    res.status(201).json({ success: true, message: 'Review added successfully', review: newReview });
+  } catch (error) {
+    console.error('Error adding review:', error);
+    res.status(500).json({ success: false, message: 'Error adding review', error: error.message });
+  }
+};
+
+
+
+exports.getProductReviews = async (req, res) => {
+  const { productId } = req.params;
+
+  try {
+    const reviews = await Review.find({ product: productId }).populate('user', 'name'); // Populate để lấy thông tin người dùng
+    res.status(200).json({ success: true, reviews });
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+    res.status(500).json({ success: false, message: 'Error fetching reviews', error: error.message });
+  }
+};
+
+
+
+
+
+exports.getFeaturedProducts = async (req, res) => {
+  try {
+    console.log("Fetching featured products...");
+    const products = await Product.find().sort({ averageRating: -1 }).limit(10); // Lấy 10 sản phẩm có rating cao nhất
+    console.log("Featured products found:", products);
+    res.status(200).json({ products });
+  } catch (error) {
+    console.error('Error fetching featured products:', error); // In ra lỗi để kiểm tra
+    res.status(500).json({ error: 'Error fetching featured products' });
+  }
+};
+
+
+

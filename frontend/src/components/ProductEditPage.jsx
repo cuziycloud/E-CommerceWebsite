@@ -156,18 +156,11 @@ const ProductEditPage = () => {
 
   const handleVariantChange = (index, field, value) => {
     const newVariants = [...formData.variants];
-  
-    if (field === "specs") {
-      newVariants[index][field] = value.split(',').map(spec => {
-        const [label, specValue] = spec.split(':').map(item => item.trim());
-        return { label, value: specValue };
-      });
-    } else {
-      newVariants[index][field] = value;
-    }
-  
+    newVariants[index][field] = value;
     setFormData({ ...formData, variants: newVariants });
   };
+  
+  
   
   
   
@@ -200,10 +193,6 @@ const ProductEditPage = () => {
       try {
         const formDataCopy = { ...formData };
   
-        if (!formDataCopy.name || typeof formDataCopy.name !== 'string') {
-          throw new Error('Name must be a valid string');
-        }
-  
         const slug = slugify(formDataCopy.name, { lower: true, strict: true });
         formDataCopy.slug = slug;
   
@@ -228,6 +217,7 @@ const ProductEditPage = () => {
         formDataCopy.stock = calculateTotalStock(formDataCopy.variants);
         formDataCopy.tags = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== "");
   
+        // Chuyển đổi specs từ chuỗi thành mảng các đối tượng
         formDataCopy.variants.forEach(variant => {
           if (variant.specs && typeof variant.specs === "string") {
             const specsArray = variant.specs.split(",").map(spec => {
@@ -254,17 +244,6 @@ const ProductEditPage = () => {
       }
     }
   };
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   
   
   

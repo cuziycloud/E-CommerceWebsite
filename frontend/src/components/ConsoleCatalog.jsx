@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaSearch, FaChevronLeft, FaChevronRight, FaStar } from "react-icons/fa";
+import { FaChevronLeft, FaChevronRight, FaStar } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -7,6 +7,7 @@ const ConsoleCatalog = () => {
   const [consoles, setConsoles] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState("default");
+  const [filterPrice, setFilterPrice] = useState("");
   const [error, setError] = useState(null);
   const navigate = useNavigate(); // Sử dụng useNavigate để điều hướng
 
@@ -21,7 +22,7 @@ const ConsoleCatalog = () => {
       });
   }, []);
 
-  const itemsPerPage = 10;
+  const itemsPerPage = 9;
   const totalPages = Math.ceil(consoles.length / itemsPerPage);
 
   const handleSort = (criteria) => {
@@ -34,7 +35,7 @@ const ConsoleCatalog = () => {
         sortedConsoles.sort((a, b) => b.price - a.price);
         break;
       case "rating":
-        sortedConsoles.sort((a, b) => b.rating - a.rating);
+        sortedConsoles.sort((a, b) => b.averageRating - a.averageRating);
         break;
       default:
         sortedConsoles = [...consoles];
@@ -44,10 +45,20 @@ const ConsoleCatalog = () => {
     setCurrentPage(1);
   };
 
+  const handleFilterPrice = (e) => {
+    setFilterPrice(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const filteredConsoles = consoles.filter(console => {
+    const matchesPriceFilter = filterPrice ? console.price <= parseFloat(filterPrice) : true;
+    return matchesPriceFilter;
+  });
+
   const getCurrentPageItems = () => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    return consoles.slice(startIndex, endIndex);
+    return filteredConsoles.slice(startIndex, endIndex);
   };
 
   if (error) {
@@ -84,13 +95,24 @@ const ConsoleCatalog = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="flex items-center mb-8">
+          <input
+            type="number"
+            placeholder="Max price"
+            value={filterPrice}
+            onChange={handleFilterPrice}
+            className="block w-full sm:w-auto pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+          />
+          <span className="ml-2 text-gray-700">USD</span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"> {/* Cập nhật khoảng cách */}
           {getCurrentPageItems().map((console) => (
             <div
               key={console._id}
-              className="bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105 cursor-pointer" // Thêm cursor-pointer
+              className="bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105 cursor-pointer"
               role="article"
-              onClick={() => navigate(`/console/${console.slug}`)} // Sự kiện onClick điều hướng tới trang chi tiết sản phẩm
+              onClick={() => navigate(`/console/${console.slug}`)}
             >
               <img
                 src={`http://localhost:5000${console.images[0]}`}
@@ -100,14 +122,14 @@ const ConsoleCatalog = () => {
                   e.target.src = "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=500&h=350";
                 }}
               />
-              <div className="p-6">
+              <div className="p-4"> {/* Cập nhật khoảng cách */}
                 <h2 className="text-xl font-semibold text-gray-900 mb-2">{console.name}</h2>
-                <p className="text-gray-600 mb-4">{console.description}</p>
-                <div className="flex justify-between items-center">
+                <p className="text-gray-600 mb-4">{console.description}</p> {/* Thêm mô tả console */}
+                <div className="flex items-center space-x-4">
                   <span className="text-2xl font-bold text-indigo-600">${console.price}</span>
-                  <div className="flex items-center">
-                    <FaStar className="text-yellow-400 mr-1" />
-                    <span className="text-gray-600">{console.rating}</span>
+                  <div className="flex items-center justify-end w-full">
+                    <span className="text-gray-600 mr-2">{console.averageRating ? console.averageRating.toFixed(1) : 'No rating'}</span>
+                    <FaStar className="text-yellow-400 fill-current" /> {/* Hiển thị một ngôi sao */}
                   </div>
                 </div>
                 <button

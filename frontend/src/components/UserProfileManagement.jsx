@@ -123,23 +123,25 @@ const UserProfileManagement = () => {
       const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
       const data = { currentPassword, newPassword };
   
+      console.log('Sending request to update password:', data);
       const response = await axios.put("http://localhost:5000/api/users/change-password", data, { headers });
   
       if (response.status === 200) {
+        console.log('Password updated successfully');
         showSuccessPopup("Password updated successfully", true);
         // Xóa token và chuyển hướng đến trang đăng nhập
         localStorage.removeItem("authToken");
         window.location.href = "/login";
       }
     } catch (error) {
-      if (error.response && error.response.status === 400) {
-        showSuccessPopup(error.response.data.message, false);
-      } else {
-        console.error("There was an error updating the password!", error);
-        showSuccessPopup("An error occurred while updating the password", false);
+      console.error('There was an error updating the password!', error);
+      if (error.response) {
+        console.log('Error response data:', error.response.data);
       }
+      showSuccessPopup("An error occurred while updating the password", false);
     }
   };
+  
   
   
 

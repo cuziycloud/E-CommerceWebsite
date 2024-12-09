@@ -4,11 +4,12 @@ const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
+const { sendPasswordResetEmail } = require('../utils/emailService'); // Import dịch vụ gửi email
+const authenticateJWT = require('../middleware/authenticateJWT'); // Import middleware xác thực
 
 const router = express.Router();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
-
 
 router.post('/register', async (req, res) => {
   const { name, email, password, role = 'customer' } = req.body;
@@ -42,12 +43,6 @@ router.post('/register', async (req, res) => {
   }
 });
 
-
-
-
-
-
-
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
   const trimmedEmail = email.trim().toLowerCase();
@@ -72,9 +67,12 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'Mật khẩu không đúng' });
     }
 
-    // Tạo JWT Token
+    if (!user.isActive) {
+      return res.status(403).json({ message: 'Tài khoản của bạn đã bị cấm' });
+    }
+
     const token = jwt.sign(
-      { userId: user._id, email: user.email, role: user.role },
+      { userId: user._id, email: user.email, role: user.role, isActive: user.isActive },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
@@ -85,7 +83,7 @@ router.post('/login', async (req, res) => {
     res.status(200).json({
       message: 'Đăng nhập thành công',
       token,
-      user: { name: user.name, email: user.email, role: user.role }
+      user: { name: user.name, email: user.email, role: user.role, isActive: user.isActive }
     });
   } catch (error) {
     console.error('Error logging in:', error);
@@ -94,30 +92,22 @@ router.post('/login', async (req, res) => {
 });
 
 
+// Route để lấy thông tin người dùng hiện tại
+router.get('/me', authenticateJWT, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
 
-// Middleware để xác thực và giải mã token
-const authenticateJWT = (req, res, next) => {
-  const authHeader = req.header('Authorization');
-
-  if (!authHeader) {
-    return res.sendStatus(403);
-  }
-
-  const token = authHeader.split(' ')[1];
-
-  if (!token) {
-    return res.sendStatus(403);
-  }
-
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) {
-      return res.sendStatus(403);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
 
-    req.user = user;
-    next();
-  });
-};
+    res.status(200).json({ user });
+  } catch (error) {
+    console.error('Error fetching user data:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 
 // Route để lấy user role
 router.get('/role', authenticateJWT, async (req, res) => {
@@ -148,8 +138,15 @@ router.post('/google-login', async (req, res) => {
     const { name, email, sub: googleId } = ticket.getPayload();
 
     let user = await User.findOne({ email });
-    if (!user) {
-      user = new User({ name, email });
+    if (user) {
+      // Nếu người dùng đã tồn tại, cập nhật ID Google của họ nếu chưa có
+      if (!user.googleId) {
+        user.googleId = googleId;
+        await user.save();
+      }
+    } else {
+      // Tạo tài khoản mới mà không yêu cầu mật khẩu
+      user = new User({ name, email, googleId, password: '' });
       await user.save();
     }
 
@@ -166,20 +163,6 @@ router.post('/google-login', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
-
-// Đăng nhập bằng Facebook
-router.get('/facebook',
-  passport.authenticate('facebook', { scope: ['email'] })
-);
-
-router.get('/facebook/callback',
-  passport.authenticate('facebook', { failureRedirect: '/login' }),
-  (req, res) => {
-    // Đăng nhập thành công, chuyển hướng về trang chủ
-    res.redirect('/');
-  }
-);
-
 
 router.put('/update-password', async (req, res) => {
   try {
@@ -205,8 +188,60 @@ router.put('/update-password', async (req, res) => {
   }
 });
 
+router.post('/reset-password/:token', async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
 
+  try {
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
 
+    if (!user) {
+      return res.status(400).json({ message: 'Password reset token is invalid or has expired' });
+    }
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+
+    await user.save();
+
+    res.status(200).json({ message: 'Password has been reset successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'An error occurred while processing the request' });
+  }
+});
+
+router.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'Email not found in system' });
+    }
+
+    // Tạo token ngẫu nhiên
+    const token = crypto.randomBytes(20).toString('hex');
+
+    // Lưu token và thời gian hết hạn vào cơ sở dữ liệu
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = Date.now() + 3600000; // Token hết hạn sau 1 giờ
+    await user.save();
+
+    // Tạo URL reset mật khẩu
+    const resetUrl = `http://localhost:3000/reset-password/${token}`;
+
+    // Gửi email reset mật khẩu
+    await sendPasswordResetEmail(user.email, resetUrl);
+
+    res.status(200).json({ message: 'Password reset link has been sent to your email' });
+  } catch (error) {
+    res.status(500).json({ message: 'An error occurred while processing the request' });
+  }
+});
 
 module.exports = router;
