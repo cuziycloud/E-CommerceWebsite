@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { useNavigate } from "react-router-dom";
 
-const clientId = "481244191445-v6732ad4a6hutn7c961ntlu8l22076gj.apps.googleusercontent.com";
+const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 const Register = ({ onLoginSuccess }) => {
   const [formData, setFormData] = useState({
