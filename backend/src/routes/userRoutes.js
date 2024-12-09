@@ -1,5 +1,5 @@
 const express = require('express');
-const { getUsers, getUserPersonalInfo, getUserAddresses, getUserRewards, getUserTransactions } = require('../controllers/userController');
+const { getUsers, getUserPersonalInfo, getUserAddresses,getUserRole, getUserRewards, getUserTransactions } = require('../controllers/userController');
 const router = express.Router();
 const authenticateJWT = require('../middleware/authenticateJWT');
 const User = require('../models/User');  // Đảm bảo rằng User model được import
@@ -137,6 +137,7 @@ router.put('/:id/userStatus', async (req, res) => {
 });
 
 
+router.get('/role', authenticateJWT, getUserRole);
 
 router.put('/addresses/:addressId', authenticateJWT, async (req, res) => {
   try {

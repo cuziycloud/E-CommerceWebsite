@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { FiTrash2, FiUpload } from "react-icons/fi";
 import { MdPreview } from "react-icons/md";
 import slugify from 'slugify';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 const AddProductForm = () => {
   const [formData, setFormData] = useState({
@@ -168,7 +171,6 @@ const AddProductForm = () => {
       if (!variant.color) {
         newErrors[`variant${index}color`] = 'Color is required';
       }
-      // Chuyển đổi specs từ chuỗi sang mảng đối tượng
       if (variant.specs && typeof variant.specs === "string") {
         const specsArray = variant.specs.split(",").map(spec => {
           const [label, specValue] = spec.split(":").map(item => item.trim());
@@ -183,7 +185,7 @@ const AddProductForm = () => {
     }
   
     if (Object.keys(newErrors).length === 0) {
-      formData.price = parseFloat(formData.price); // Đảm bảo price là số thực
+      formData.price = parseFloat(formData.price);
       formData.stock = formData.variants.reduce((acc, variant) => acc + parseInt(variant.stock, 10), 0);
       formData.variants = formData.variants.map(variant => ({
         ...variant,
@@ -238,6 +240,12 @@ const AddProductForm = () => {
         if (response.ok) {
           const result = await response.json();
           console.log('Form submitted:', result);
+          toast.success('Product added successfully!');
+  
+          // Reload trang sau khi thông báo thành công
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000); // Đợi 2 giây để hiển thị toast trước khi reload trang
         } else {
           const errorResponse = await response.json();
           console.error('Error submitting form:', errorResponse.error);
@@ -249,6 +257,7 @@ const AddProductForm = () => {
       setErrors(newErrors);
     }
   };
+  
   
   
   return (
@@ -618,12 +627,13 @@ const AddProductForm = () => {
                                 className="h-45 w-50 object-cover rounded-lg"
                               />
                             ))}
+                           
                           </div>
                         </div>
                       </div>
                     );
                   };
-                  
+                  <ToastContainer />
 
 
                   

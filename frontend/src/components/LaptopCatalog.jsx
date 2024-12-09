@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaSearch, FaChevronLeft, FaChevronRight, FaStar } from "react-icons/fa";
+import { FaChevronLeft, FaChevronRight, FaStar } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -7,6 +7,7 @@ const LaptopCatalog = () => {
   const [laptops, setLaptops] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState("default");
+  const [filterPrice, setFilterPrice] = useState("");
   const [error, setError] = useState(null);
   const navigate = useNavigate(); // Sử dụng useNavigate để điều hướng
 
@@ -44,10 +45,20 @@ const LaptopCatalog = () => {
     setCurrentPage(1);
   };
 
+  const handleFilterPrice = (e) => {
+    setFilterPrice(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const filteredLaptops = laptops.filter(laptop => {
+    const matchesPriceFilter = filterPrice ? laptop.price <= parseFloat(filterPrice) : true;
+    return matchesPriceFilter;
+  });
+
   const getCurrentPageItems = () => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    return laptops.slice(startIndex, endIndex);
+    return filteredLaptops.slice(startIndex, endIndex);
   };
 
   if (error) {
@@ -84,13 +95,24 @@ const LaptopCatalog = () => {
           </div>
         </div>
 
+        <div className="flex items-center mb-8">
+          <input
+            type="number"
+            placeholder="Max price"
+            value={filterPrice}
+            onChange={handleFilterPrice}
+            className="block w-full sm:w-auto pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+          />
+          <span className="ml-2 text-gray-700">USD</span>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {getCurrentPageItems().map((laptop) => (
             <div
               key={laptop._id}
-              className="bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105 cursor-pointer" // Thêm cursor-pointer
+              className="bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105 cursor-pointer"
               role="article"
-              onClick={() => navigate(`/laptop/${laptop.slug}`)} // Sự kiện onClick điều hướng tới trang chi tiết sản phẩm
+              onClick={() => navigate(`/laptop/${laptop.slug}`)}
             >
               <img
                 src={`http://localhost:5000${laptop.images[0]}`}

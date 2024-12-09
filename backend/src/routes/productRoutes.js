@@ -9,6 +9,7 @@ const {
   getProductBySlug,
   deleteProduct,
   updateProduct,
+  searchProducts,
   updateProductBySlug, // Thêm hàm cập nhật sản phẩm theo slug
 } = require('../controllers/productController');
 
@@ -29,6 +30,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+router.get('/search', searchProducts);
 // Route thêm sản phẩm mới
 router.post('/add-product', upload.array('images', 5), addProduct);
 
@@ -52,6 +54,8 @@ router.delete('/:id', deleteProduct);
 
 // Route cập nhật sản phẩm
 router.put('/:id', updateProduct);
+
+
 
 router.post('/related-products', getRelatedProducts);
 

@@ -171,7 +171,30 @@ exports.getRelatedProducts = async (req, res) => {
 };
 
 
+exports.searchProducts = async (req, res) => {
+  try {
+    const { keyword } = req.query;
+    if (!keyword) {
+      return res.status(400).json({ success: false, message: 'Keyword is required' });
+    }
 
+    const regex = new RegExp(keyword, 'i');
+
+    const products = await Product.find({ name: { $regex: regex } })
+      .select('name price images slug') // Chỉ lấy các trường cần thiết
+      .limit(20); // Giới hạn số kết quả trả về (tùy chỉnh theo nhu cầu)
+
+    if (products.length === 0) {
+      return res.status(404).json({ success: false, message: 'No products found' });
+    }
+
+    res.status(200).json({ success: true, products });
+
+  } catch (error) {
+    console.error('Error searching products:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error', error: error.message });
+  }
+};
 
 
 

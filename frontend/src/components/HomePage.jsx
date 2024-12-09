@@ -9,13 +9,12 @@ const HomePage = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [showBestSeller, setShowBestSeller] = useState(false);
-  const [showNewArrivals, setShowNewArrivals] = useState(false);
   const [laptops, setLaptops] = useState([]);
   const [phones, setPhones] = useState([]);
   const [tablets, setTablets] = useState([]);
   const [consoles, setConsoles] = useState([]);
   const [accessories, setAccessories] = useState([]);
+  const [searchKeyword, setSearchKeyword] = useState("");
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [userName, setUserName] = useState("");
   const navigate = useNavigate();
@@ -135,6 +134,16 @@ const HomePage = () => {
     { id: 4, name: "New Arrivals", image: "images.unsplash.com/photo-1498049794561-7780e7231661" }
   ];
 
+  const handleSearch = () => {
+    navigate(`/search/${searchKeyword}`);
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter") {
+      handleSearch();
+    }
+  };
+
   const ProductDetail = ({ product }) => (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-8 rounded-lg w-4/5 max-h-[90vh] overflow-y-auto">
@@ -205,13 +214,21 @@ const HomePage = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Search Bar */}
       <div className="container mx-auto px-4 pt-24 pb-4">
-        <div className="relative">
+        <div className="flex items-center justify-center">
           <input
             type="text"
             placeholder="Search products..."
-            className="w-full p-4 pl-12 rounded-lg border"
+            value={searchKeyword} // Liên kết với state từ khóa
+            onChange={(e) => setSearchKeyword(e.target.value)} // Cập nhật state từ khóa
+            onKeyDown={handleKeyDown} // Thêm sự kiện onKeyDown
+            className="w-3/4 md:w-1/2 p-4 pl-10 rounded-lg border"
           />
-          <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
+          <button
+            className="ml-2 p-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            onClick={handleSearch} // Gọi hàm xử lý tìm kiếm khi nhấp vào nút
+          >
+            <FiSearch className="text-xl" />
+          </button>
         </div>
       </div>
 

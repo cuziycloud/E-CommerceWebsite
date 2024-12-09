@@ -215,14 +215,13 @@ const ProductDetail = ({ onAddToCart }) => {
                   >
                     Add to Cart
                   </button>
-                  <button 
-                    className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                    onClick={() => {
-                      handleAddToCart();
-                    }}
-                  >
-                    <Link to="/checkout" className="text-white">Buy Now</Link>
-                  </button>       
+                  <Link to="/cart" className="flex-1">
+                    <button 
+                      className="w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                    >
+                      View Cart
+                    </button>
+                  </Link>       
                 </div>
               )}
             </div>
@@ -307,7 +306,7 @@ const ProductDetail = ({ onAddToCart }) => {
         <div className="p-4">
           <h3 className="font-medium">{product.name}</h3>
           <p className="text-lg font-bold mt-2">${product.price}</p>
-          <Link to={`/product/${product.slug}`} className="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-center block">
+          <Link to={`/product-detail/${product.slug}`} className="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-center block">
             View Details
           </Link>
         </div>
@@ -315,6 +314,7 @@ const ProductDetail = ({ onAddToCart }) => {
     ))}
   </div>
 </div>
+
 
     </main>
 
