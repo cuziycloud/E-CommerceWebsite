@@ -204,10 +204,9 @@ const ProductEditPage = () => {
           throw new Error('Name must be a valid string');
         }
   
-        const slug = slugify(formDataCopy.name, { lower: true, strict: true }); // Tạo slug từ tên sản phẩm
-        formDataCopy.slug = slug; // Thêm slug vào dữ liệu sản phẩm
+        const slug = slugify(formDataCopy.name, { lower: true, strict: true });
+        formDataCopy.slug = slug;
   
-        // Tải lên ảnh và lấy URL
         const uploadedImageUrls = [];
         for (const image of formData.images) {
           if (typeof image === "object") {
@@ -225,17 +224,10 @@ const ProductEditPage = () => {
         }
   
         formDataCopy.images = uploadedImageUrls;
-  
-        // Đảm bảo variants luôn là một mảng hợp lệ
         formDataCopy.variants = formDataCopy.variants || [];
-  
-        // Tính toán lại tổng số lượng `stock`
         formDataCopy.stock = calculateTotalStock(formDataCopy.variants);
-  
-        // Chuyển đổi tags thành mảng trước khi gửi
         formDataCopy.tags = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== "");
   
-        // Chuyển đổi specs từ chuỗi sang mảng đối tượng
         formDataCopy.variants.forEach(variant => {
           if (variant.specs && typeof variant.specs === "string") {
             const specsArray = variant.specs.split(",").map(spec => {
@@ -246,15 +238,14 @@ const ProductEditPage = () => {
           }
         });
   
-        console.log('Updating product data:', formDataCopy); // Log dữ liệu trước khi gửi
-        const response = await axios.put(`http://localhost:5000/api/products/slug/${originalSlug}`, formDataCopy); // Sử dụng slug gốc khi gửi yêu cầu PUT
+        console.log('Updating product data:', formDataCopy);
+        const response = await axios.put(`http://localhost:5000/api/products/slug/${originalSlug}`, formDataCopy); 
         console.log("Form submitted:", response.data);
   
-        // Chuyển hướng tới trang mới với slug mới sau khi cập nhật thành công
         if (slug !== originalSlug) {
           window.location.href = `/admin/edit-product/${slug}`;
         } else {
-          window.location.reload(); // Reload lại trang nếu slug không thay đổi
+          window.location.reload();
         }
       } catch (error) {
         console.error("Error submitting form:", error);
@@ -263,6 +254,10 @@ const ProductEditPage = () => {
       }
     }
   };
+  
+  
+  
+  
   
   
   
@@ -333,33 +328,35 @@ const ProductEditPage = () => {
             </div>
 
             <div>
-              <label
-                htmlFor="price"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Price
-              </label>
-              <input
-                type="number"
-                id="price"
-                value={formData.price}
-                onChange={(e) =>
-                  setFormData({ ...formData, price: e.target.value })
-                }
-                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${errors.price ? "border-red-500" : ""}`}
-                aria-invalid={errors.price ? "true" : "false"}
-                aria-describedby={errors.price ? "price-error" : undefined}
-              />
-              {errors.price && (
-                <p
-                  className="mt-1 text-sm text-red-600"
-                  id="price-error"
-                  role="alert"
-                >
-                  {errors.price}
-                </p>
-              )}
-            </div>
+  <label
+    htmlFor="price"
+    className="block text-sm font-medium text-gray-700"
+  >
+    Price
+  </label>
+  <input
+    type="number"
+    id="price"
+    value={formData.price}
+    onChange={(e) =>
+      setFormData({ ...formData, price: e.target.value })
+    }
+    step="0.01" // Thêm thuộc tính này để cho phép số thực
+    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${errors.price ? "border-red-500" : ""}`}
+    aria-invalid={errors.price ? "true" : "false"}
+    aria-describedby={errors.price ? "price-error" : undefined}
+  />
+  {errors.price && (
+    <p
+      className="mt-1 text-sm text-red-600"
+      id="price-error"
+      role="alert"
+    >
+      {errors.price}
+    </p>
+  )}
+</div>
+
           </div>
 
           <div>

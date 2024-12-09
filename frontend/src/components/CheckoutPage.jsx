@@ -1,539 +1,434 @@
-import React, { useState } from "react";
-import { FiArrowLeft, FiShoppingCart, FiUser, FiSearch, FiChevronDown } from "react-icons/fi";
-import { BsCreditCard2Back, BsCash, BsWallet2, BsTag } from "react-icons/bs";
-import { FaTimes, FaGoogle, FaFacebook } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { FaEdit, FaMoneyBill } from "react-icons/fa";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { Link, useNavigate } from 'react-router-dom';
 
 
-// Updated component to accept appliedDiscountCode prop
-const CheckoutPage = ({ appliedDiscountCode = "" }) => {
-  const [activeStep, setActiveStep] = useState(1);
-  const [shippingInfo, setShippingInfo] = useState({
-    fullName: "",
-    phone: "",
-    province: "",
-    district: "",
-    ward: "",
-    street: "",
-    saveAddress: false
-  });
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [cartItems, setCartItems] = useState(0);
-  const [showLogin, setShowLogin] = useState(false);
-  const [showRegister, setShowRegister] = useState(false);
-  const [showCheckout, setShowCheckout] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [showBestSeller, setShowBestSeller] = useState(false);
-  const [showNewArrivals, setShowNewArrivals] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState("");
-  const [cardDetails, setCardDetails] = useState({
-    number: "",
-    name: "",
-    expiry: "",
-    cvv: ""
-  });
+const CheckoutPage = () => {
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [showNewAddressForm, setShowNewAddressForm] = useState(false);
+  const [addresses, setAddresses] = useState([]);
+  const [newAddress, setNewAddress] = useState({ name: "", phone: "", region: "", fullAddress: "" });
+  const [editAddress, setEditAddress] = useState(null);
+  const [editingAddressId, setEditingAddressId] = useState(null);
+  const [cartItems, setCartItems] = useState([]);
+  const [subtotal, setSubtotal] = useState(0);
+  const [discount, setDiscount] = useState(20);
+  const [pointsUsed, setPointsUsed] = useState(0);
+  const [voucher, setVoucher] = useState(null);
+  const [voucherDiscount, setVoucherDiscount] = useState(0);
+  const [shippingMethod, setShippingMethod] = useState("none");
+  const [shippingCost, setShippingCost] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [orderPlaced, setOrderPlaced] = useState(false);
+  const [tax, setTax] = useState(0); // Thêm biến tax
+  const [pointsEarned, setPointsEarned] = useState(0);
+  const navigate = useNavigate();
+  const pointsEarnRate = 0.05;
 
-  // Initialize discountCode state with the prop value
-  const [discountCode, setDiscountCode] = useState(appliedDiscountCode);
-  const [isLoggedIn] = useState(false);
-
-
-  const [selectedVoucher, setSelectedVoucher] = useState("");
-  const [appliedVouchers, setAppliedVouchers] = useState([]);
-
-  const dummyProducts = [
-    {
-      id: 1,
-      name: "Premium Headphones",
-      quantity: 1,
-      price: 199.99,
-      image: "images.unsplash.com/photo-1505740420928-5e560c06d30e"
-    },
-    {
-      id: 2,
-      name: "Wireless Mouse",
-      quantity: 2,
-      price: 49.99,
-      image: "images.unsplash.com/photo-1527864550417-7fd91fc51a46"
-    }
-  ];
-
-  const availableVouchers = [
-    { id: 1, code: "SUMMER20", discount: 20, type: "percentage" },
-    { id: 2, code: "FREESHIP", discount: 10, type: "fixed" },
-    { id: 3, code: "SAVE50", discount: 50, type: "fixed" },
-  ];
-
-    const handleApplyVoucher = () => {
-        const voucher = availableVouchers.find(v => v.code === selectedVoucher);
-        if (voucher && !appliedVouchers.some(v => v.code === voucher.code)) {
-        setAppliedVouchers([...appliedVouchers, voucher]);
-        setSelectedVoucher("");
-        showToast("Voucher applied successfully!");
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        const headers = { Authorization: `Bearer ${token}` };
+        const response = await axios.get("http://localhost:5000/api/users/addresses", { headers });
+        setAddresses(response.data.addresses);
+        if (response.data.addresses.length > 0) {
+          setSelectedAddress(response.data.addresses[0]);
         }
+      } catch (error) {
+        console.error("There was an error fetching the addresses!", error);
+      }
     };
-
-    const handleRemoveVoucher = (voucherCode) => {
-        setAppliedVouchers(appliedVouchers.filter(v => v.code !== voucherCode));
-        showToast("Voucher removed");
-    };
-
-    const handleContinueShipping = () => {
-        if (validateShippingInfo()) {
-        setActiveStep(2);
-        showToast("Shipping information saved successfully");
-        }
-    };
-
-    const handleContinuePayment = () => {
-        if (validatePaymentInfo()) {
-        setActiveStep(3);
-        showToast("Payment method selected successfully");
-        }
-    };
-
-    const handleCompleteOrder = () => {
-        showToast("Order placed successfully!");
-    };
-
-    const validateShippingInfo = () => {
-        return Object.values(shippingInfo).every(value => 
-        typeof value === "boolean" ? true : Boolean(value)
-        );
-    };
-
-    const validatePaymentInfo = () => {
-        return Boolean(paymentMethod);
-    };
-
-    const showToast = (message) => {
-        alert(message);
-    };
-
-    const calculateTotal = () => {
-        const subtotal = dummyProducts.reduce((acc, product) => 
-        acc + (product.price * product.quantity), 0
-        );
-        const tax = subtotal * 0.1;
-        const shipping = 10;
-
-        let totalDiscount = 0;
-        appliedVouchers.forEach(voucher => {
-        if (voucher.type === "percentage") {
-            totalDiscount += (subtotal * voucher.discount / 100);
+  
+    const fetchCartItems = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        const headers = { Authorization: `Bearer ${token}` };
+        const response = await axios.get("http://localhost:5000/api/cart", { headers });
+        console.log("Fetched cart items:", response.data.cartItems);
+        setCartItems(response.data.cartItems);
+  
+        const calculatedSubtotal = response.data.cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+        setSubtotal(parseFloat(calculatedSubtotal.toFixed(2))); // Chuyển đổi thành double
+  
+        if (response.data.voucher) {
+          setVoucher(response.data.voucher);
+          setVoucherDiscount(response.data.voucher.discount);
         } else {
-            totalDiscount += voucher.discount;
+          setVoucher(null);
+          setVoucherDiscount(0);
         }
-        });
+  
+        // Lấy chính xác giá trị pointsUsed từ giỏ hàng
+        if (response.data.loyaltyPoints !== undefined) {
+          setPointsUsed(response.data.loyaltyPoints);
+        } else {
+          setPointsUsed(0);
+        }
+  
+        let shippingFee = 0;
+        if (response.data.shippingMethod) {
+          setShippingMethod(response.data.shippingMethod);
+          shippingFee = response.data.shippingMethod === 'standard' ? calculatedSubtotal * 0.05 : (response.data.shippingMethod === 'express' ? calculatedSubtotal * 0.08 : 0);
+          setShippingCost(parseFloat(shippingFee.toFixed(2))); // Chuyển đổi thành double
+        }
+  
+        const tax = calculatedSubtotal * 0.10; // Tính thuế 10%
+        setTax(tax);
+  
+        let calculatedTotal = calculatedSubtotal - (response.data.voucher ? response.data.voucher.discount : 0) - (response.data.loyaltyPoints * 0.1) + shippingFee + tax;
+        if (calculatedTotal < 0) calculatedTotal = 0; // Đảm bảo giá trị tối thiểu là 0$
+        calculatedTotal = parseFloat(calculatedTotal.toFixed(2)); // Chuyển đổi thành double
+        setTotal(calculatedTotal);
+  
+        const calculatedPointsEarned = Math.floor(calculatedTotal * pointsEarnRate);
+        setPointsEarned(calculatedPointsEarned);
+      } catch (error) {
+        console.error("There was an error fetching the cart items!", error);
+      }
+    };
+  
+    fetchAddresses();
+    fetchCartItems();
+  }, []);
+  
+  const handleNewAddressSubmit = async (e) => {
+    e.preventDefault();
 
-        const total = subtotal + tax + shipping - totalDiscount;
-        return { subtotal, tax, shipping, totalDiscount, total };
+    if (!newAddress.fullAddress) {
+      toast.error("Full Address is required.");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("authToken");
+      const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+
+      if (editingAddressId) {
+        await axios.put(`http://localhost:5000/api/users/addresses/${editingAddressId}`, newAddress, { headers });
+        setAddresses(addresses.map(address => address._id === editingAddressId ? newAddress : address));
+        toast.success("Address updated successfully");
+      } else {
+        const response = await axios.post("http://localhost:5000/api/users/addresses", newAddress, { headers });
+        setAddresses([...addresses, response.data.address]);
+        toast.success("Address added successfully");
+      }
+
+      setShowNewAddressForm(false);
+      setSelectedAddress(newAddress);
+      setEditingAddressId(null);
+      setNewAddress({ name: "", phone: "", region: "", fullAddress: "" });
+
+    } catch (error) {
+      console.error("There was an error adding/updating the address!", error);
+      toast.error("Failed to add/update address");
+    }
+  };
+
+  const saveAddress = async (addressId, updatedAddress) => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+      await axios.put(`http://localhost:5000/api/users/addresses/${addressId}`, updatedAddress, { headers });
+      setAddresses(addresses.map(address => address._id === addressId ? updatedAddress : address));
+      toast.success("Address updated successfully");
+    } catch (error) {
+      console.error("There was an error updating the address!", error);
+      toast.error("Failed to update address");
+    }
+  };
+
+  const handleEditSave = async () => {
+    if (editingAddressId && editAddress) {
+      await saveAddress(editingAddressId, editAddress);
+      setEditingAddressId(null);
+      setEditAddress(null);
+    }
+  };
+
+  const handlePlaceOrder = async () => {
+  if (!selectedAddress) {
+    toast.error("Please select a shipping address.");
+    return;
+  }
+
+  let calculatedTotal = Math.max(total, 0);
+  calculatedTotal = calculatedTotal === 0 ? 0.0 : parseFloat(calculatedTotal.toFixed(2)); // Đảm bảo kiểu double
+
+  try {
+    const token = localStorage.getItem("authToken");
+    const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+
+    // Giải mã token để lấy userId
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const userId = payload.userId;
+
+    console.log("User ID:", userId);
+    console.log("Cart Items:", cartItems);
+
+    const orderData = {
+      userId: userId,
+      products: cartItems.map(item => ({
+        productId: item.productId._id || item.productId, // Đảm bảo `productId` là đúng từ cartItems
+        quantity: item.quantity
+      })),
+      total: calculatedTotal,
+      status: 'pending',
+      createdAt: new Date(),
+      pointsEarned: Math.max(pointsEarned, 0),
+      address: {
+        name: selectedAddress.name,
+        phone: selectedAddress.phone,
+        region: selectedAddress.region,
+        fullAddress: selectedAddress.fullAddress
+      },
+      pointsUsed // Thêm thông tin pointsUsed để gửi lên server
     };
 
-    const categories = [
-        { id: 1, name: "Phones", image: "images.unsplash.com/photo-1511707171634-5f897ff02aa9" },
-        { id: 2, name: "Laptops", image: "images.unsplash.com/photo-1496181133206-80ce9b88a853" },
-        { id: 3, name: "Best Sellers", image: "images.unsplash.com/photo-1531297484001-80022131f5a1" },
-        { id: 4, name: "New Arrivals", image: "images.unsplash.com/photo-1498049794561-7780e7231661" }
-      ];
+    console.log("Order Data:", orderData);
+
+    await axios.post("http://localhost:5000/api/orders", orderData, { headers });
+    toast.success("Order placed successfully!");
+
+    // Điều hướng tới trang xác nhận đơn hàng
+    setOrderPlaced(true);
+    navigate('/order-confirmation');
+
+    // Xóa giỏ hàng trong cơ sở dữ liệu
+    await axios.delete("http://localhost:5000/api/cart", { headers });
+
+    // Reset lại giỏ hàng trên client
+    setCartItems([]);
+    setSubtotal(0);
+    setTotal(0);
+    setPointsUsed(0);
+    setVoucher(null);
+    setVoucherDiscount(0);
+    setShippingMethod("none");
+    setShippingCost(0);
+    setPointsEarned(0);
+  } catch (error) {
+    console.error("There was an error placing the order!", error.response?.data || error);
+    toast.error("Failed to place order");
+    if (error.response && error.response.data && error.response.data.errInfo) {
+      console.error("Validation error details:", error.response.data.errInfo.details);
+    } else {
+      console.error("Unknown error occurred", error);
+    }
+  }
+};
+
+  
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="fixed top-0 w-full bg-gray-900 text-white shadow-md z-40">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-8">
-              <h1 className="text-2xl font-bold text-blue-400">TechStore</h1>
-              <div className="hidden md:flex space-x-6 relative">
-                {categories.map(category => (
-                  <div
-                    key={category.id}
-                    className="relative group"
-                    onMouseEnter={() => setShowCategoryDropdown(true)}
-                    onMouseLeave={() => setShowCategoryDropdown(false)}
-                  >
-                    <button className="flex items-center space-x-1 hover:text-blue-400 transition-colors">
-                      <span>{category.name}</span>
-                      <FiChevronDown />
-                    </button>
-                    {showCategoryDropdown && (
-                      <div className="absolute top-full left-0 w-48 bg-white text-gray-900 shadow-lg rounded-lg py-2 mt-2 transform opacity-0 group-hover:opacity-100 transition-all duration-200">
-                        <a href="#" className="block px-4 py-2 hover:bg-gray-100">Sub Category 1</a>
-                        <a href="#" className="block px-4 py-2 hover:bg-gray-100">Sub Category 2</a>
-                        <a href="#" className="block px-4 py-2 hover:bg-gray-100">Sub Category 3</a>
+    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 mt-16">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h2 className="text-2xl font-bold mb-6">Shipping Information</h2>
+            
+            <div>
+              {addresses.length > 0 && !showNewAddressForm ? (
+                <div className="space-y-4">
+                  {addresses.map((addr, index) => (
+                    <div key={`${addr._id}-${index}`} className="flex items-center">
+                      <input
+                        type="radio"
+                        name="address"
+                        value={addr._id}
+                        checked={selectedAddress && selectedAddress._id === addr._id}
+                        onChange={() => setSelectedAddress(addr)}
+                        className="mr-4"
+                      />
+                      <div
+                        className={`p-4 border rounded-lg cursor-pointer text-left flex-1 ${selectedAddress?._id === addr._id ? "border-blue-500 bg-blue-50" : "border-gray-200"}`}
+                        onClick={() => setSelectedAddress(addr)}
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-semibold">{addr.name}</p>
+                            <p>{addr.phone}</p>
+                            <p>{addr.region}</p>
+                            <p>{addr.fullAddress}</p>
+                          </div>
+                          <button
+                            className="text-blue-600 hover:text-blue-800"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowNewAddressForm(true);
+                              setNewAddress(addr);
+                              setEditingAddressId(addr._id);
+                            }}
+                          >
+                            <FaEdit size={20} />
+                          </button>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="flex items-center space-x-6">
-              <div className="relative">
-                <FiShoppingCart className="text-2xl" />
-                {cartItems > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-                    {cartItems}
-                  </span>
-                )}
-              </div>
-              <button onClick={() => setShowLogin(true)} className="flex items-center space-x-2">
-                <FiUser className="text-2xl" />
-                <span>{isLoggedIn ? "John Doe" : "Login"}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav> 
-
-      <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <button
-          onClick={() => setActiveStep(Math.max(1, activeStep - 1))}
-          className="flex items-center text-gray-600 mb-6"
-        >
-          <FiArrowLeft className="mr-2" />
-          Back
-        </button>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 text-left">
-          <div className="lg:col-span-2 space-y-8">
-            <div className={activeStep === 1 ? "bg-white p-6 rounded-lg shadow-sm" : "bg-white p-6 rounded-lg shadow-sm opacity-50"}>
-              <h2 className="text-2xl font-bold mb-6">Shipping Information</h2>
-              <div className="space-y-4">
+                    </div>
+                  ))}
+                  <button
+                    className="w-full py-2 px-4 border border-blue-500 text-blue-500 rounded hover:bg-blue-50"
+                    onClick={() => setShowNewAddressForm(true)}
+                  >
+                    Add New Address
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleNewAddressSubmit} className="space-y-4 text-left">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Full Name</label>
+                  <label className="block text-sm font-medium text-gray-700">Name</label>
                   <input
                     type="text"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    value={shippingInfo.fullName}
-                    onChange={(e) => setShippingInfo({...shippingInfo, fullName: e.target.value})}
+                    value={newAddress.name}
+                    onChange={(e) => setNewAddress({ ...newAddress, name: e.target.value })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                  <label className="block text-sm font-medium text-gray-700">Phone</label>
                   <input
                     type="tel"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    value={shippingInfo.phone}
-                    onChange={(e) => setShippingInfo({...shippingInfo, phone: e.target.value})}
+                    value={newAddress.phone}
+                    onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    required
                   />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Province/City</label>
-                    <select
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      value={shippingInfo.province}
-                      onChange={(e) => setShippingInfo({...shippingInfo, province: e.target.value})}
-                    >
-                      <option value="">Select Province</option>
-                      <option value="province1">Province 1</option>
-                      <option value="province2">Province 2</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">District</label>
-                    <select
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      value={shippingInfo.district}
-                      onChange={(e) => setShippingInfo({...shippingInfo, district: e.target.value})}
-                    >
-                      <option value="">Select District</option>
-                      <option value="district1">District 1</option>
-                      <option value="district2">District 2</option>
-                    </select>
-                  </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Street Address</label>
+                  <label className="block text-sm font-medium text-gray-700">Region</label>
+                  <select
+                    value={newAddress.region}
+                    onChange={(e) => setNewAddress({ ...newAddress, region: e.target.value })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    required
+                  >
+                    <option value="" disabled>Select Region</option>
+                    <option value="Northern Vietnam">Northern Vietnam</option>
+                    <option value="Central Vietnam">Central Vietnam</option>
+                    <option value="Southern Vietnam">Southern Vietnam</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Full Address</label>
                   <input
                     type="text"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    value={shippingInfo.street}
-                    onChange={(e) => setShippingInfo({...shippingInfo, street: e.target.value})}
+                    value={newAddress.fullAddress}
+                    onChange={(e) => setNewAddress({ ...newAddress, fullAddress: e.target.value })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    required
                   />
                 </div>
-                {isLoggedIn && (
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="saveAddress"
-                      checked={shippingInfo.saveAddress}
-                      onChange={(e) => setShippingInfo({...shippingInfo, saveAddress: e.target.checked})}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label htmlFor="saveAddress" className="ml-2 text-sm text-gray-600">
-                      Save this address for future purchases
-                    </label>
-                  </div>
-                )}
-                {activeStep === 1 && (
+                <div className="flex space-x-4">
                   <button
-                    onClick={handleContinueShipping}
-                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+                    type="submit"
+                    className="flex-1 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
                   >
-                    Continue to Payment
+                    Save Address
                   </button>
-                )}
-              </div>
-            </div>
-
-            <div className={activeStep === 2 ? "bg-white p-6 rounded-lg shadow-sm" : "bg-white p-6 rounded-lg shadow-sm opacity-50"}>
-              <h2 className="text-2xl font-bold mb-6 text-left">Payment Method</h2>
-              <div className="space-y-4">
-                <div className="flex items-center p-4 border rounded-lg">
-                  <input
-                    type="radio"
-                    id="cod"
-                    name="payment"
-                    value="cod"
-                    checked={paymentMethod === "cod"}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="h-4 w-4 text-blue-600"
-                  />
-                  <label htmlFor="cod" className="ml-3 flex items-center">
-                    <BsCash className="h-6 w-6 text-gray-400 mr-2" />
-                    Cash on Delivery
-                  </label>
-                </div>
-
-                <div className="flex items-center p-4 border rounded-lg">
-                  <input
-                    type="radio"
-                    id="card"
-                    name="payment"
-                    value="card"
-                    checked={paymentMethod === "card"}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="h-4 w-4 text-blue-600"
-                  />
-                  <label htmlFor="card" className="ml-3 flex items-center">
-                    <BsCreditCard2Back className="h-6 w-6 text-gray-400 mr-2" />
-                    Credit/Debit Card
-                  </label>
-                </div>
-
-                {paymentMethod === "card" && (
-                  <div className="space-y-4 mt-4 p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Card Number</label>
-                      <input
-                        type="text"
-                        maxLength="16"
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        value={cardDetails.number}
-                        onChange={(e) => setCardDetails({...cardDetails, number: e.target.value})}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Cardholder Name</label>
-                      <input
-                        type="text"
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        value={cardDetails.name}
-                        onChange={(e) => setCardDetails({...cardDetails, name: e.target.value})}
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Expiry Date</label>
-                        <input
-                          type="text"
-                          placeholder="MM/YY"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                          value={cardDetails.expiry}
-                          onChange={(e) => setCardDetails({...cardDetails, expiry: e.target.value})}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">CVV</label>
-                        <input
-                          type="text"
-                          maxLength="3"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                          value={cardDetails.cvv}
-                          onChange={(e) => setCardDetails({...cardDetails, cvv: e.target.value})}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex items-center p-4 border rounded-lg">
-                  <input
-                    type="radio"
-                    id="wallet"
-                    name="payment"
-                    value="wallet"
-                    checked={paymentMethod === "wallet"}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="h-4 w-4 text-blue-600"
-                  />
-                  <label htmlFor="wallet" className="ml-3 flex items-center">
-                    <BsWallet2 className="h-6 w-6 text-gray-400 mr-2" />
-                    E-Wallet
-                  </label>
-                </div>
-
-                {activeStep === 2 && (
-                  <button
-                    onClick={handleContinuePayment}
-                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
-                  >
-                    Continue to Review
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="lg:col-span-1 text-left">
-            <div className="bg-white p-6 rounded-lg shadow-sm sticky top-4">
-            <h2 className="text-2xl font-bold mb-6">Order Summary</h2>
-            <div className="space-y-4">
-                {dummyProducts.map((product) => (
-                <div key={product.id} className="flex space-x-4">
-                    <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-20 h-20 object-cover rounded"
-                    />
-                    <div className="flex-1">
-                    <h3 className="font-medium">{product.name}</h3>
-                    <p className="text-gray-500">Qty: {product.quantity}</p>
-                    <p className="text-gray-900">${product.price.toFixed(2)}</p>
-                    </div>
-                </div>
-                ))}
-
-                <div className="border-t pt-4">
-                <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Available Vouchers
-                    </label>
-                    <div className="flex gap-2">
-                    <select
-                        value={selectedVoucher}
-                        onChange={(e) => setSelectedVoucher(e.target.value)}
-                        className="flex-1 rounded-l-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  {addresses.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setShowNewAddressForm(false)}
+                      className="flex-1 border border-gray-300 py-2 px-4 rounded hover:bg-gray-50"
                     >
-                        <option value="">Select a voucher</option>
-                        {availableVouchers.map(voucher => (
-                        <option key={voucher.id} value={voucher.code}>
-                            {voucher.code} - {voucher.type === "percentage" ? `${voucher.discount}%` : `$${voucher.discount}`} off
-                        </option>
-                        ))}
-                    </select>
-                    <button 
-                        onClick={handleApplyVoucher}
-                        className="bg-blue-600 text-white px-4 rounded-r-md hover:bg-blue-700 transition-colors"
-                        disabled={!selectedVoucher}
-                    >
-                        Apply
+                      Cancel
                     </button>
-                    </div>
+                  )}
                 </div>
+              </form>
+            )}
+          </div>
 
-                {appliedVouchers.length > 0 && (
-                    <div className="mb-4">
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Applied Vouchers</h4>
-                    <div className="space-y-2">
-                        {appliedVouchers.map(voucher => (
-                        <div key={voucher.code} className="flex items-center justify-between bg-gray-50 p-2 rounded">
-                            <div className="flex items-center">
-                            <BsTag className="text-green-500 mr-2" />
-                            <span className="text-sm">{voucher.code}</span>
-                            </div>
-                            <button
-                            onClick={() => handleRemoveVoucher(voucher.code)}
-                            className="text-red-500 hover:text-red-700"
-                            >
-                            <FaTimes />
-                            </button>
-                        </div>
-                        ))}
-                    </div>
-                    </div>
-                )}
-                </div>
-
-                <div className="border-t pt-4 space-y-2">
-                <div className="flex justify-between text-gray-600">
-                    <span>Subtotal</span>
-                    <span>${calculateTotal().subtotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-gray-600">
-                    <span>Tax</span>
-                    <span>${calculateTotal().tax.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-gray-600">
-                    <span>Shipping</span>
-                    <span>${calculateTotal().shipping.toFixed(2)}</span>
-                </div>
-                {calculateTotal().totalDiscount > 0 && (
-                    <div className="flex justify-between text-green-600">
-                    <span>Discount Savings</span>
-                    <span>-${calculateTotal().totalDiscount.toFixed(2)}</span>
-                    </div>
-                )}
-                <div className="flex justify-between font-bold text-lg">
-                    <span>Total</span>
-                    <span>${calculateTotal().total.toFixed(2)}</span>
-                </div>
-                </div>
-
-                {activeStep === 3 && (
-                <button
-                    onClick={handleCompleteOrder}
-                    className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors"
-                >
-                    Complete Order
-                </button>
-                )}
-            </div>
-            </div>
-        </div>
-        </div>
-      </main>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-xl font-bold mb-4">TechStore</h3>
-              <p className="text-gray-400">Your one-stop shop for all things tech</p>
-            </div>
-            <div>
-              <h4 className="font-bold mb-4">Quick Links</h4>
-              <ul className="space-y-2">
-                <li><a href="#" className="text-gray-400 hover:text-white">Privacy Policy</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white">Terms of Use</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white">Return Policy</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold mb-4">Contact</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>123 Tech Street</li>
-                <li>Phone: (123) 456-7890</li>
-                <li>Email: support@techstore.com</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold mb-4">Follow Us</h4>
-              <div className="flex space-x-4">
-                <FaFacebook className="text-2xl hover:text-blue-500 cursor-pointer" />
-                <FaGoogle className="text-2xl hover:text-red-500 cursor-pointer" />
-              </div>
+          {/* Payment Method Section */}
+          <div className="mt-8">
+            <h3 className="text-xl font-bold mb-4">Payment Method</h3>
+            <div className="p-4 bg-gray-50 rounded flex items-center">
+              <FaMoneyBill className="text-green-600 mr-2" size={24} />
+              <span className="font-medium">Cash Only</span>
             </div>
           </div>
         </div>
-      </footer>
+
+        {/* Order Summary Section */}
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-2xl font-bold mb-6">Order Summary</h2>
+          <div className="space-y-4">
+            {cartItems.map((item, index) => (
+              <div key={`${item.id}-${index}`} className="flex justify-between items-center py-2 border-b">
+                <div className="flex items-center">
+                  <img 
+                    src={`http://localhost:5000${item.image}`} // Cập nhật URL lấy ảnh từ sản phẩm
+                    alt={item.name}
+                    className="w-16 h-16 object-cover rounded-md mr-4"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://via.placeholder.com/150"; // Ảnh mẫu dự phòng nếu ảnh sản phẩm không hiển thị
+                    }}
+                  />
+                  <div>
+                    <h3 className="font-medium">{item.name}</h3>
+                    <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
+                  </div>
+                </div>
+                <p className="font-medium">${(item.price * item.quantity).toFixed(2)}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 space-y-2">
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span>${subtotal.toFixed(2)}</span>
+            </div>
+            {voucher && (
+              <div className="flex justify-between text-green-600">
+                <span>Voucher Discount ({voucher.code})</span>
+                <span>-${voucherDiscount.toFixed(2)}</span>
+              </div>
+            )}
+            {pointsUsed > 0 && (
+              <div className="flex justify-between text-green-600">
+                <span>Points Used ({pointsUsed} pts)</span>
+                <span>-${(pointsUsed * 0.1).toFixed(2)}</span>
+              </div>
+            )}
+            {shippingMethod !== 'none' && (
+              <div className="flex justify-between text-black">
+                <span>Shipping ({shippingMethod})</span>
+                <span>${shippingCost.toFixed(2)}</span>
+              </div>
+            )}
+            <div className="flex justify-between">
+              <span>Tax (10%)</span>
+              <span>${tax.toFixed(2)}</span>
+            </div>
+            <div className="pt-4 border-t">
+              <div className="flex justify-between items-center">
+                <span className="text-xl font-bold">Total</span>
+                <span className="text-xl font-bold">${total.toFixed(2)}</span>
+              </div>
+            </div>
+            <div className="flex justify-between text-blue-600">
+              <span>Points Earned</span>
+              <span>{pointsEarned} pts</span>
+            </div>
+          </div>
+          <button
+            className="w-full mt-6 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            onClick={handlePlaceOrder}
+          >
+            Place Order
+          </button>
+        </div>
+      </div>
     </div>
-  );
+    <ToastContainer />
+  </div>
+);
 };
 
 export default CheckoutPage;

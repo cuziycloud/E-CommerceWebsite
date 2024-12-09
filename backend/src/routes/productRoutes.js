@@ -12,6 +12,8 @@ const {
   updateProductBySlug, // Thêm hàm cập nhật sản phẩm theo slug
 } = require('../controllers/productController');
 
+const { getRelatedProducts } = require('../controllers/productController');
+
 const router = express.Router();
 
 const storage = multer.diskStorage({
@@ -50,5 +52,7 @@ router.delete('/:id', deleteProduct);
 
 // Route cập nhật sản phẩm
 router.put('/:id', updateProduct);
+
+router.post('/related-products', getRelatedProducts);
 
 module.exports = router;

@@ -3,8 +3,8 @@ import { FaSearch, FaChevronLeft, FaChevronRight, FaStar } from "react-icons/fa"
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const LaptopCatalog = () => {
-  const [laptops, setLaptops] = useState([]);
+const TabletCatalog = () => {
+  const [tablets, setTablets] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState("default");
   const [error, setError] = useState(null);
@@ -12,34 +12,34 @@ const LaptopCatalog = () => {
 
   // Gọi API để lấy dữ liệu sản phẩm
   useEffect(() => {
-    axios.get("http://localhost:5000/api/products/category?category=Laptop")
+    axios.get("http://localhost:5000/api/products/category?category=Tablet")
       .then(response => {
-        setLaptops(response.data.products);
+        setTablets(response.data.products);
       })
       .catch(error => {
-        setError("Error fetching laptops. Please try again.");
+        setError("Error fetching tablets. Please try again.");
       });
   }, []);
 
   const itemsPerPage = 10;
-  const totalPages = Math.ceil(laptops.length / itemsPerPage);
+  const totalPages = Math.ceil(tablets.length / itemsPerPage);
 
   const handleSort = (criteria) => {
-    let sortedLaptops = [...laptops];
+    let sortedTablets = [...tablets];
     switch (criteria) {
       case "price-low":
-        sortedLaptops.sort((a, b) => a.price - b.price);
+        sortedTablets.sort((a, b) => a.price - b.price);
         break;
       case "price-high":
-        sortedLaptops.sort((a, b) => b.price - a.price);
+        sortedTablets.sort((a, b) => b.price - a.price);
         break;
       case "rating":
-        sortedLaptops.sort((a, b) => b.rating - a.rating);
+        sortedTablets.sort((a, b) => b.rating - a.rating);
         break;
       default:
-        sortedLaptops = [...laptops];
+        sortedTablets = [...tablets];
     }
-    setLaptops(sortedLaptops);
+    setTablets(sortedTablets);
     setSortBy(criteria);
     setCurrentPage(1);
   };
@@ -47,7 +47,7 @@ const LaptopCatalog = () => {
   const getCurrentPageItems = () => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    return laptops.slice(startIndex, endIndex);
+    return tablets.slice(startIndex, endIndex);
   };
 
   if (error) {
@@ -65,7 +65,7 @@ const LaptopCatalog = () => {
     <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
       <div className="pt-20 max-w-7xl mx-auto">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4 sm:mb-0">Laptop Catalog</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4 sm:mb-0">Tablet Catalog</h1>
           <div className="flex items-center space-x-4">
             <label htmlFor="sort" className="text-gray-700 font-medium">
               Sort by:
@@ -85,34 +85,34 @@ const LaptopCatalog = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {getCurrentPageItems().map((laptop) => (
+          {getCurrentPageItems().map((tablet) => (
             <div
-              key={laptop._id}
+              key={tablet._id}
               className="bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105 cursor-pointer" // Thêm cursor-pointer
               role="article"
-              onClick={() => navigate(`/laptop/${laptop.slug}`)} // Sự kiện onClick điều hướng tới trang chi tiết sản phẩm
+              onClick={() => navigate(`/tablet/${tablet.slug}`)} // Sự kiện onClick điều hướng tới trang chi tiết sản phẩm
             >
               <img
-                src={`http://localhost:5000${laptop.images[0]}`}
-                alt={laptop.name}
+                src={`http://localhost:5000${tablet.images[0]}`}
+                alt={tablet.name}
                 className="w-full h-48 object-cover"
                 onError={(e) => {
                   e.target.src = "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=500&h=350";
                 }}
               />
               <div className="p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">{laptop.name}</h2>
-                <p className="text-gray-600 mb-4">{laptop.description}</p>
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">{tablet.name}</h2>
+                <p className="text-gray-600 mb-4">{tablet.description}</p>
                 <div className="flex justify-between items-center">
-                  <span className="text-2xl font-bold text-indigo-600">${laptop.price}</span>
+                  <span className="text-2xl font-bold text-indigo-600">${tablet.price}</span>
                   <div className="flex items-center">
                     <FaStar className="text-yellow-400 mr-1" />
-                    <span className="text-gray-600">{laptop.rating}</span>
+                    <span className="text-gray-600">{tablet.rating}</span>
                   </div>
                 </div>
                 <button
                   className="mt-4 w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-300"
-                  aria-label={`Add ${laptop.name} to cart`}
+                  aria-label={`Add ${tablet.name} to cart`}
                 >
                   Add to Cart
                 </button>
@@ -160,4 +160,4 @@ const LaptopCatalog = () => {
   );
 };
 
-export default LaptopCatalog;
+export default TabletCatalog;

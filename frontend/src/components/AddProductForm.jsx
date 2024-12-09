@@ -183,7 +183,7 @@ const AddProductForm = () => {
     }
   
     if (Object.keys(newErrors).length === 0) {
-      formData.price = Number(formData.price);
+      formData.price = parseFloat(formData.price); // Đảm bảo price là số thực
       formData.stock = formData.variants.reduce((acc, variant) => acc + parseInt(variant.stock, 10), 0);
       formData.variants = formData.variants.map(variant => ({
         ...variant,
@@ -249,6 +249,7 @@ const AddProductForm = () => {
       setErrors(newErrors);
     }
   };
+  
   
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
@@ -326,21 +327,20 @@ const AddProductForm = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="price" className="block text-sm font-medium text-gray-700">
-                    Price *
-                  </label>
-                  <input
-                    type="number"
-                    id="price"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleInputChange}
-                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${errors.price ? "border-red-500" : ""}`}
-                    
-                  />
-                  {errors.price && <p className="mt-1 text-sm text-red-500">{errors.price}</p>}
-                </div>
-
+                    <label htmlFor="price" className="block text-sm font-medium text-gray-700">
+                      Price *
+                    </label>
+                    <input
+                      type="number"
+                      id="price"
+                      name="price"
+                      value={formData.price}
+                      onChange={handleInputChange}
+                      step="0.01" // Thêm thuộc tính này để cho phép số thực
+                      className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${errors.price ? "border-red-500" : ""}`}
+                    />
+                    {errors.price && <p className="mt-1 text-sm text-red-500">{errors.price}</p>}
+                  </div>                                    
                 <div className="col-span-2">
                   <label htmlFor="description" className="block text-sm font-medium text-gray-700">
                     Description
