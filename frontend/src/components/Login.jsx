@@ -138,7 +138,7 @@ const Login = ({ onLoginSuccess }) => {
                     className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    
                   </button>
                 </div>
                 {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password}</p>}
