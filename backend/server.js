@@ -6,6 +6,7 @@ const path = require('path');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const passport = require('passport');
+
 require('dotenv').config();
 require('./src/config/passport');
 
@@ -16,7 +17,7 @@ const userRoutes = require('./src/routes/userRoutes');
 const cartRoutes = require('./src/routes/cartRoutes');
 const promotionRoutes = require('./src/routes/promotionRoutes');
 const orderRoutes = require('./src/routes/orderRoutes'); 
-
+const reviewRoutes = require('./src/routes/reviewRoutes');
 const app = express();
 
 mongoose.connect(process.env.MONGO_URI, {
@@ -45,6 +46,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/promotions', promotionRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 // Tạo đường dẫn tĩnh cho thư mục upload
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));

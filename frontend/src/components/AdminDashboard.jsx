@@ -21,6 +21,10 @@ const AdminDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [orderStatusData, setOrderStatusData] = useState({});
   const [promotions, setPromotions] = useState([]);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState("");
+
   const [revenue, setRevenue] = useState(0);
   const [revenueByWeek, setRevenueByWeek] = useState([]);
   const [topProducts, setTopProducts] = useState([]);
@@ -138,8 +142,6 @@ const AdminDashboard = () => {
   };
   
   
-  
-  
   const handleCancelPromotion = async (id) => {
     try {
       const response = await axios.put(`http://localhost:5000/api/promotions/${id}/status`, {
@@ -177,10 +179,28 @@ const AdminDashboard = () => {
   
   
   
+  const filteredOrders = orders.filter((order) => {
+    const orderDate = new Date(order.createdAt);
+    const start = startDate ? new Date(startDate) : null;
+    const end = endDate ? new Date(endDate) : null;
+    if (start && end) {
+      return orderDate >= start && orderDate <= end;
+    }
+    if (start) {
+      return orderDate >= start;
+    }
+    if (end) {
+      return orderDate <= end;
+    }
+    return true;
+  });
   
   
   
   
+  const filteredUsers = users.filter(user =>
+    user.name.toLowerCase().includes(searchKeyword.toLowerCase())
+  );
   
   
   
@@ -352,17 +372,22 @@ const totalRevenue = revenueByWeek.reduce((sum, weekRevenue) => sum + weekRevenu
       return (
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="p-4 flex justify-between items-center">
-            <input
-              type="text"
-              placeholder="Search orders..."
-              className="p-2 border rounded-lg"
-            />
-            <select className="p-2 border rounded-lg">
-              <option>Last 7 days</option>
-              <option>Last 30 days</option>
-              <option>Last 90 days</option>
-            </select>
-          </div>
+  <div className="flex items-center space-x-4">
+    <input
+      type="date"
+      value={startDate}
+      onChange={(e) => setStartDate(e.target.value)}
+      className="p-2 border rounded-lg"
+    />
+    <input
+      type="date"
+      value={endDate}
+      onChange={(e) => setEndDate(e.target.value)}
+      className="p-2 border rounded-lg"
+    />
+  </div>
+</div>
+
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50">
@@ -375,50 +400,51 @@ const totalRevenue = revenueByWeek.reduce((sum, weekRevenue) => sum + weekRevenu
               </tr>
             </thead>
             <tbody>
-              {paginate(orders, currentOrderPage).map((order) => (
-                <tr key={order._id} className="border-t">
-                  <td className="p-4 text-left">{`OD-${order._id.slice(-6)}`}</td>
-                  <td className="p-4 text-left">
-                    {order.products.map((product) => (
-                      <div key={product._id}>
-                        {product.productId ? `${product.productId.name} (Quantity: ${product.quantity})` : 'Product not found'}
-                      </div>
-                    ))}
-                  </td>
-                  <td className="p-4 text-left">${order.total.toFixed(2)}</td>
-                  <td className="p-4 text-left">
-                    <span
-                      className={`px-2 py-1 rounded-full text-sm ${
-                        order.status === "completed"
-                          ? "bg-green-100 text-black-800"
-                          : order.status === "Delivered"
-                          ? "bg-green-100 text-green-800"
-                          : order.status === "canceled"
-                          ? "bg-red-100 text-red-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {order.status}
-                    </span>
-                  </td>
-                  <td className="p-4 text-left">{new Date(order.createdAt).toLocaleDateString()}</td>
-                  <td className="p-4 text-left">
-                    <Link 
-                      to={`/admin/edit-order/${order._id}`}
-                      className="text-blue-600 hover:text-blue-800 mr-2"
-                    >
-                      Edit
-                    </Link>
-                    <button 
-                      className="text-red-600 hover:text-red-800"
-                      onClick={() => cancelOrder(order._id)}
-                    >
-                      Cancel
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+  {paginate(filteredOrders, currentOrderPage).map((order) => (
+    <tr key={order._id} className="border-t">
+      <td className="p-4 text-left">{`OD-${order._id.slice(-6)}`}</td>
+      <td className="p-4 text-left">
+        {order.products.map((product) => (
+          <div key={product._id}>
+            {product.productId ? `${product.productId.name} (Quantity: ${product.quantity})` : 'Product not found'}
+          </div>
+        ))}
+      </td>
+      <td className="p-4 text-left">${order.total.toFixed(2)}</td>
+      <td className="p-4 text-left">
+        <span
+          className={`px-2 py-1 rounded-full text-sm ${
+            order.status === "completed"
+              ? "bg-green-100 text-black-800"
+              : order.status === "Delivered"
+              ? "bg-green-100 text-green-800"
+              : order.status === "canceled"
+              ? "bg-red-100 text-red-800"
+              : "bg-yellow-100 text-yellow-800"
+          }`}
+        >
+          {order.status}
+        </span>
+      </td>
+      <td className="p-4 text-left">{new Date(order.createdAt).toLocaleDateString()}</td>
+      <td className="p-4 text-left">
+        <Link 
+          to={`/admin/edit-order/${order._id}`}
+          className="text-blue-600 hover:text-blue-800 mr-2"
+        >
+          Edit
+        </Link>
+        <button 
+          className="text-red-600 hover:text-red-800"
+          onClick={() => cancelOrder(order._id)}
+        >
+          Cancel
+        </button>
+      </td>
+    </tr>
+  ))}
+</tbody>
+
           </table>
           <PaginationControls
             totalItems={orders.length}
@@ -498,6 +524,8 @@ const totalRevenue = revenueByWeek.reduce((sum, weekRevenue) => sum + weekRevenu
         <input
           type="text"
           placeholder="Search users..."
+          value={searchKeyword}
+          onChange={(e) => setSearchKeyword(e.target.value)}
           className="p-2 border rounded-lg"
         />
       </div>
@@ -513,7 +541,7 @@ const totalRevenue = revenueByWeek.reduce((sum, weekRevenue) => sum + weekRevenu
           </tr>
         </thead>
         <tbody>
-          {paginate(users, currentUserPage).map((user, index) => (
+          {paginate(filteredUsers, currentUserPage).map((user, index) => (
             <tr key={user._id} className="border-t text-left">
               <td className="p-4">{(currentUserPage - 1) * itemsPerPage + index + 1}</td>
               <td className="p-4">{user.name}</td>
@@ -537,7 +565,7 @@ const totalRevenue = revenueByWeek.reduce((sum, weekRevenue) => sum + weekRevenu
         </tbody>
       </table>
       <PaginationControls
-        totalItems={users.length}
+        totalItems={filteredUsers.length}
         currentPage={currentUserPage}
         setCurrentPage={setCurrentUserPage}
       />

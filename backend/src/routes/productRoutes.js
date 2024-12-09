@@ -10,10 +10,13 @@ const {
   deleteProduct,
   updateProduct,
   searchProducts,
-  updateProductBySlug, // Thêm hàm cập nhật sản phẩm theo slug
+  updateProductBySlug,
+  getFeaturedProducts,
+  getProductReviews,
+  addReview
 } = require('../controllers/productController');
-
 const { getRelatedProducts } = require('../controllers/productController');
+const authenticateJWT = require('../middleware/authenticateJWT');
 
 const router = express.Router();
 
@@ -30,33 +33,19 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+router.get('/featured', getFeaturedProducts);
 router.get('/search', searchProducts);
-// Route thêm sản phẩm mới
 router.post('/add-product', upload.array('images', 5), addProduct);
-
-// Route lấy sản phẩm theo category
 router.get('/category', getProductsByCategory);
-
-// Route lấy sản phẩm theo slug
 router.get('/slug/:slug', getProductBySlug);
-
-// Route cập nhật sản phẩm theo slug
-router.put('/slug/:slug', updateProductBySlug); // Thêm route cập nhật sản phẩm theo slug
-
-// Route lấy danh sách sản phẩm
+router.put('/slug/:slug', updateProductBySlug);
 router.get('/', getProducts);
-
-// Route lấy thông tin sản phẩm theo ID
 router.get('/:id', getProductById);
-
-// Route xóa sản phẩm
 router.delete('/:id', deleteProduct);
-
-// Route cập nhật sản phẩm
 router.put('/:id', updateProduct);
-
-
-
 router.post('/related-products', getRelatedProducts);
+router.post('/:productId/reviews', authenticateJWT, addReview);
+router.get('/:productId/reviews', getProductReviews);
+
 
 module.exports = router;

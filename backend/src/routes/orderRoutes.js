@@ -7,6 +7,7 @@ const Cart = require('../models/Cart');
 const Product = require('../models/Product'); // Import thêm model Product
 const { formatOrderId } = require('../utils/utils');
 const { sendOrderConfirmationEmail } = require('../utils/emailService'); // Import dịch vụ gửi email
+const authenticateJWT = require('../middleware/authenticateJWT'); // Import middleware xác thực
 
 // Hàm giảm số lượng sản phẩm trong kho
 async function updateProductStock(orderItems) {
@@ -190,5 +191,23 @@ router.put('/:id', async (req, res) => {
     res.status(500).json({ success: false, message: "Error updating order", error: error.message });
   }
 });
+
+router.get('/has-purchased/:productId', authenticateJWT, async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const userId = req.user.userId;
+
+    const order = await Order.findOne({
+      userId: userId,
+      'products.productId': productId
+    });
+
+    res.status(200).json({ hasPurchased: !!order });
+  } catch (error) {
+    console.error('Error checking purchase:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 
 module.exports = router;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FiShoppingCart, FiUser, FiSearch } from "react-icons/fi";
-import { FaGoogle, FaFacebook, FaShoppingCart, FaTrash } from "react-icons/fa";
+import { FaStar, FaFacebook, FaShoppingCart, FaTrash } from "react-icons/fa";
 import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
 import { Link, useNavigate } from "react-router-dom"; 
 import axios from "axios";
@@ -9,6 +9,11 @@ const HomePage = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentLaptopPage, setCurrentLaptopPage] = useState(0);
+  const [currentPhonePage, setCurrentPhonePage] = useState(0);
+  const [currentTabletPage, setCurrentTabletPage] = useState(0);
+  const [currentConsolePage, setCurrentConsolePage] = useState(0);
+  const [currentAccessoryPage, setCurrentAccessoryPage] = useState(0);
   const [laptops, setLaptops] = useState([]);
   const [phones, setPhones] = useState([]);
   const [tablets, setTablets] = useState([]);
@@ -16,8 +21,14 @@ const HomePage = () => {
   const [accessories, setAccessories] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [error, setError] = useState(null);
+
   const [userName, setUserName] = useState("");
   const navigate = useNavigate();
+
+  const productsPerPage = 4;
 
   useEffect(() => {
     axios.get("http://localhost:5000/api/products/category?category=Laptop")
@@ -87,52 +98,16 @@ const HomePage = () => {
     }
   ];
 
-  const featuredProducts = [
-    {
-      id: 1,
-      name: "iPhone 13 Pro",
-      price: "$999",
-      image: "images.unsplash.com/photo-1632661674596-df8be070a5c5",
-      category: "Phones",
-      description: "Latest iPhone with Pro camera system",
-      images: [
-        "images.unsplash.com/photo-1632661674596-df8be070a5c5",
-        "images.unsplash.com/photo-1610945265064-0e34e5519bbf",
-        "images.unsplash.com/photo-1511707171634-5f897ff02aa9"
-      ]
-    },
-    {
-      id: 2,
-      name: "MacBook Pro M1",
-      price: "$1299",
-      image: "images.unsplash.com/photo-1617499610754-53f754d5438d",
-      category: "Laptops",
-      description: "Powerful laptop with M1 chip",
-      images: [
-        "images.unsplash.com/photo-1617499610754-53f754d5438d",
-        "images.unsplash.com/photo-1593642632823-8f785ba67e45",
-        "images.unsplash.com/photo-1496181133206-80ce9b88a853"
-      ]
-    }
-  ];
-
-
-  const bestSellers = [
-    { id: 1, name: "iPhone 13 Pro", price: "$999", image: "images.unsplash.com/photo-1632661674596-df8be070a5c5" },
-    { id: 2, name: "MacBook Pro M1", price: "$1299", image: "images.unsplash.com/photo-1617499610754-53f754d5438d" }
-  ];
-
-  const newArrivals = [
-    { id: 1, name: "AirPods Pro", price: "$249", image: "images.unsplash.com/photo-1572569511254-d8f925fe2cbb" },
-    { id: 2, name: "iPad Air", price: "$599", image: "images.unsplash.com/photo-1544244015-0df4b3ffc6b0" }
-  ];
-
-  const categories = [
-    { id: 1, name: "Phones", image: "images.unsplash.com/photo-1511707171634-5f897ff02aa9" },
-    { id: 2, name: "Laptops", image: "images.unsplash.com/photo-1496181133206-80ce9b88a853" },
-    { id: 3, name: "Best Sellers", image: "images.unsplash.com/photo-1531297484001-80022131f5a1" },
-    { id: 4, name: "New Arrivals", image: "images.unsplash.com/photo-1498049794561-7780e7231661" }
-  ];
+  useEffect(() => {
+    axios.get("http://localhost:5000/api/products/featured")
+      .then(response => {
+        setFeaturedProducts(response.data.products);
+      })
+      .catch(error => {
+        setError("Error fetching featured products. Please try again.");
+        console.error('Error fetching featured products:', error); // Thêm logging chi tiết
+      });
+  }, []);
 
   const handleSearch = () => {
     navigate(`/search/${searchKeyword}`);
@@ -142,6 +117,18 @@ const HomePage = () => {
     if (event.key === "Enter") {
       handleSearch();
     }
+  };
+
+  const handleNextPage = (setCurrentPage, currentPage, items) => {
+    setCurrentPage((prevPage) => (prevPage + 1) % Math.ceil(items.length / productsPerPage));
+  };
+
+  const handlePrevPage = (setCurrentPage, currentPage, items) => {
+    setCurrentPage((prevPage) => (prevPage - 1 + Math.ceil(items.length / productsPerPage)) % Math.ceil(items.length / productsPerPage));
+  };
+
+  const getCurrentProducts = (items, currentPage) => {
+    return items.slice(currentPage * productsPerPage, (currentPage + 1) * productsPerPage);
   };
 
   const ProductDetail = ({ product }) => (
@@ -232,8 +219,8 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Banner Slider */}
-      <div className="relative h-96">
+            {/* Banner Slider */}
+            <div className="relative h-96">
         {bannerSlides.map((slide, index) => (
           <div
             key={slide.id}
@@ -247,7 +234,6 @@ const HomePage = () => {
             <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
               <div className="text-center text-white">
                 <h2 className="text-4xl font-bold mb-4">{slide.title}</h2>
-                <button className="bg-blue-600 px-8 py-3 rounded-lg hover:bg-blue-700">Shop Now</button>
               </div>
             </div>
           </div>
@@ -267,53 +253,68 @@ const HomePage = () => {
       </div>
 
       {/* Categories */}
-<div className="container mx-auto px-4 py-12">
-  <h2 className="text-3xl font-bold mb-8">Categories</h2>
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-    {categories.map(category => (
-      <Link
-        key={category.id}
-        to={`/${category.name.toLowerCase()}`} // Điều hướng tới đúng trang
-        className="relative rounded-lg overflow-hidden h-48 group"
-      >
-        <img
-          src={`https://${category.image}`}
-          alt={category.name}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-        />
-        <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center group-hover:bg-opacity-50 transition-all duration-300">
-          <h3 className="text-white text-xl font-bold">{category.name}</h3>
+      <div className="container mx-auto px-4 py-12">
+        <h2 className="text-3xl font-bold mb-8">Categories</h2>
+        <div className="bg-white p-6 rounded-lg shadow-lg">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <Link to="/laptop" className="bg-blue-200 rounded-lg shadow-md flex items-center justify-center h-48 transform hover:scale-105 transition-transform duration-300">
+              <div className="text-center">
+                <h3 className="text-xl font-bold">Laptops</h3>
+              </div>
+            </Link>
+            <Link to="/phone" className="bg-green-200 rounded-lg shadow-md flex items-center justify-center h-48 transform hover:scale-105 transition-transform duration-300">
+              <div className="text-center">
+                <h3 className="text-xl font-bold">Phones</h3>
+              </div>
+            </Link>
+            <Link to="/console" className="bg-yellow-200 rounded-lg shadow-md flex items-center justify-center h-48 transform hover:scale-105 transition-transform duration-300">
+              <div className="text-center">
+                <h3 className="text-xl font-bold">Consoles</h3>
+              </div>
+            </Link>
+            <Link to="/accessory" className="bg-red-200 rounded-lg shadow-md flex items-center justify-center h-48 transform hover:scale-105 transition-transform duration-300">
+              <div className="text-center">
+                <h3 className="text-xl font-bold">Accessories</h3>
+              </div>
+            </Link>
+          </div>
         </div>
-      </Link>
-    ))}
-  </div>
-</div>
-
+      </div>
 
       {/* Featured Products */}
       <div className="container mx-auto px-4 py-12">
         <h2 className="text-3xl font-bold mb-8">Featured Products</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {featuredProducts.map(product => (
-            <div
-              key={product.id}
-              className="bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300"
-              onClick={() => setSelectedProduct(product)}
-            >
-              <img
-                src={`https://${product.image}`}
-                alt={product.name}
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-4">
-                <h3 className="font-bold text-lg mb-2">{product.name}</h3>
-                <p className="text-gray-600 mb-4">{product.price}</p>
-                <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
-                  Buy Now
-                </button>
+        <div className="bg-white p-6 rounded-lg shadow-lg">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {getCurrentProducts(featuredProducts, currentPage).map(product => (
+              <div
+                key={product._id}
+                className="bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-transform duration-300"
+                onClick={() => setSelectedProduct(product)}
+              >
+                <img
+                  src={`http://localhost:5000${product.images[0]}`}
+                  alt={product.name}
+                  className="w-full h-48 object-cover"
+                />
+                <div className="p-4">
+                  <h3 className="font-bold text-lg mb-2">{product.name}</h3>
+                  <p className="text-gray-600 mb-4">${product.price}</p>
+                  <div className="flex items-center justify-end">
+                    <span className="text-gray-600 mr-2">{product.averageRating ? product.averageRating.toFixed(1) : 'No rating'}</span>
+                    <FaStar className="text-yellow-400 fill-current" />
+                  </div>
+                  <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+                    Buy Now
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+          <div className="flex justify-end space-x-4 mt-4">
+            <button onClick={() => handlePrevPage(setCurrentPage, currentPage, featuredProducts)} className="bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">Previous</button>
+            <button onClick={() => handleNextPage(setCurrentPage, currentPage, featuredProducts)} className="bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">Next</button>
+          </div>
         </div>
       </div>
 
@@ -321,7 +322,7 @@ const HomePage = () => {
       <div className="container mx-auto px-4 py-12 bg-blue-50 rounded-lg">
         <h2 className="text-3xl font-bold mb-8 text-left">Laptops</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {laptops.map(product => (
+          {getCurrentProducts(laptops, currentLaptopPage).map(product => (
             <Link to={`/laptop/${product.slug}`} key={product._id} className="bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 relative cursor-pointer">
               <img
                 src={`http://localhost:5000${product.images && product.images[0]}`}
@@ -331,9 +332,17 @@ const HomePage = () => {
               <div className="p-4">
                 <h3 className="font-bold text-lg mb-2">{product.name}</h3>
                 <p className="text-gray-600 mb-4">${product.price}</p>
+                <div className="flex items-center justify-end">
+                  <span className="text-gray-600 mr-2">{product.averageRating ? product.averageRating.toFixed(1) : 'No rating'}</span>
+                  <FaStar className="text-yellow-400 fill-current" />
+                </div>
               </div>
             </Link>
           ))}
+        </div>
+        <div className="flex justify-end space-x-4 mt-4">
+          <button onClick={() => handlePrevPage(setCurrentLaptopPage, currentLaptopPage, laptops)} className="bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">Previous</button>
+          <button onClick={() => handleNextPage(setCurrentLaptopPage, currentLaptopPage, laptops)} className="bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">Next</button>
         </div>
       </div>
 
@@ -341,7 +350,7 @@ const HomePage = () => {
       <div className="container mx-auto px-4 py-12 bg-green-50 rounded-lg">
         <h2 className="text-3xl font-bold mb-8 text-left">Phones</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {phones.map(product => (
+          {getCurrentProducts(phones, currentPhonePage).map(product => (
             <Link to={`/phone/${product.slug}`} key={product._id} className="bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 relative cursor-pointer">
               <img
                 src={`http://localhost:5000${product.images && product.images[0]}`}
@@ -351,9 +360,17 @@ const HomePage = () => {
               <div className="p-4">
                 <h3 className="font-bold text-lg mb-2">{product.name}</h3>
                 <p className="text-gray-600 mb-4">${product.price}</p>
+                <div className="flex items-center justify-end">
+                  <span className="text-gray-600 mr-2">{product.averageRating ? product.averageRating.toFixed(1) : 'No rating'}</span>
+                  <FaStar className="text-yellow-400 fill-current" />
+                </div>
               </div>
             </Link>
           ))}
+        </div>
+        <div className="flex justify-end space-x-4 mt-4">
+        <button onClick={() => handlePrevPage(setCurrentPhonePage, currentPhonePage, phones)} className="bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">Previous</button>
+          <button onClick={() => handleNextPage(setCurrentPhonePage, currentPhonePage, phones)} className="bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">Next</button>
         </div>
       </div>
 
@@ -361,97 +378,87 @@ const HomePage = () => {
       <div className="container mx-auto px-4 py-12 bg-yellow-50 rounded-lg">
         <h2 className="text-3xl font-bold mb-8 text-left">Tablets</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {tablets.map(product => (
+          {getCurrentProducts(tablets, currentTabletPage).map(product => (
             <Link to={`/tablet/${product.slug}`} key={product._id} className="bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 relative cursor-pointer">
               <img
                 src={`http://localhost:5000${product.images && product.images[0]}`}
                 alt={product.name}
                 className="w-full h-48 object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="font-bold text-lg mb-2">{product.name}</h3>
-                  <p className="text-gray-600 mb-4">${product.price}</p>
+              />
+              <div className="p-4">
+                <h3 className="font-bold text-lg mb-2">{product.name}</h3>
+                <p className="text-gray-600 mb-4">${product.price}</p>
+                <div className="flex items-center justify-end">
+                  <span className="text-gray-600 mr-2">{product.averageRating ? product.averageRating.toFixed(1) : 'No rating'}</span>
+                  <FaStar className="text-yellow-400 fill-current" />
                 </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-  
-        {/* Consoles */}
-        <div className="container mx-auto px-4 py-12 bg-red-50 rounded-lg">
-          <h2 className="text-3xl font-bold mb-8 text-left">Consoles</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {consoles.map(product => (
-              <Link to={`/console/${product.slug}`} key={product._id} className="bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 relative cursor-pointer">
-                <img
-                  src={`http://localhost:5000${product.images && product.images[0]}`}
-                  alt={product.name}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="font-bold text-lg mb-2">{product.name}</h3>
-                  <p className="text-gray-600 mb-4">${product.price}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-  
-        {/* Accessories */}
-        <div className="container mx-auto px-4 py-12 bg-purple-50 rounded-lg">
-          <h2 className="text-3xl font-bold mb-8 text-left">Accessories</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {accessories.map(product => (
-              <Link to={`/accessory/${product.slug}`} key={product._id} className="bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 relative cursor-pointer">
-                <img
-                  src={`http://localhost:5000${product.images && product.images[0]}`}
-                  alt={product.name}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="font-bold text-lg mb-2">{product.name}</h3>
-                  <p className="text-gray-600 mb-4">${product.price}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-  
-        {/* Hiển thị sản phẩm theo danh mục */}
-        <div className="container mx-auto px-4 py-24">
-          {selectedCategory === "Best Sellers" && (
-            <div>
-              <h2 className="text-3xl font-bold mb-8">Best Sellers</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-                {bestSellers.map((product) => (
-                  <div key={product.id} className="bg-white p-4 rounded-lg shadow-lg">
-                    <img src={`https://${product.image}`} alt={product.name} className="w-full h-64 object-cover rounded-lg mb-4" />
-                    <h3 className="text-xl font-bold mb-2">{product.name}</h3>
-                    <p className="text-gray-600">{product.price}</p>
-                  </div>
-                ))}
               </div>
-            </div>
-          )}
-  
-          {selectedCategory === "New Arrivals" && (
-            <div>
-              <h2 className="text-3xl font-bold mb-8">New Arrivals</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-                {newArrivals.map((product) => (
-                  <div key={product.id} className="bg-white p-4 rounded-lg shadow-lg">
-                    <img src={`https://${product.image}`} alt={product.name} className="w-full h-64 object-cover rounded-lg mb-4" />
-                    <h3 className="text-xl font-bold mb-2">{product.name}</h3>
-                    <p className="text-gray-600">{product.price}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+            </Link>
+          ))}
+        </div>
+        <div className="flex justify-end space-x-4 mt-4">
+          <button onClick={() => handlePrevPage(setCurrentTabletPage, currentTabletPage, tablets)} className="bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">Previous</button>
+          <button onClick={() => handleNextPage(setCurrentTabletPage, currentTabletPage, tablets)} className="bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">Next</button>
         </div>
       </div>
-    );
-  };
-  
-  export default HomePage;
-  
+
+      {/* Consoles */}
+      <div className="container mx-auto px-4 py-12 bg-red-50 rounded-lg">
+        <h2 className="text-3xl font-bold mb-8 text-left">Consoles</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {getCurrentProducts(consoles, currentConsolePage).map(product => (
+            <Link to={`/console/${product.slug}`} key={product._id} className="bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 relative cursor-pointer">
+              <img
+                src={`http://localhost:5000${product.images && product.images[0]}`}
+                alt={product.name}
+                className="w-full h-48 object-cover"
+              />
+              <div className="p-4">
+                <h3 className="font-bold text-lg mb-2">{product.name}</h3>
+                <p className="text-gray-600 mb-4">${product.price}</p>
+                <div className="flex items-center justify-end">
+                  <span className="text-gray-600 mr-2">{product.averageRating ? product.averageRating.toFixed(1) : 'No rating'}</span>
+                  <FaStar className="text-yellow-400 fill-current" />
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+        <div className="flex justify-end space-x-4 mt-4">
+          <button onClick={() => handlePrevPage(setCurrentConsolePage, currentConsolePage, consoles)} className="bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">Previous</button>
+          <button onClick={() => handleNextPage(setCurrentConsolePage, currentConsolePage, consoles)} className="bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">Next</button>
+        </div>
+      </div>
+
+      {/* Accessories */}
+      <div className="container mx-auto px-4 py-12 bg-purple-50 rounded-lg">
+        <h2 className="text-3xl font-bold mb-8 text-left">Accessories</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {getCurrentProducts(accessories, currentAccessoryPage).map(product => (
+            <Link to={`/accessory/${product.slug}`} key={product._id} className="bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 relative cursor-pointer">
+              <img
+                src={`http://localhost:5000${product.images && product.images[0]}`}
+                alt={product.name}
+                className="w-full h-48 object-cover"
+              />
+              <div className="p-4">
+                <h3 className="font-bold text-lg mb-2">{product.name}</h3>
+                <p className="text-gray-600 mb-4">${product.price}</p>
+                <div className="flex items-center justify-end">
+                  <span className="text-gray-600 mr-2">{product.averageRating ? product.averageRating.toFixed(1) : 'No rating'}</span>
+                  <FaStar className="text-yellow-400 fill-current" />
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+        <div className="flex justify-end space-x-4 mt-4">
+          <button onClick={() => handlePrevPage(setCurrentAccessoryPage, currentAccessoryPage, accessories)} className="bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">Previous</button>
+          <button onClick={() => handleNextPage(setCurrentAccessoryPage, currentAccessoryPage, accessories)} className="bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">Next</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default HomePage;

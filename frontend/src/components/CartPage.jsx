@@ -50,23 +50,21 @@ const CartPage = ({ cartItems = [], setCartItems }) => {
   
         setCart(cartResponse.data.cartItems);
         setLoyaltyPoints(pointsResponse.data.loyaltyPoints);
-        setAvailableVouchers(vouchersResponse.data);
   
-        // Đặt selectedShipping từ database
+        const validVouchers = vouchersResponse.data.filter(voucher => voucher.status !== "canceled" && voucher.status !== "expired");
+        setAvailableVouchers(validVouchers);
+  
         if (cartResponse.data.shippingMethod) {
           setSelectedShipping(cartResponse.data.shippingMethod);
         } else {
           setSelectedShipping("none");
         }
   
-        // Đặt selectedVoucher từ database
         if (cartResponse.data.voucher) {
           setSelectedVoucher(cartResponse.data.voucher);
         }
   
-        // Đặt selectedPoints mặc định là 0
         setSelectedPoints(0); 
-  
       } catch (error) {
         console.error("Error fetching cart data:", error);
         toast.error("Error fetching cart data");
@@ -75,6 +73,7 @@ const CartPage = ({ cartItems = [], setCartItems }) => {
   
     fetchCartAndPoints();
   }, []);
+  
   
   const removeItem = async (id) => {
     try {
@@ -378,27 +377,28 @@ const CartPage = ({ cartItems = [], setCartItems }) => {
                 </button>
                 {showVouchers && (
                   <div className="mt-4 space-y-4">
-                    {availableVouchers.map((voucher) => (
-                      <div
-                        key={voucher._id}
-                        className={`border rounded-lg p-3 ${selectedVoucher?._id === voucher._id ? "border-blue-500" : "border-gray-200"}`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="font-semibold">{voucher.code}</h4>
-                            <p className="text-green-600">${voucher.discount}</p>
-                            <p className="text-sm text-gray-500">Expires: {new Date(voucher.validTo).toLocaleDateString()}</p>
-                          </div>
-                          <input
-                            type="radio"
-                            name="voucher"
-                            checked={selectedVoucher?._id === voucher._id}
-                            onChange={() => handleVoucherSelection(voucher)}
-                            className="ml-4"
-                          />
-                        </div>
-                      </div>
-                    ))}
+                    {availableVouchers.filter(voucher => voucher.status !== "canceled" && voucher.status !== "expired").map((voucher) => (
+  <div
+    key={voucher._id}
+    className={`border rounded-lg p-3 ${selectedVoucher?._id === voucher._id ? "border-blue-500" : "border-gray-200"}`}
+  >
+    <div className="flex items-center justify-between">
+      <div>
+        <h4 className="font-semibold">{voucher.code}</h4>
+        <p className="text-green-600">${voucher.discount}</p>
+        <p className="text-sm text-gray-500">Expires: {new Date(voucher.validTo).toLocaleDateString()}</p>
+      </div>
+      <input
+        type="radio"
+        name="voucher"
+        checked={selectedVoucher?._id === voucher._id}
+        onChange={() => handleVoucherSelection(voucher)}
+        className="ml-4"
+      />
+    </div>
+  </div>
+))}
+
                     {selectedVoucher && (
                       <button
                         onClick={handleCancelVoucherSelection}

@@ -6,11 +6,10 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { sendPasswordResetEmail } = require('../utils/emailService'); // Import dịch vụ gửi email
+const authenticateJWT = require('../middleware/authenticateJWT'); // Import middleware xác thực
 
 const router = express.Router();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
-
 
 router.post('/register', async (req, res) => {
   const { name, email, password, role = 'customer' } = req.body;
@@ -43,12 +42,6 @@ router.post('/register', async (req, res) => {
     res.status(500).json({ message: 'Đã xảy ra lỗi khi đăng ký' });
   }
 });
-
-
-
-
-
-
 
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
@@ -99,31 +92,24 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// Middleware đã được import từ middleware/authenticateJWT.js, không cần định nghĩa lại ở đây
 
+// Route để lấy thông tin người dùng hiện tại
+router.get('/me', authenticateJWT, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
 
-// Middleware để xác thực và giải mã token
-const authenticateJWT = (req, res, next) => {
-  const authHeader = req.header('Authorization');
-
-  if (!authHeader) {
-    return res.sendStatus(403);
-  }
-
-  const token = authHeader.split(' ')[1];
-
-  if (!token) {
-    return res.sendStatus(403);
-  }
-
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) {
-      return res.sendStatus(403);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
 
-    req.user = user;
-    next();
-  });
-};
+    res.status(200).json({ user });
+  } catch (error) {
+    console.error('Error fetching user data:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 
 // Route để lấy user role
 router.get('/role', authenticateJWT, async (req, res) => {
@@ -180,7 +166,6 @@ router.post('/google-login', async (req, res) => {
   }
 });
 
-
 router.put('/update-password', async (req, res) => {
   try {
     const { email, newPassword } = req.body;
@@ -204,7 +189,6 @@ router.put('/update-password', async (req, res) => {
     res.status(500).json({ message: 'Error updating password', error: error.message });
   }
 });
-
 
 router.post('/reset-password/:token', async (req, res) => {
   const { token } = req.params;
@@ -261,8 +245,5 @@ router.post('/forgot-password', async (req, res) => {
     res.status(500).json({ message: 'An error occurred while processing the request' });
   }
 });
-
-
-
 
 module.exports = router;
