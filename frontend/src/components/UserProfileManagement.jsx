@@ -440,69 +440,71 @@ const UserProfileManagement = () => {
   
     
 
-    const renderChangePassword = () => (
-      <div className="space-y-6 text-left">
-        {renderSectionTitle("Change Password")}
-        <div className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Current Password</label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                value={currentPassword}
-                onChange={handleCurrentPasswordChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              />
-              <button
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2"
-              >
-                {showPassword ? <FiEyeOff /> : <FiEye />}
-              </button>
-            </div>
+  const renderChangePassword = () => (
+    <div className="space-y-6 text-left">
+      {renderSectionTitle("Change Password")}
+      <div className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Current Password</label>
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              value={currentPassword}
+              onChange={handleCurrentPasswordChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              required
+            />
+            <button
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2"
+            >
+            </button>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">New Password</label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                value={newPassword}
-                onChange={handleNewPasswordChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
-            <div className="relative">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                value={confirmPassword}
-                onChange={handleConfirmPasswordChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              />
-              <button
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2"
-              >
-                {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
-              </button>
-            </div>
-          </div>
-          {passwordError && (
-            <div className="text-red-600 text-sm">
-              {passwordError}
-            </div>
-          )}
-          <button
-            className="w-full bg-indigo-600 text-white px-4 py-3 rounded-md hover:bg-indigo-700 transition-colors text-center"
-            onClick={handleUpdatePassword}
-          >
-            Update Password
-          </button>
         </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">New Password</label>
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              value={newPassword}
+              onChange={handleNewPasswordChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              required
+            />
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
+          <div className="relative">
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              value={confirmPassword}
+              onChange={handleConfirmPasswordChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              required
+            />
+            <button
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2"
+            >
+            </button>
+          </div>
+        </div>
+        {passwordError && (
+          <div className="text-red-600 text-sm">
+            {passwordError}
+          </div>
+        )}
+        <button
+          className="w-full bg-indigo-600 text-white px-4 py-3 rounded-md hover:bg-indigo-700 transition-colors text-center"
+          onClick={handleUpdatePassword}
+        >
+          Update Password
+        </button>
       </div>
-    );
+    </div>
+  );
+  
     
 
     const renderAddresses = () => (

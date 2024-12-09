@@ -201,9 +201,6 @@ const Login = ({ onLoginSuccess }) => {
 
           <footer className="mt-8 text-center">
             <div className="flex justify-center space-x-4 mb-4">
-              <a href="#" className="text-gray-600 hover:text-gray-900"><FaTwitter /></a>
-              <a href="#" className="text-gray-600 hover:text-gray-900"><FaLinkedin /></a>
-              <a href="#" className="text-gray-600 hover:text-gray-900"><FaInstagram /></a>
             </div>
             <div className="text-sm text-gray-600 space-x-4">
               <a href="#" className="hover:text-gray-900">Privacy Policy</a>
@@ -212,7 +209,7 @@ const Login = ({ onLoginSuccess }) => {
               <span>•</span>
               <a href="#" className="hover:text-gray-900">Contact Us</a>
             </div>
-            <p className="mt-4 text-sm text-gray-600">© 2024 Your Company. All rights reserved.</p>
+            <p className="mt-4 text-sm text-gray-600">© 2024 BinhTruongVan. All rights reserved.</p>
           </footer>
         </div>
       </div>

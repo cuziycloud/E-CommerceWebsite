@@ -134,7 +134,7 @@ const Register = ({ onLoginSuccess }) => {
 
   return (
     <GoogleOAuthProvider clientId={clientId}>
-      <div className="min-h-screen bg-gradient-to-br from-blue-100 via-pink-100 to-purple-100 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gradient-to-br from-blue-100 via-pink-100 to-purple-100 py-12 px-4 sm:px-6 lg:px-8 mt-10">
         <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg p-8">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Register your account</h2>
@@ -258,11 +258,7 @@ const Register = ({ onLoginSuccess }) => {
           <div className="border-t border-gray-200 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
               <div className="flex space-x-6">
-                <a href="#" className="text-gray-600 hover:text-gray-900">Privacy Policy</a>
-                <a href="#" className="text-gray-600 hover:text-gray-900">Terms of Use</a>
-                <a href="#" className="text-gray-600 hover:text-gray-900">Contact</a>
               </div>
-              <div className="text-gray-500">&copy; 2024 Your Company. All rights reserved.</div>
             </div>
           </div>
         </footer>
