@@ -117,24 +117,6 @@ const HomePage = () => {
     }
   ];
 
-  const specialOffers = [
-    {
-      id: 1,
-      name: "AirPods Pro",
-      originalPrice: "$249",
-      discountedPrice: "$179",
-      image: "images.unsplash.com/photo-1572569511254-d8f925fe2cbb",
-      discount: "28%"
-    },
-    {
-      id: 2,
-      name: "iPad Air",
-      originalPrice: "$599",
-      discountedPrice: "$449",
-      image: "images.unsplash.com/photo-1544244015-0df4b3ffc6b0",
-      discount: "25%"
-    }
-  ];
 
   const bestSellers = [
     { id: 1, name: "iPhone 13 Pro", price: "$999", image: "images.unsplash.com/photo-1632661674596-df8be070a5c5" },
@@ -267,57 +249,29 @@ const HomePage = () => {
         </button>
       </div>
 
-      {/* Special Offers */}
-      <div className="container mx-auto px-4 py-12">
-        <h2 className="text-3xl font-bold mb-8">Special Offers</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {specialOffers.map(offer => (
-            <div key={offer.id} className="bg-white rounded-lg shadow-md overflow-hidden flex">
-              <img
-                src={`https://${offer.image}`}
-                alt={offer.name}
-                className="w-1/3 object-cover"
-              />
-              <div className="p-6 flex flex-col justify-center">
-                <div className="bg-red-100 text-red-600 px-3 py-1 rounded-full w-fit mb-4">
-                  Save {offer.discount}
-                </div>
-                <h3 className="font-bold text-xl mb-2">{offer.name}</h3>
-                <div className="flex items-center space-x-4">
-                  <span className="text-gray-400 line-through">{offer.originalPrice}</span>
-                  <span className="text-2xl font-bold text-red-600">{offer.discountedPrice}</span>
-                </div>
-                <button className="mt-4 bg-blue-600 text-white py-2 px-6 rounded hover:bg-blue-700 w-fit">
-                  Shop Now
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Categories */}
-      <div className="container mx-auto px-4 py-12">
-        <h2 className="text-3xl font-bold mb-8">Categories</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {categories.map(category => (
-            <div
-              key={category.id}
-              className="relative rounded-lg overflow-hidden h-48 group cursor-pointer"
-              onClick={() => setSelectedCategory(category)}
-            >
-              <img
-                src={`https://${category.image}`}
-                alt={category.name}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-              />
-              <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center group-hover:bg-opacity-50 transition-all duration-300">
-                <h3 className="text-white text-xl font-bold">{category.name}</h3>
-              </div>
-            </div>
-          ))}
+<div className="container mx-auto px-4 py-12">
+  <h2 className="text-3xl font-bold mb-8">Categories</h2>
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+    {categories.map(category => (
+      <Link
+        key={category.id}
+        to={`/${category.name.toLowerCase()}`} // Điều hướng tới đúng trang
+        className="relative rounded-lg overflow-hidden h-48 group"
+      >
+        <img
+          src={`https://${category.image}`}
+          alt={category.name}
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+        />
+        <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center group-hover:bg-opacity-50 transition-all duration-300">
+          <h3 className="text-white text-xl font-bold">{category.name}</h3>
         </div>
-      </div>
+      </Link>
+    ))}
+  </div>
+</div>
+
 
       {/* Featured Products */}
       <div className="container mx-auto px-4 py-12">

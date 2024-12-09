@@ -3,6 +3,7 @@ const { getUsers, getUserPersonalInfo, getUserAddresses, getUserRewards, getUser
 const router = express.Router();
 const authenticateJWT = require('../middleware/authenticateJWT');
 const User = require('../models/User');  // Đảm bảo rằng User model được import
+const mongoose = require('mongoose');
 
 router.get('/', getUsers);
 
@@ -105,6 +106,37 @@ router.get('/loyalty-points', authenticateJWT, async (req, res) => {
     res.status(500).json({ message: 'Error fetching loyalty points', error: error.message });
   }
 });
+
+router.put('/:id/userStatus', async (req, res) => {
+  console.log("Entering userStatus route");
+  let { id } = req.params;
+  const { isActive } = req.body;
+
+  console.log(`Request received to update user status. ID: ${id}, isActive: ${isActive}`);
+
+  try {
+    id = new mongoose.Types.ObjectId(id);  // Handle ObjectId conversion
+    console.log("Before findById:", id);
+    const user = await User.findById(id);
+    console.log("After findById:", user); 
+
+    if (!user) {
+      console.log('User not found');
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.isActive = isActive;
+    await user.save();
+
+    console.log('User status updated successfully');
+    res.status(200).json({ message: 'User status updated successfully' });
+  } catch (error) {
+    console.error('Error updating user status:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
 
 router.put('/addresses/:addressId', authenticateJWT, async (req, res) => {
   try {

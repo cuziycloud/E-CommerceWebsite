@@ -32,8 +32,10 @@ const userSchema = new mongoose.Schema({
     match: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
   },
   password: {
-    type: String,
-    required: true
+    type: String
+  },
+  googleId: {
+    type: String
   },
   role: {
     type: String,
@@ -69,22 +71,18 @@ const userSchema = new mongoose.Schema({
   reviews: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Review'
-  }]
+  }],
+  resetPasswordToken: {
+    type: String
+  },
+  resetPasswordExpires: {
+    type: Date
+  }
 });
 
 userSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
-/*
-userSchema.pre('save', async function (next) { // Comment out đoạn này
-  if (!this.isModified('password')) {
-    next();
-  }
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-  next();
-});
-*/
 
 const User = mongoose.model('User', userSchema);
 

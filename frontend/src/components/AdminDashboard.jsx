@@ -117,16 +117,6 @@ const AdminDashboard = () => {
     fetchOrders();
   }, []);
   
-  
-  
-  
-  
-  
-
-  
-  
-  
-
 
   const cancelOrder = async (id) => {
     try {
@@ -168,6 +158,31 @@ const AdminDashboard = () => {
       console.error("There was an error canceling the promotion!", error);
     }
   };
+  
+  const handleBanUnban = async (userId, currentStatus) => {
+    console.log(`Attempting to update user status for ID: ${userId} to ${!currentStatus}`);
+    
+    try {
+      console.log("ID being sent to API:", userId);
+      const response = await axios.put(`http://localhost:5000/api/users/${userId}/userStatus`, { isActive: !currentStatus });
+      console.log('API response:', response.data);
+  
+      setUsers(users.map(user => 
+        user._id === userId ? { ...user, isActive: !currentStatus } : user
+      ));
+    } catch (error) {
+      console.error("Error updating user status:", error);
+    }
+  };
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   
   const updatePromotionStatus = async (id, newStatus) => {
@@ -477,55 +492,59 @@ const totalRevenue = revenueByWeek.reduce((sum, weekRevenue) => sum + weekRevenu
             </div>
           );
           case "users":
-            return (
-              <div className="bg-white rounded-lg shadow overflow-hidden">
-                <div className="p-4">
-                  <input
-                    type="text"
-                    placeholder="Search users..."
-                    className="p-2 border rounded-lg"
-                  />
-                </div>
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-gray-50 text-left">
-                      <th className="p-4">STT</th>
-                      <th className="p-4">Name</th>
-                      <th className="p-4">Email</th>
-                      <th className="p-4">Role</th>
-                      <th className="p-4">Status</th>
-                      <th className="p-4">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {paginate(users, currentUserPage).map((user, index) => (
-                      <tr key={user._id} className="border-t text-left">
-                        <td className="p-4">{(currentUserPage - 1) * itemsPerPage + index + 1}</td>
-                        <td className="p-4">{user.name}</td>
-                        <td className="p-4">{user.email}</td>
-                        <td className="p-4">{user.role}</td>
-                        <td className="p-4">
-                          <span className={`px-2 py-1 rounded-full text-sm ${user.isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
-                            {user.isActive ? "Active" : "Inactive"}
-                          </span>
-                        </td>
-                        <td className="p-4">
-                          <button className="text-blue-600 hover:text-blue-800 mr-2">Edit</button>
-                          <button className="text-red-600 hover:text-red-800">
-                            {user.isActive ? "Ban" : "Unban"}
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <PaginationControls
-                  totalItems={users.length}
-                  currentPage={currentUserPage}
-                  setCurrentPage={setCurrentUserPage}
-                />
-              </div>
-            );
+  return (
+    <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="p-4">
+        <input
+          type="text"
+          placeholder="Search users..."
+          className="p-2 border rounded-lg"
+        />
+      </div>
+      <table className="w-full">
+        <thead>
+          <tr className="bg-gray-50 text-left">
+            <th className="p-4">STT</th>
+            <th className="p-4">Name</th>
+            <th className="p-4">Email</th>
+            <th className="p-4">Role</th>
+            <th className="p-4">Status</th>
+            <th className="p-4">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {paginate(users, currentUserPage).map((user, index) => (
+            <tr key={user._id} className="border-t text-left">
+              <td className="p-4">{(currentUserPage - 1) * itemsPerPage + index + 1}</td>
+              <td className="p-4">{user.name}</td>
+              <td className="p-4">{user.email}</td>
+              <td className="p-4">{user.role}</td>
+              <td className="p-4">
+                <span className={`px-2 py-1 rounded-full text-sm ${user.isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+                  {user.isActive ? "Active" : "Inactive"}
+                </span>
+              </td>
+              <td className="p-4">
+                <button
+                  className="text-red-600 hover:text-red-800"
+                  onClick={() => handleBanUnban(user._id, user.isActive)}
+                >
+                  {user.isActive ? "Ban" : "Unban"}
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <PaginationControls
+        totalItems={users.length}
+        currentPage={currentUserPage}
+        setCurrentPage={setCurrentUserPage}
+      />
+    </div>
+  );
+
+
             case "promotions":
   const today = new Date();
 

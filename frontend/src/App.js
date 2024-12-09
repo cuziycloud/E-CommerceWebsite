@@ -13,6 +13,7 @@ import ProductEditPage from './components/ProductEditPage';
 import CheckoutPage from './components/CheckoutPage';
 import TermsOfService from './components/TermsOfService';
 import ContactUs from './components/ContactUs';
+import BannedNotification from "./components/BannedNotification"
 import PrivacyPolicy from './components/PrivacyPolicy';
 import ProductDetail from './components/ProductDetail';
 import CartPage from './components/CartPage';
@@ -20,6 +21,7 @@ import './styles/tailwind.css';
 import ProductCategoryPage from './components/ProductCategoryPage';
 import LaptopCatalog from './components/LaptopCatalog';
 import PhoneCatalog from './components/PhoneCatalog';
+import ResetPassword from './components/ResetPassword';
 import TabletCatalog from './components/TabletCatalog';
 import ConsoleCatalog from './components/ConsoleCatalog';
 import AccessoryCatalog from './components/AccessoryCatalog';
@@ -171,7 +173,7 @@ function App() {
         />
         <Routes>
           <Route path="/" element={<HomePage onAddToCart={handleAddToCart} />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/register" element={<Register onLoginSuccess={handleLoginSuccess} />} />
           <Route path="/login" element={<LoginRedirectRoute element={<Login onLoginSuccess={handleLoginSuccess} />} />} />
           <Route path="/admin" element={<PrivateRoute element={<AdminDashboard />} />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -193,6 +195,8 @@ function App() {
           <Route path="/console/:slug" element={<ProductDetail onAddToCart={handleAddToCart} />} />
           <Route path="/accessory/:slug" element={<ProductDetail onAddToCart={handleAddToCart} />} />
           <Route path="/admin/add-promotion" element={<PrivateRoute element={<AddCoupon />} />} />
+          <Route path="/banned" element={<BannedNotification />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/admin/edit-promotion/:id" element={<PrivateRoute element={<EditCoupon />} />} />
           <Route path="/admin/edit-order/:id" element={<PrivateRoute element={<EditOrder />} />} />
           <Route path="/order-confirmation" element={<OrderConfirmation setOrderConfirmed={setOrderConfirmed} />} /> {/* Truyền hàm setOrderConfirmed */}
