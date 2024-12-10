@@ -1,26 +1,4 @@
 const express = require('express');
-<<<<<<< HEAD
-const bcrypt = require('bcryptjs');
-const User = require('../models/User');
-const { createToken } = require('../config/jwtConfig.js');
-const router = express.Router();
-
-// Register
-router.post('/register', async (req, res) => {
-  const { name, email, password, role } = req.body;
-
-  try {
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'Email already exists' });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = new User({
-      name,
-      email,
-=======
 const passport = require('passport');
 const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
@@ -51,25 +29,11 @@ router.post('/register', async (req, res) => {
     const newUser = new User({
       name,
       email: normalizedEmail,
->>>>>>> a8a81ce (Final code)
       password: hashedPassword,
       role
     });
 
     await newUser.save();
-<<<<<<< HEAD
-
-    res.status(201).json({ message: 'Registration successful!' });
-  } catch (error) {
-    console.error('Error registering user:', error);
-    res.status(500).json({ message: 'An error occurred during registration' });
-  }
-});
-
-// Login
-router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-=======
     console.log('User registered successfully:', normalizedEmail);
 
     res.status(201).json({ message: 'Đăng ký thành công!' });
@@ -253,27 +217,10 @@ router.post('/reset-password/:token', async (req, res) => {
 
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
->>>>>>> a8a81ce (Final code)
 
   try {
     const user = await User.findOne({ email });
     if (!user) {
-<<<<<<< HEAD
-      return res.status(400).json({ message: 'Email does not exist' });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Incorrect password' });
-    }
-
-    // Create JWT Token
-    const token = createToken(user);
-    res.status(200).json({ message: 'Login successful', token });
-  } catch (error) {
-    console.error('Error logging in:', error);
-    res.status(500).json({ message: 'An error occurred during login' });
-=======
       return res.status(404).json({ message: 'Email not found in system' });
     }
 
@@ -294,7 +241,6 @@ router.post('/forgot-password', async (req, res) => {
     res.status(200).json({ message: 'Password reset link has been sent to your email' });
   } catch (error) {
     res.status(500).json({ message: 'An error occurred while processing the request' });
->>>>>>> a8a81ce (Final code)
   }
 });
 

@@ -1,10 +1,7 @@
 import React, { useState } from "react";
 import { FiMail, FiArrowLeft, FiCheck } from "react-icons/fi";
 import { Link } from 'react-router-dom'; 
-<<<<<<< HEAD
-=======
 import axios from 'axios';
->>>>>>> a8a81ce (Final code)
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -33,16 +30,6 @@ const ForgotPassword = () => {
 
     setIsLoading(true);
     try {
-<<<<<<< HEAD
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      setMessage({
-        type: "success",
-        text: "Password reset link has been sent to your email",
-      });
-    } catch (error) {
-      setMessage({ type: "error", text: "Email not found in system" });
-=======
       const response = await axios.post('http://localhost:5000/api/auth/forgot-password', { email });
       setMessage({
         type: "success",
@@ -50,7 +37,6 @@ const ForgotPassword = () => {
       });
     } catch (error) {
       setMessage({ type: "error", text: error.response.data.message });
->>>>>>> a8a81ce (Final code)
     } finally {
       setIsLoading(false);
     }
@@ -130,16 +116,6 @@ const ForgotPassword = () => {
             </div>
           )}
 
-<<<<<<< HEAD
-            <div className="text-center mt-4">
-                <Link
-                to="/login" 
-                className="flex items-center justify-center text-sm text-blue-600 hover:text-blue-500 transition-colors duration-200"
-            >
-            <FiArrowLeft className="mr-2" /> Back to Login Page
-                </Link>
-            </div>
-=======
           <div className="text-center mt-4">
             <Link
               to="/login"
@@ -148,7 +124,6 @@ const ForgotPassword = () => {
               <FiArrowLeft className="mr-2" /> Back to Login Page
             </Link>
           </div>
->>>>>>> a8a81ce (Final code)
 
           <div className="mt-6 text-center text-xs text-gray-500">
             <a href="#" className="hover:text-blue-500 transition-colors duration-200">
@@ -171,8 +146,4 @@ const ForgotPassword = () => {
   );
 };
 
-<<<<<<< HEAD
 export default ForgotPassword;
-=======
-export default ForgotPassword;
->>>>>>> a8a81ce (Final code)

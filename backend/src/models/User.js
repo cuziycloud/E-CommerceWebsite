@@ -1,6 +1,4 @@
 const mongoose = require('mongoose');
-<<<<<<< HEAD
-=======
 const bcrypt = require('bcryptjs');
 
 const addressSchema = new mongoose.Schema({
@@ -21,7 +19,6 @@ const addressSchema = new mongoose.Schema({
     required: true
   }
 });
->>>>>>> a8a81ce (Final code)
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -32,13 +29,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-<<<<<<< HEAD
-    match: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/  // Đảm bảo email hợp lệ
-  },
-  password: {
-    type: String,
-    required: true
-=======
     match: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
   },
   password: {
@@ -46,14 +36,10 @@ const userSchema = new mongoose.Schema({
   },
   googleId: {
     type: String
->>>>>>> a8a81ce (Final code)
   },
   role: {
     type: String,
     required: true,
-<<<<<<< HEAD
-    enum: ['admin', 'customer']
-=======
     enum: ['admin', 'customer'],
     default: 'customer'
   },
@@ -68,16 +54,10 @@ const userSchema = new mongoose.Schema({
   phoneNumber: {
     type: String,
     default: ''
->>>>>>> a8a81ce (Final code)
   },
   createdAt: {
     type: Date,
     default: Date.now
-<<<<<<< HEAD
-  }
-});
-
-=======
   },
   orderHistory: [{
     orderId: mongoose.Schema.Types.ObjectId,
@@ -104,7 +84,6 @@ userSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
->>>>>>> a8a81ce (Final code)
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;

@@ -1,28 +1,4 @@
 const express = require('express');
-<<<<<<< HEAD
-const Product = require('../models/Product');  // Đảm bảo đường dẫn đúng tới file Product.js
-const router = express.Router();
-
-// Endpoint để lấy tất cả sản phẩm
-router.get('/showProducts', async (req, res) => {
-  try {
-    // Lấy danh sách sản phẩm từ MongoDB
-    const products = await Product.find();
-
-    // Kiểm tra nếu không có sản phẩm nào
-    if (!products) {
-      return res.status(404).json({ message: 'No products found' });
-    }
-
-    // Trả về danh sách sản phẩm
-    res.status(200).json(products);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-=======
 const multer = require('multer');
 const path = require('path');
 const {
@@ -72,5 +48,4 @@ router.post('/:productId/reviews', authenticateJWT, addReview);
 router.get('/:productId/reviews', getProductReviews);
 
 
->>>>>>> a8a81ce (Final code)
 module.exports = router;

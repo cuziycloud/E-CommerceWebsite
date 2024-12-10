@@ -1,28 +1,16 @@
 import React, { useState } from "react";
 import { FiTrash2, FiUpload } from "react-icons/fi";
 import { MdPreview } from "react-icons/md";
-<<<<<<< HEAD
-=======
 import slugify from 'slugify';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
->>>>>>> a8a81ce (Final code)
 
 const AddProductForm = () => {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     price: "",
-<<<<<<< HEAD
-    tag: "",
-    category: "Laptop",
-    isAvailable: false,
-    variants: [{ size: "", color: "", material: "", stock: "" }],
-    images: []
-  });
-
-=======
     category: "",
     tags: "",
     images: [],
@@ -39,15 +27,10 @@ const AddProductForm = () => {
   });
   
   
->>>>>>> a8a81ce (Final code)
   const [errors, setErrors] = useState({});
   const [isPreview, setIsPreview] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-<<<<<<< HEAD
-  // Updated categories array with technology focus
-=======
->>>>>>> a8a81ce (Final code)
   const categories = [
     "Laptop",
     "Phone",
@@ -65,16 +48,9 @@ const AddProductForm = () => {
       case "price":
         if (!value) error = "Price is required";
         if (isNaN(value)) error = "Price must be a number";
-<<<<<<< HEAD
-        // Added validation for negative price
-        if (Number(value) < 0) error = "Price cannot be negative";
-        break;
-      case "tag":
-=======
         if (Number(value) < 0) error = "Price cannot be negative";
         break;
       case "tags":
->>>>>>> a8a81ce (Final code)
         if (!value) error = "At least one tag is required";
         const tags = value.split(",").map(tag => tag.trim());
         if (tags.some(tag => tag === "")) {
@@ -94,10 +70,6 @@ const AddProductForm = () => {
     const { name, value, type, checked } = e.target;
     let fieldValue = type === "checkbox" ? checked : value;
   
-<<<<<<< HEAD
-    // Chuyển đổi giá trị của trường price thành số
-=======
->>>>>>> a8a81ce (Final code)
     if (name === "price") {
       fieldValue = parseFloat(value);
     }
@@ -106,22 +78,12 @@ const AddProductForm = () => {
     const error = validateField(name, fieldValue);
     setErrors({ ...errors, [name]: error });
   };
-<<<<<<< HEAD
-  
-  const handleVariantChange = (index, field, value) => {
-    const newVariants = [...formData.variants];
-  
-    // Chuyển đổi giá trị của trường stock thành số nguyên
-    if (field === "stock") {
-      newVariants[index][field] = parseInt(value, 10);
-=======
 
   const handleVariantChange = (index, field, value) => {
     const newVariants = [...formData.variants];
   
     if (field === "specs") {
       newVariants[index][field] = value; // Giữ specs như một chuỗi
->>>>>>> a8a81ce (Final code)
     } else {
       newVariants[index][field] = value;
     }
@@ -129,11 +91,7 @@ const AddProductForm = () => {
     setFormData({ ...formData, variants: newVariants });
   
     if (field === "stock") {
-<<<<<<< HEAD
-      const error = validateField("stock", newVariants[index][field]);
-=======
       const error = validateField("stock", value);
->>>>>>> a8a81ce (Final code)
       if (error) {
         setErrors({ ...errors, [`variant${index}stock`]: error });
       } else {
@@ -144,24 +102,16 @@ const AddProductForm = () => {
     }
   };
   
-<<<<<<< HEAD
-
-=======
   
   
   
   
   
->>>>>>> a8a81ce (Final code)
 
   const addVariant = () => {
     setFormData({
       ...formData,
-<<<<<<< HEAD
-      variants: [...formData.variants, { size: "", color: "", material: "", stock: "" }]
-=======
       variants: [...formData.variants, { size: "", color: "", stock: "", specs: [] }]
->>>>>>> a8a81ce (Final code)
     });
   };
 
@@ -183,11 +133,7 @@ const AddProductForm = () => {
       const reader = new FileReader();
       reader.onloadend = () => {
         const imageUrl = URL.createObjectURL(file);
-<<<<<<< HEAD
-        imageUrls.push(imageUrl); // Lưu URL tạm thời vào mảng
-=======
         imageUrls.push(imageUrl); 
->>>>>>> a8a81ce (Final code)
   
         if (imageUrls.length === files.length) {
           setFormData({ ...formData, images: [...formData.images, ...imageUrls] });
@@ -197,33 +143,20 @@ const AddProductForm = () => {
       reader.readAsDataURL(file);
     });
   };
-<<<<<<< HEAD
-  
-=======
->>>>>>> a8a81ce (Final code)
 
   const removeImage = (index) => {
     const newImages = formData.images.filter((_, i) => i !== index);
     setFormData({ ...formData, images: newImages });
   };
 
-<<<<<<< HEAD
-=======
   const handleTagsChange = (e) => {
     setFormData({ ...formData, tags: e.target.value });
   };
 
->>>>>>> a8a81ce (Final code)
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
   
-<<<<<<< HEAD
-    // Debug toàn bộ formData
-    console.log('Form data:', formData);
-  
-=======
->>>>>>> a8a81ce (Final code)
     Object.keys(formData).forEach((key) => {
       if (key !== "variants" && key !== "images" && key !== "isAvailable") {
         const error = validateField(key, formData[key]);
@@ -232,18 +165,12 @@ const AddProductForm = () => {
     });
   
     formData.variants.forEach((variant, index) => {
-<<<<<<< HEAD
-      console.log(`Variant ${index}:`, variant); // Debug thông tin variant
-=======
->>>>>>> a8a81ce (Final code)
       if (!variant.stock || isNaN(variant.stock) || variant.stock < 0) {
         newErrors[`variant${index}stock`] = 'Stock is required and must be a non-negative number';
       }
       if (!variant.color) {
         newErrors[`variant${index}color`] = 'Color is required';
       }
-<<<<<<< HEAD
-=======
       if (variant.specs && typeof variant.specs === "string") {
         const specsArray = variant.specs.split(",").map(spec => {
           const [label, specValue] = spec.split(":").map(item => item.trim());
@@ -251,7 +178,6 @@ const AddProductForm = () => {
         });
         variant.specs = specsArray;
       }
->>>>>>> a8a81ce (Final code)
     });
   
     if (formData.variants.length === 0) {
@@ -259,45 +185,26 @@ const AddProductForm = () => {
     }
   
     if (Object.keys(newErrors).length === 0) {
-<<<<<<< HEAD
-      formData.price = Number(formData.price);
-      formData.stock = formData.variants.reduce((acc, variant) => acc + parseInt(variant.stock, 10), 0); // Tính tổng số stock
-      formData.variants = formData.variants.map(variant => ({
-        ...variant,
-        stock: parseInt(variant.stock, 10) // Đảm bảo stock là số nguyên
-=======
       formData.price = parseFloat(formData.price);
       formData.stock = formData.variants.reduce((acc, variant) => acc + parseInt(variant.stock, 10), 0);
       formData.variants = formData.variants.map(variant => ({
         ...variant,
         stock: parseInt(variant.stock, 10)
->>>>>>> a8a81ce (Final code)
       }));
   
       formData.isActive = formData.isAvailable;
       delete formData.isAvailable;
   
-<<<<<<< HEAD
-      // Debug dữ liệu trước khi tải lên ảnh
-      console.log('Form data before uploading images:', formData);
-  
-      // Tải lên ảnh và lấy URL
-=======
       const slug = slugify(formData.name, { lower: true, strict: true });
       formData.slug = slug;
   
->>>>>>> a8a81ce (Final code)
       const uploadedImageUrls = [];
       for (const imageUrl of formData.images) {
         if (imageUrl.startsWith('blob:')) {
           const response = await fetch(imageUrl);
           const blob = await response.blob();
           const formDataImage = new FormData();
-<<<<<<< HEAD
-          formDataImage.append('image', blob, `${Date.now()}.png`); // Đặt tên file để tránh blob
-=======
           formDataImage.append('image', blob, `${Date.now()}.png`);
->>>>>>> a8a81ce (Final code)
   
           try {
             const uploadResponse = await fetch('http://localhost:5000/api/uploads/upload', {
@@ -306,10 +213,6 @@ const AddProductForm = () => {
             });
             if (uploadResponse.ok) {
               const data = await uploadResponse.json();
-<<<<<<< HEAD
-              console.log('Uploaded image URL:', data.url); // Debug URL ảnh đã tải lên
-=======
->>>>>>> a8a81ce (Final code)
               uploadedImageUrls.push(data.url);
             } else {
               console.error('Error uploading image:', uploadResponse.statusText);
@@ -318,24 +221,14 @@ const AddProductForm = () => {
             console.error('Error uploading image:', error);
           }
         } else {
-<<<<<<< HEAD
-          uploadedImageUrls.push(imageUrl); // Nếu là URL trực tiếp từ máy tính người dùng
-=======
           uploadedImageUrls.push(imageUrl);
->>>>>>> a8a81ce (Final code)
         }
       }
   
       const productData = { ...formData, images: uploadedImageUrls };
-<<<<<<< HEAD
-  
-      try {
-        console.log('Sending data:', productData);
-=======
       productData.tags = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== "");
   
       try {
->>>>>>> a8a81ce (Final code)
         const response = await fetch('http://localhost:5000/api/products/add-product', {
           method: 'POST',
           headers: {
@@ -347,15 +240,12 @@ const AddProductForm = () => {
         if (response.ok) {
           const result = await response.json();
           console.log('Form submitted:', result);
-<<<<<<< HEAD
-=======
           toast.success('Product added successfully!');
   
           // Reload trang sau khi thông báo thành công
           setTimeout(() => {
             window.location.reload();
           }, 2000); // Đợi 2 giây để hiển thị toast trước khi reload trang
->>>>>>> a8a81ce (Final code)
         } else {
           const errorResponse = await response.json();
           console.error('Error submitting form:', errorResponse.error);
@@ -370,15 +260,9 @@ const AddProductForm = () => {
   
   
   
-<<<<<<< HEAD
-
-  return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-=======
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 mt-12">
       <ToastContainer />
->>>>>>> a8a81ce (Final code)
       <div className="max-w-4xl mx-auto">
         <div className="bg-white shadow-xl rounded-lg p-6">
           <div className="flex justify-between items-center mb-6">
@@ -416,25 +300,11 @@ const AddProductForm = () => {
                 </div>
 
                 <div>
-<<<<<<< HEAD
-                  <label htmlFor="tag" className="block text-sm font-medium text-gray-700">
-=======
                   <label htmlFor="tags" className="block text-sm font-medium text-gray-700">
->>>>>>> a8a81ce (Final code)
                     Tags * (comma-separated)
                   </label>
                   <input
                     type="text"
-<<<<<<< HEAD
-                    id="tag"
-                    name="tag"
-                    value={formData.tag}
-                    onChange={handleInputChange}
-                    placeholder="tag1, tag2, tag3"
-                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${errors.tag ? "border-red-500" : ""}`}
-                  />
-                  {errors.tag && <p className="mt-1 text-sm text-red-500">{errors.tag}</p>}
-=======
                     id="tags"
                     name="tags"
                     value={formData.tags}
@@ -443,7 +313,6 @@ const AddProductForm = () => {
                     className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${errors.tags ? "border-red-500" : ""}`}
                   />
                   {errors.tags && <p className="mt-1 text-sm text-red-500">{errors.tags}</p>}
->>>>>>> a8a81ce (Final code)
                   <p className="mt-1 text-xs text-gray-500">Enter multiple tags separated by commas</p>
                 </div>
 
@@ -458,10 +327,7 @@ const AddProductForm = () => {
                     onChange={handleInputChange}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   >
-<<<<<<< HEAD
-=======
                     <option value="">Select a category</option>
->>>>>>> a8a81ce (Final code)
                     {categories.map((category) => (
                       <option key={category} value={category}>
                         {category}
@@ -471,22 +337,6 @@ const AddProductForm = () => {
                 </div>
 
                 <div>
-<<<<<<< HEAD
-                  <label htmlFor="price" className="block text-sm font-medium text-gray-700">
-                    Price *
-                  </label>
-                  <input
-                    type="number"
-                    id="price"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleInputChange}
-                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${errors.price ? "border-red-500" : ""}`}
-                  />
-                  {errors.price && <p className="mt-1 text-sm text-red-500">{errors.price}</p>}
-                </div>
-
-=======
                     <label htmlFor="price" className="block text-sm font-medium text-gray-700">
                       Price *
                     </label>
@@ -501,7 +351,6 @@ const AddProductForm = () => {
                     />
                     {errors.price && <p className="mt-1 text-sm text-red-500">{errors.price}</p>}
                   </div>                                    
->>>>>>> a8a81ce (Final code)
                 <div className="col-span-2">
                   <label htmlFor="description" className="block text-sm font-medium text-gray-700">
                     Description
@@ -550,53 +399,6 @@ const AddProductForm = () => {
                 )}
 
                 {formData.variants.map((variant, index) => (
-<<<<<<< HEAD
-                  <div key={index} className="flex gap-4 items-start">
-                    <div className="flex-1">
-                      <input
-                        type="text"
-                        placeholder="Size"
-                        value={variant.size}
-                        onChange={(e) => handleVariantChange(index, "size", e.target.value)}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <input
-                        type="text"
-                        placeholder="Color"
-                        value={variant.color}
-                        onChange={(e) => handleVariantChange(index, "color", e.target.value)}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <input
-                        type="text"
-                        placeholder="Material"
-                        value={variant.material}
-                        onChange={(e) => handleVariantChange(index, "material", e.target.value)}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <input
-                        type="number"
-                        placeholder="Stock"
-                        value={variant.stock}
-                        min="0"
-                        onChange={(e) => handleVariantChange(index, "stock", e.target.value)}
-                        className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${errors[`variant${index}stock`] ? "border-red-500" : ""}`}
-                      />
-                      {errors[`variant${index}stock`] && (
-                        <p className="mt-1 text-sm text-red-500">{errors[`variant${index}stock`]}</p>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeVariant(index)}
-                      className="mt-1 p-2 text-red-600 hover:text-red-800"
-=======
                   <div key={index} className="space-y-4 p-4 border rounded-lg">
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div>
@@ -650,7 +452,6 @@ const AddProductForm = () => {
                       type="button"
                       onClick={() => removeVariant(index)}
                       className="mt-2 p-2 text-red-600 hover:text-red-800"
->>>>>>> a8a81ce (Final code)
                     >
                       <FiTrash2 />
                     </button>
@@ -710,119 +511,6 @@ const AddProductForm = () => {
 
               <div className="pt-4">
                 <button
-<<<<<<< HEAD
-                  type="submit"
-                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-                >
-                  Save Product
-                </button>
-              </div>
-            </form>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const PreviewSection = ({ formData }) => {
-  const tags = formData.tag.split(",").map(tag => tag.trim()).filter(tag => tag !== "");
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-medium text-gray-900">Product Details</h3>
-        <dl className="mt-2 divide-y divide-gray-200">
-          <div className="py-3 flex justify-between">
-            <dt className="text-sm font-medium text-gray-500">Name</dt>
-            <dd className="text-sm text-gray-900">{formData.name}</dd>
-          </div>
-          <div className="py-3 flex justify-between">
-            <dt className="text-sm font-medium text-gray-500">Category</dt>
-            <dd className="text-sm text-gray-900">{formData.category}</dd>
-          </div>
-          <div className="py-3 flex justify-between">
-            <dt className="text-sm font-medium text-gray-500">Price</dt>
-            <dd className="text-sm text-gray-900">${formData.price}</dd>
-          </div>
-          <div className="py-3">
-            <dt className="text-sm font-medium text-gray-500">Tags</dt>
-            <dd className="mt-1 text-sm text-gray-900">
-              <div className="flex flex-wrap gap-2">
-                {tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </dd>
-          </div>
-          <div className="py-3 flex justify-between">
-            <dt className="text-sm font-medium text-gray-500">Availability</dt>
-            <dd className="text-sm text-gray-900">
-              {formData.isAvailable ? "Available" : "Not Available"}
-            </dd>
-          </div>
-          <div className="py-3">
-            <dt className="text-sm font-medium text-gray-500">Description</dt>
-            <dd className="mt-1 text-sm text-gray-900">{formData.description}</dd>
-          </div>
-        </dl>
-      </div>
-
-      <div>
-        <h3 className="text-lg font-medium text-gray-900">Variants</h3>
-        <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {formData.variants.map((variant, index) => (
-            <div
-              key={index}
-              className="border rounded-lg p-4 bg-gray-50"
-            >
-              <dl className="divide-y divide-gray-200">
-                <div className="py-2 flex justify-between">
-                  <dt className="text-sm font-medium text-gray-500">Size</dt>
-                  <dd className="text-sm text-gray-900">{variant.size}</dd>
-                </div>
-                <div className="py-2 flex justify-between">
-                  <dt className="text-sm font-medium text-gray-500">Color</dt>
-                  <dd className="text-sm text-gray-900">{variant.color}</dd>
-                </div>
-                <div className="py-2 flex justify-between">
-                  <dt className="text-sm font-medium text-gray-500">Material</dt>
-                  <dd className="text-sm text-gray-900">{variant.material}</dd>
-                </div>
-                <div className="py-2 flex justify-between">
-                  <dt className="text-sm font-medium text-gray-500">Stock</dt>
-                  <dd className="text-sm text-gray-900">{variant.stock}</dd>
-                </div>
-              </dl>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <h3 className="text-lg font-medium text-gray-900">Product Images</h3>
-        <div className="mt-2 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-          {formData.images.map((image, index) => (
-            <img
-              key={index}
-              src={image}
-              alt={`Product ${index + 1}`}
-              className="h-45 w-50 object-cover rounded-lg"
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default AddProductForm;
-=======
                                     type="submit"
                                     className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
                                   >
@@ -954,4 +642,3 @@ export default AddProductForm;
                   
 export default AddProductForm;
                   
->>>>>>> a8a81ce (Final code)
