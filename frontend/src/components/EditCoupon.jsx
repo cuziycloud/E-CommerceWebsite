@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { FaToggleOn, FaToggleOff } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const EditCoupon = () => {
   const { id } = useParams();
@@ -89,10 +91,10 @@ const EditCoupon = () => {
           validTo: new Date(formData.validTo).toISOString(),
           status: formData.isActive ? 'active' : 'canceled'
         });
-
+  
         if (response.status === 200) {
           console.log("Promotion updated:", response.data);
-          // Có thể thêm thông báo thành công tại đây
+          toast.success('Coupon updated successfully!'); // Thêm thông báo thành công
         } else {
           console.error("Error updating promotion:", response.data);
         }
@@ -101,9 +103,11 @@ const EditCoupon = () => {
       }
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 mt-24">
+      <ToastContainer />
       <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Edit Coupon</h2>
         

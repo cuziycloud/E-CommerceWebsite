@@ -73,13 +73,6 @@ const ProductDetail = ({ onAddToCart }) => {
     fetchProduct();
   }, [slug]);
   
-  
-
-  
-  
-  
-  
-  
 
   const handlePrevImage = () => {
     setSelectedImage((prev) => (prev === 0 ? product.images.length - 1 : prev - 1));
@@ -189,14 +182,6 @@ const ProductDetail = ({ onAddToCart }) => {
     }
   };
   
-  
-  
-  
-  
-  
-  
-  
-
   const ZoomModal = () => {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
@@ -345,52 +330,52 @@ const ProductDetail = ({ onAddToCart }) => {
         </div>
         
         {/* Tabs */}
-        <div className="mt-12">
-          <div className="border-b">
-            <div className="flex space-x-8">
-              <button
-                onClick={() => setSelectedTab("description")}
-                className={`py-4 ${selectedTab === "description" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500"}`}
-              >
-                Specifications
-              </button>
-              <button
-                onClick={() => setSelectedTab("reviews")}
-                className={`py-4 ${selectedTab === "reviews" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500"}`}
-              >
-                Reviews
-              </button>
-            </div>
-          </div>
+<div className="mt-12">
+  <div className="border-b">
+    <div className="flex space-x-8">
+      <button
+        onClick={() => setSelectedTab("description")}
+        className={`py-4 ${selectedTab === "description" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500"}`}
+      >
+        Specifications
+      </button>
+      <button
+        onClick={() => setSelectedTab("reviews")}
+        className={`py-4 ${selectedTab === "reviews" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500"}`}
+      >
+        Reviews
+      </button>
+    </div>
+  </div>
 
-          <div className="py-8">
-            {selectedTab === "description" ? (
-              <div className="space-y-6">
-                <div className="flex space-x-4 mb-4">
-                  {product.variants && product.variants.map((variant, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedVariant(index)}
-                      className={`px-4 py-2 rounded-lg ${selectedVariant === index ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
-                    >
-                      Variant {index + 1}
-                    </button>
-                  ))}
-                </div>
-                <div className="grid grid-cols-2 gap-8">
-                  {product.variants && product.variants[selectedVariant] && product.variants[selectedVariant].specs.split(',').map((spec, i) => {
-                    const [label, value] = spec.split(':').map(item => item.trim());
-                    return (
-                      <div key={i} className={`p-4 rounded-lg ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                        <span className="font-medium">{label}:</span>
-                        <span className="ml-20">{value}</span>
-                      </div>
-                    );
-                  })}
-                </div>
+  <div className="py-8">
+    {selectedTab === "description" ? (
+      <div className="space-y-6">
+        <div className="flex space-x-4 mb-4">
+          {product.variants && product.variants.map((variant, index) => (
+            <button
+              key={index}
+              onClick={() => setSelectedVariant(index)}
+              className={`px-4 py-2 rounded-lg ${selectedVariant === index ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+            >
+              Variant {index + 1}
+            </button>
+          ))}
+        </div>
+        <div className="space-y-4">
+          {product.variants && product.variants[selectedVariant] && product.variants[selectedVariant].specs.split(',').map((spec, i) => {
+            const [label, value] = spec.split(':').map(item => item.trim());
+            return (
+              <div key={i} className={`p-4 rounded-lg ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                <span className="font-medium">{label}:</span>
+                <span className="ml-2">{value}</span>
               </div>
-            ) : (
-              <div className="space-y-8">
+            );
+          })}
+        </div>
+      </div>
+    ) : (
+      <div className="space-y-8">
                 {/* Display product reviews */}
 {product.reviews && product.reviews.map((review, index) => (
   <div key={index} className="border-b pb-6">
@@ -468,29 +453,29 @@ const ProductDetail = ({ onAddToCart }) => {
           </div>
         </div>
 
-        {/* Related Products */}
-        <div className="mt-12">
-          <h2 className="text-2xl font-bold mb-6">Related Products</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {relatedProducts && relatedProducts.map((product) => (
-              <div key={product._id} className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-                <img
-                  src={`http://localhost:5000${product.images[0]}`}
-                  alt={product.name}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="font-medium">{product.name}</h3>
-                  <p className="text-lg font-bold mt-2">${product.price}</p>
-                  <Link to={`/product-detail/${product.slug}`} className="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-center block">
-                    View Details
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
+       {/* Related Products */}
+<div className="mt-12">
+  <h2 className="text-2xl font-bold mb-6">Related Products</h2>
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    {relatedProducts && relatedProducts.map((product) => (
+      <Link to={`/product-detail/${product.slug}`} key={product._id} className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+        <img
+          src={`http://localhost:5000${product.images[0]}`}
+          alt={product.name}
+          className="w-full h-48 object-cover"
+        />
+        <div className="p-4">
+          <h3 className="font-medium">{product.name}</h3>
+          <p className="text-lg font-bold mt-2">${product.price}</p>
+          <button className="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-center block">
+            View Details
+          </button>
         </div>
-      </main>
+      </Link>
+    ))}
+  </div>
+</div>
+</main>
 
       {/* Zoom Modal */}
       {showZoomModal && <ZoomModal />}

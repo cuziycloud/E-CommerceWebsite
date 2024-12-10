@@ -208,17 +208,15 @@ const CartPage = ({ cartItems = [], setCartItems }) => {
             <p className="text-gray-600 mb-6">You have {cart.length} products in your cart ^-^</p>
 
             {cart.length === 0 ? (
-              <div className="text-center py-12">
-                <img
-                  src="images.unsplash.com/photo-1584473457409-ae5c91d211ff"
-                  alt="Empty Cart"
-                  className="w-64 mx-auto mb-6"
-                />
-                <p className="text-xl text-gray-600 mb-4">Your cart is empty. Keep shopping!</p>
-                <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
-                  Continue Shopping
-                </button>
-              </div>
+  <div className="text-center py-12">
+    <p className="text-xl text-gray-600 mb-4">Your cart is empty. Keep shopping!</p>
+    <button 
+      className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
+      onClick={() => window.location.href = "/"} // Thêm sự kiện onClick để điều hướng
+    >
+      Continue Shopping
+    </button>
+  </div>
             ) : (
               <div className="space-y-4">
                 {cartItems.map((item) => (

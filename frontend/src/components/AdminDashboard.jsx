@@ -24,6 +24,7 @@ const AdminDashboard = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
+  const [sortOption, setSortOption] = useState("default");
 
   const [revenue, setRevenue] = useState(0);
   const [revenueByWeek, setRevenueByWeek] = useState([]);
@@ -141,6 +142,16 @@ const AdminDashboard = () => {
     }
   };
   
+  const sortProducts = (products, sortOption) => {
+    switch (sortOption) {
+      case "recent":
+        return [...products].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      case "default":
+      default:
+        return products;
+    }
+  };
+  
   
   const handleCancelPromotion = async (id) => {
     try {
@@ -199,8 +210,10 @@ const AdminDashboard = () => {
   
   
   const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(searchKeyword.toLowerCase())
+    user.name.toLowerCase().includes(searchKeyword.toLowerCase()) || 
+    user.email.toLowerCase().includes(searchKeyword.toLowerCase())
   );
+  
   
   
   
@@ -457,59 +470,69 @@ const totalRevenue = revenueByWeek.reduce((sum, weekRevenue) => sum + weekRevenu
         case "products":
           return (
             <div className="bg-white rounded-lg shadow overflow-hidden">
-              <div className="p-4">
-                <Link 
-                  to="/admin/add-product"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Add New Product
-                </Link>
-              </div>
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-gray-50 text-left">
-                    <th className="p-4">STT</th>
-                    <th className="p-4">Name</th>
-                    <th className="p-4">Price</th>
-                    <th className="p-4">Total Stock</th>
-                    <th className="p-4">Variants</th>
-                    <th className="p-4">Status</th>
-                    <th className="p-4">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginate(products, currentProductPage).map((product, index) => (
-                    <tr key={product._id} className="border-t text-left">
-                      <td className="p-4">{(currentProductPage - 1) * itemsPerPage + index + 1}</td>
-                      <td className="p-4">{product.name}</td>
-                      <td className="p-4">${product.price}</td>
-                      <td className="p-4">{product.stock}</td>
-                      <td className="p-4">{product.variants.length}</td>
-                      <td className="p-4">
-                        <span
-                          className={`px-2 py-1 rounded-full text-sm ${product.status === "Available" ? "bg-green-100 text-green-800" : product.status === "Low Stock" ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800"}`}
-                        >
-                          {product.status}
-                        </span>
-                      </td>
-                      <td className="p-4">
-                      <Link 
-                          to={`/admin/edit-product/${product.slug}`} // Sử dụng slug thay vì ObjectId
-                          className="text-blue-600 hover:text-blue-800 mr-2"
-                        >
-                          Edit
-                        </Link>
-                        <button 
-                          className="text-red-600 hover:text-red-800"
-                          onClick={() => deleteProduct(product._id)}
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className="p-4 flex justify-between items-center">
+  <Link 
+    to="/admin/add-product"
+    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+  >
+    Add New Product
+  </Link>
+  <select
+    value={sortOption}
+    onChange={(e) => setSortOption(e.target.value)}
+    className="p-2 border rounded-lg"
+  >
+    <option value="default">Default</option>
+    <option value="recent">Recently Added</option>
+  </select>
+</div>
+
+<table className="w-full">
+  <thead>
+    <tr className="bg-gray-50 text-left">
+      <th className="p-4">STT</th>
+      <th className="p-4">Name</th>
+      <th className="p-4">Price</th>
+      <th className="p-4">Total Stock</th>
+      <th className="p-4">Variants</th>
+      <th className="p-4">Status</th>
+      <th className="p-4">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {paginate(sortProducts(products, sortOption), currentProductPage).map((product, index) => (
+      <tr key={product._id} className="border-t text-left">
+        <td className="p-4">{(currentProductPage - 1) * itemsPerPage + index + 1}</td>
+        <td className="p-4">{product.name}</td>
+        <td className="p-4">${product.price}</td>
+        <td className="p-4">{product.stock}</td>
+        <td className="p-4">{product.variants.length}</td>
+        <td className="p-4">
+          <span
+            className={`px-2 py-1 rounded-full text-sm ${product.status === "Available" ? "bg-green-100 text-green-800" : product.status === "Low Stock" ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800"}`}
+          >
+            {product.status}
+          </span>
+        </td>
+        <td className="p-4">
+          <Link 
+            to={`/admin/edit-product/${product.slug}`}
+            className="text-blue-600 hover:text-blue-800 mr-2"
+          >
+            Edit
+          </Link>
+          <button 
+            className="text-red-600 hover:text-red-800"
+            onClick={() => deleteProduct(product._id)}
+          >
+            Delete
+          </button>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
               <PaginationControls
                 totalItems={products.length}
                 currentPage={currentProductPage}

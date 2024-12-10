@@ -22,7 +22,7 @@ const SearchResults = () => {
           }
         })
         .catch(error => {
-          setError("Error fetching products. Please try again.");
+          setError("Can't find any items with that keyword.");
           console.error(error);
         });
     }
@@ -40,7 +40,7 @@ const SearchResults = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="bg-white p-8 rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
+          <h2 className="text-2xl font-bold text-red-600 mb-4">No Item Found</h2>
           <p className="text-gray-700">{error}</p>
         </div>
       </div>

@@ -6,7 +6,8 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 
-const clientId = "481244191445-v6732ad4a6hutn7c961ntlu8l22076gj.apps.googleusercontent.com";
+const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+
 
 const Login = ({ onLoginSuccess }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -137,7 +138,7 @@ const Login = ({ onLoginSuccess }) => {
                     className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    
                   </button>
                 </div>
                 {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password}</p>}
@@ -201,9 +202,6 @@ const Login = ({ onLoginSuccess }) => {
 
           <footer className="mt-8 text-center">
             <div className="flex justify-center space-x-4 mb-4">
-              <a href="#" className="text-gray-600 hover:text-gray-900"><FaTwitter /></a>
-              <a href="#" className="text-gray-600 hover:text-gray-900"><FaLinkedin /></a>
-              <a href="#" className="text-gray-600 hover:text-gray-900"><FaInstagram /></a>
             </div>
             <div className="text-sm text-gray-600 space-x-4">
               <a href="#" className="hover:text-gray-900">Privacy Policy</a>
@@ -212,7 +210,7 @@ const Login = ({ onLoginSuccess }) => {
               <span>•</span>
               <a href="#" className="hover:text-gray-900">Contact Us</a>
             </div>
-            <p className="mt-4 text-sm text-gray-600">© 2024 Your Company. All rights reserved.</p>
+            <p className="mt-4 text-sm text-gray-600">© 2024 BinhTruongVan. All rights reserved.</p>
           </footer>
         </div>
       </div>

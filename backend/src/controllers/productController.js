@@ -258,15 +258,13 @@ exports.addReview = async (req, res) => {
   const userId = req.user.userId;
 
   try {
+    // Tìm đơn hàng của người dùng với sản phẩm cụ thể
     const order = await Order.findOne({
       userId: userId,
       'products.productId': productId
     });
 
-    if (!order && rating !== undefined) {
-      return res.status(400).json({ success: false, message: 'You can only rate products you have purchased' });
-    }
-
+    // Nếu người dùng chưa mua sản phẩm, không cho phép đánh giá
     const newReview = new Review({
       user: userId,
       product: productId,
@@ -279,7 +277,6 @@ exports.addReview = async (req, res) => {
     // Cập nhật danh sách reviews của sản phẩm và tính lại averageRating
     const product = await Product.findById(productId);
     product.reviews.push(newReview._id);
-    const validRatings = product.reviews.filter(reviewId => newReview._id.equals(reviewId) && rating !== null).map(() => rating);
     const allRatings = await Review.find({ _id: { $in: product.reviews } });
     const ratings = allRatings.filter(r => r.rating !== null).map(r => r.rating);
     product.averageRating = ratings.length > 0 ? (ratings.reduce((acc, curr) => acc + curr, 0) / ratings.length) : 0;
@@ -291,6 +288,7 @@ exports.addReview = async (req, res) => {
     res.status(500).json({ success: false, message: 'Error adding review', error: error.message });
   }
 };
+
 
 
 
