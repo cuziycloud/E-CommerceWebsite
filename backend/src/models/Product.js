@@ -1,23 +1,11 @@
 const mongoose = require('mongoose');
-<<<<<<< HEAD
-
-=======
 const slugify = require('slugify');
 
 // Schema biến thể sản phẩm
->>>>>>> a8a81ce (Final code)
 const variantSchema = new mongoose.Schema({
   color: { type: String, required: true },
   stock: { type: Number, required: true, min: 0 },
   size: { type: String, required: true },
-<<<<<<< HEAD
-  material: { type: String, required: true }, // Thêm trường material vào đây
-  additionalAttributes: {
-    // Có thể thêm các thuộc tính tùy chọn khác nếu cần
-  }
-});
-
-=======
   specs: [{
     label: { type: String, required: true },
     value: { type: String, required: true }
@@ -25,15 +13,10 @@ const variantSchema = new mongoose.Schema({
 });
 
 // Schema sản phẩm
->>>>>>> a8a81ce (Final code)
 const productSchema = new mongoose.Schema({
   name: { type: String, required: true, minlength: 3, maxlength: 100 },
   description: { type: String, maxlength: 1000 },
   price: { type: Number, required: true, min: 0 },
-<<<<<<< HEAD
-  stock: { type: Number, required: true, min: 0 },
-  category: { type: String, required: true, enum: ['Laptop', 'Phone', 'Tablet', 'Console', 'Accessory'] },
-=======
   category: { type: String, required: true, enum: ['Laptop', 'Phone', 'Tablet', 'Console', 'Accessory'] },
   tags: {
     type: [String],
@@ -44,28 +27,17 @@ const productSchema = new mongoose.Schema({
       message: 'A list of tags is required'
     }
   },
->>>>>>> a8a81ce (Final code)
   variants: { type: [variantSchema], required: true },
   images: {
     type: [String],
     validate: {
       validator: function (v) {
-<<<<<<< HEAD
-        return v.every((url) => /^(https?:\/\/.+|\/uploads\/.+)/.test(url)); // Chấp nhận cả URL cục bộ và URL https
-=======
         return v.every((url) => /^(https?:\/\/.+|\/uploads\/.+)/.test(url));
->>>>>>> a8a81ce (Final code)
       },
       message: 'Invalid URL format in images',
     },
   },
   isAvailable: { type: Boolean, default: true },
-<<<<<<< HEAD
-  createdAt: { type: Date, default: Date.now },
-});
-
-module.exports = mongoose.model('Product', productSchema);
-=======
   slug: { type: String, unique: true, required: true },
   stock: { type: Number, required: true, min: 0 },
   createdAt: { type: Date, default: Date.now },
@@ -97,4 +69,3 @@ productSchema.pre('findOneAndUpdate', function (next) {
 });
 
 module.exports = mongoose.model('Product', productSchema);
->>>>>>> a8a81ce (Final code)
